@@ -6,7 +6,7 @@
 [![CI](https://github.com/FollowTheProcess/glox/workflows/CI/badge.svg)](https://github.com/FollowTheProcess/glox/actions?query=workflow%3ACI)
 [![codecov](https://codecov.io/gh/FollowTheProcess/glox/branch/main/graph/badge.svg)](https://codecov.io/gh/FollowTheProcess/glox)
 
-A Go implementation of the Lox language from Crafting Interpreters
+A Go implementation of the Lox language from [Crafting Interpreters]
 
 > [!WARNING]
 > **glox is in early development and is not yet ready for use**
@@ -33,3 +33,4 @@ This package was created with [copier] and the [FollowTheProcess/go_copier] proj
 [FollowTheProcess/go_copier]: https://github.com/FollowTheProcess/go_copier
 [GitHub release]: https://github.com/FollowTheProcess/glox/releases
 [homebrew]: https://brew.sh
+[Crafting Interpreters]: https://craftinginterpreters.com
