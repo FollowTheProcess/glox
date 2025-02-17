@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
+	"errors"
 	"os"
 
 	"github.com/FollowTheProcess/cli"
+	"github.com/FollowTheProcess/glox/internal/repl"
 	"github.com/FollowTheProcess/msg"
 )
 
@@ -29,8 +30,11 @@ func run() error {
 		cli.Commit(commit),
 		cli.BuildDate(date),
 		cli.Run(func(cmd *cli.Command, args []string) error {
-			fmt.Printf("Lox, args: %v\n", args)
-			return nil
+			if len(args) != 0 {
+				return errors.New("only the REPL is supported at the moment")
+			}
+
+			return repl.Start(os.Stdin, os.Stdout)
 		}),
 	)
 	if err != nil {
