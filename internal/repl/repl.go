@@ -7,6 +7,7 @@ import (
 	"io"
 
 	"github.com/FollowTheProcess/glox/internal/syntax/lexer"
+	"github.com/FollowTheProcess/glox/internal/syntax/token"
 )
 
 const prompt = "-> "
@@ -26,6 +27,8 @@ func Start(in io.Reader, out io.Writer) error {
 		line := scanner.Bytes()
 		lex := lexer.New(line)
 
-		fmt.Fprintf(out, "%s\n", lex.NextToken())
+		for tok := lex.NextToken(); tok.Kind != token.EOF; tok = lex.NextToken() {
+			fmt.Fprintf(out, "%s\n", tok)
+		}
 	}
 }

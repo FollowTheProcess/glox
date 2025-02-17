@@ -7,7 +7,9 @@ import "fmt"
 type Kind int
 
 const (
-	EOF Kind = iota // EOF
+	EOF        Kind = iota // EOF
+	OpenParen              // '('
+	CloseParen             // ')'
 )
 
 // String returns the string representation of [Kind].
@@ -15,6 +17,10 @@ func (k Kind) String() string {
 	switch k {
 	case EOF:
 		return "EOF"
+	case OpenParen:
+		return "OpenParen"
+	case CloseParen:
+		return "CloseParen"
 	default:
 		return "<BadToken>"
 	}
