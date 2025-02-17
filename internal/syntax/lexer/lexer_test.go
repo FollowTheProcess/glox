@@ -23,6 +23,14 @@ func TestLexer(t *testing.T) {
 			},
 		},
 		{
+			name: "unexpected",
+			src:  "%",
+			want: []token.Token{
+				{Kind: token.Error, Text: []byte("unexpected char %"), Offset: 0},
+				{Kind: token.EOF, Offset: 0},
+			},
+		},
+		{
 			name: "open paren",
 			src:  "(",
 			want: []token.Token{

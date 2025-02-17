@@ -2,8 +2,6 @@
 package lexer
 
 import (
-	"fmt"
-	"os"
 	"unicode"
 	"unicode/utf8"
 
@@ -12,6 +10,8 @@ import (
 
 // lexFn represents the state of the scanner as a function that returns the next state.
 type lexFn func(*Lexer) lexFn
+
+const eof = rune(0)
 
 // Lexer is the lexical scanner.
 type Lexer struct {
@@ -53,6 +53,14 @@ func (l *Lexer) next() rune {
 	return r
 }
 
+// current returns the rune the lexer is currently sat on.
+func (l *Lexer) current() rune {
+	if l.atEOF() {
+		return eof
+	}
+	return rune(l.src[l.pos])
+}
+
 // rest returns the string from the current lexer position to the end of the input.
 func (l *Lexer) rest() []byte {
 	if l.atEOF() {
@@ -69,7 +77,7 @@ func (l *Lexer) atEOF() bool {
 // backup steps back one rune. Can only be called once per call of next.
 func (l *Lexer) backup() {
 	l.pos -= l.width
-	if l.width == 1 && l.src[l.pos] == '\n' {
+	if l.width == 1 && l.current() == '\n' {
 		l.line--
 	}
 }
@@ -101,6 +109,7 @@ func (l *Lexer) run() {
 	for state := lexStart; state != nil; {
 		state = state(l)
 	}
+	l.tokens <- token.Token{Kind: token.EOF, Offset: l.pos}
 	close(l.tokens)
 }
 
@@ -108,29 +117,40 @@ func (l *Lexer) run() {
 func lexStart(l *Lexer) lexFn {
 	l.skipWhitespace()
 
-	next := l.next()
-	switch {
-	case next == '(':
+	switch l.current() {
+	case '(':
 		return lexOpenParen
-	case next == ')':
+	case ')':
 		return lexCloseParen
-	case l.atEOF():
-		l.tokens <- token.Token{Kind: token.EOF, Offset: l.pos}
+	case eof:
 		return nil
 	default:
-		fmt.Fprintf(os.Stderr, "unexpected char %q\n", next)
-		return nil
+		return lexUnexpectedChar
 	}
 }
 
 // lexOpenParen scans a '(' char.
 func lexOpenParen(l *Lexer) lexFn {
+	l.pos++
 	l.emit(token.OpenParen)
 	return lexStart
 }
 
 // lexCloseParen scans a ')' char.
 func lexCloseParen(l *Lexer) lexFn {
+	l.pos++
 	l.emit(token.CloseParen)
 	return lexStart
+}
+
+// lexUnexpectedChar handles any unrecognised char in the input by
+// emitting an error token with the information and returning nil
+// to halt the state machine.
+func lexUnexpectedChar(l *Lexer) lexFn {
+	l.tokens <- token.Token{
+		Text:   []byte("unexpected char " + string(l.current())),
+		Kind:   token.Error,
+		Offset: l.pos,
+	}
+	return nil
 }

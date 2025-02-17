@@ -8,6 +8,7 @@ type Kind int
 
 const (
 	EOF        Kind = iota // EOF
+	Error                  // Lex error e.g. unexpected token
 	OpenParen              // '('
 	CloseParen             // ')'
 )
@@ -17,6 +18,8 @@ func (k Kind) String() string {
 	switch k {
 	case EOF:
 		return "EOF"
+	case Error:
+		return "Error"
 	case OpenParen:
 		return "OpenParen"
 	case CloseParen:
