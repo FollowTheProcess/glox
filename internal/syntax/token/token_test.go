@@ -18,6 +18,21 @@ func TestToken(t *testing.T) {
 			tok:  token.Token{Kind: token.EOF},
 			want: `<Token::EOF text="", offset=0>`,
 		},
+		{
+			name: "error",
+			tok:  token.Token{Kind: token.Error, Text: []byte("bang"), Offset: 42},
+			want: `<Token::Error text="bang", offset=42>`,
+		},
+		{
+			name: "open paren",
+			tok:  token.Token{Kind: token.OpenParen, Text: []byte("("), Offset: 1},
+			want: `<Token::OpenParen text="(", offset=1>`,
+		},
+		{
+			name: "close paren",
+			tok:  token.Token{Kind: token.CloseParen, Text: []byte(")"), Offset: 1},
+			want: `<Token::CloseParen text=")", offset=1>`,
+		},
 	}
 
 	for _, tt := range tests {
