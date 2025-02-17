@@ -147,8 +147,9 @@ func lexCloseParen(l *Lexer) lexFn {
 // emitting an error token with the information and returning nil
 // to halt the state machine.
 func lexUnexpectedChar(l *Lexer) lexFn {
+	cur := string(l.current())
 	l.tokens <- token.Token{
-		Text:   []byte("unexpected char " + string(l.current())),
+		Text:   []byte("unexpected char " + cur),
 		Kind:   token.Error,
 		Offset: l.pos,
 	}
