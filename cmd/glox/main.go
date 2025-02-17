@@ -29,7 +29,7 @@ func run() error {
 		cli.Commit(commit),
 		cli.BuildDate(date),
 		cli.Run(func(cmd *cli.Command, args []string) error {
-			fmt.Printf("Lox, args: %v\n", args)
+			fmt.Printf("Glox, args: %v\n", args)
 			return nil
 		}),
 	)
