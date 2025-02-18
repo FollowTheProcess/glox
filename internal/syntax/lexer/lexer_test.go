@@ -134,6 +134,71 @@ func TestLexer(t *testing.T) {
 				{Kind: token.EOF, Offset: 2},
 			},
 		},
+		{
+			name: "equal",
+			src:  "=",
+			want: []token.Token{
+				{Kind: token.Equal, Text: []byte("="), Offset: 0, Width: 1},
+				{Kind: token.EOF, Offset: 1},
+			},
+		},
+		{
+			name: "double equal",
+			src:  "==",
+			want: []token.Token{
+				{Kind: token.DoubleEqual, Text: []byte("=="), Offset: 0, Width: 2},
+				{Kind: token.EOF, Offset: 2},
+			},
+		},
+		{
+			name: "greater than",
+			src:  ">",
+			want: []token.Token{
+				{Kind: token.GreaterThan, Text: []byte(">"), Offset: 0, Width: 1},
+				{Kind: token.EOF, Offset: 1},
+			},
+		},
+		{
+			name: "greater than equal",
+			src:  ">=",
+			want: []token.Token{
+				{Kind: token.GreaterThanEqual, Text: []byte(">="), Offset: 0, Width: 2},
+				{Kind: token.EOF, Offset: 2},
+			},
+		},
+		{
+			name: "less than",
+			src:  "<",
+			want: []token.Token{
+				{Kind: token.LessThan, Text: []byte("<"), Offset: 0, Width: 1},
+				{Kind: token.EOF, Offset: 1},
+			},
+		},
+		{
+			name: "less than equal",
+			src:  "<=",
+			want: []token.Token{
+				{Kind: token.LessThanEqual, Text: []byte("<="), Offset: 0, Width: 2},
+				{Kind: token.EOF, Offset: 2},
+			},
+		},
+		{
+			name: "comment",
+			src:  "// I'm a comment to be ignored",
+			want: []token.Token{
+				{Kind: token.EOF, Offset: 30},
+			},
+		},
+		{
+			name: "ignore whitespace",
+			src:  "  \t\t\n\n ()!=",
+			want: []token.Token{
+				{Kind: token.OpenParen, Text: []byte("("), Offset: 7, Width: 1},
+				{Kind: token.CloseParen, Text: []byte(")"), Offset: 8, Width: 1},
+				{Kind: token.BangEqual, Text: []byte("!="), Offset: 9, Width: 2},
+				{Kind: token.EOF, Offset: 11},
+			},
+		},
 	}
 
 	for _, tt := range tests {

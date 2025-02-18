@@ -84,6 +84,11 @@ func TestToken(t *testing.T) {
 			want: `<Token::Bang text="!", offset=7, width=1>`,
 		},
 		{
+			name: "equal",
+			tok:  token.Token{Kind: token.Equal, Text: []byte("="), Offset: 2, Width: 1},
+			want: `<Token::Equal text="=", offset=2, width=1>`,
+		},
+		{
 			name: "bang equal",
 			tok:  token.Token{Kind: token.BangEqual, Text: []byte("!="), Offset: 1, Width: 2},
 			want: `<Token::BangEqual text="!=", offset=1, width=2>`,

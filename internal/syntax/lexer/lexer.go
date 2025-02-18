@@ -53,6 +53,13 @@ func (l *Lexer) next() rune {
 	return r
 }
 
+// peek returns, but does not consume, the next rune in the input.
+func (l *Lexer) peek() rune {
+	r := l.next()
+	l.backup()
+	return r
+}
+
 // current returns the rune the lexer is currently sat on.
 func (l *Lexer) current() rune {
 	if l.atEOF() {
@@ -145,6 +152,12 @@ func lexStart(l *Lexer) lexFn {
 		return lexStar
 	case '!':
 		return lexBang
+	case '=':
+		return lexEqual
+	case '>':
+		return lexGreaterThan
+	case '<':
+		return lexLessThan
 	case eof:
 		return nil
 	default:
@@ -217,7 +230,14 @@ func lexSemiColon(l *Lexer) lexFn {
 
 // lexForwardSlash scans a '/' char.
 func lexForwardSlash(l *Lexer) lexFn {
-	l.pos++
+	l.pos++ // Consume the first '/'
+	if l.peek() == '/' {
+		// It's a comment, absorb the whole line
+		for l.peek() != '\n' && !l.atEOF() {
+			l.next()
+		}
+		return lexStart
+	}
 	l.emit(token.ForwardSlash)
 	return lexStart
 }
@@ -231,8 +251,8 @@ func lexStar(l *Lexer) lexFn {
 
 // lexBang scans a '!' char.
 func lexBang(l *Lexer) lexFn {
-	l.pos++              // Consume the '!'
-	if l.next() == '=' { // Consume the '='
+	l.pos++ // Consume the '!'
+	if l.peek() == '=' {
 		return lexBangEqual
 	}
 	l.emit(token.Bang)
@@ -241,9 +261,70 @@ func lexBang(l *Lexer) lexFn {
 
 // lexBangEqual scans the '!=' lexeme.
 //
-// The '!=' has already been consumed by lexBang.
+// The '!' has already been consumed by lexBang.
 func lexBangEqual(l *Lexer) lexFn {
+	l.pos++ // Consume the remaining '='
 	l.emit(token.BangEqual)
+	return lexStart
+}
+
+// lexEqual scans a '=' char.
+func lexEqual(l *Lexer) lexFn {
+	l.pos++ // Consume the '='
+	if l.peek() == '=' {
+		// Its a '=='
+		return lexDoubleEqual
+	}
+	l.emit(token.Equal)
+	return lexStart
+}
+
+// lexDoubleEqual scans the '==' lexeme.
+//
+// The first '=' has already been consumed.
+func lexDoubleEqual(l *Lexer) lexFn {
+	l.pos++ // Consume the remaining '='
+	l.emit(token.DoubleEqual)
+	return lexStart
+}
+
+// lexGreaterThan scans the '>' char.
+func lexGreaterThan(l *Lexer) lexFn {
+	l.pos++ // Consume the '>'
+	if l.peek() == '=' {
+		// Its a '>='
+		return lexGreaterThanEqual
+	}
+	l.emit(token.GreaterThan)
+	return lexStart
+}
+
+// lexGreaterThanEqual scans the '>=' lexeme.
+//
+// The initial '>' has already been consumed.
+func lexGreaterThanEqual(l *Lexer) lexFn {
+	l.pos++ // Consume the remaining '='
+	l.emit(token.GreaterThanEqual)
+	return lexStart
+}
+
+// lexLessThan scans the '>' char.
+func lexLessThan(l *Lexer) lexFn {
+	l.pos++ // Consume the '<'
+	if l.peek() == '=' {
+		// Its a '<='
+		return lexLessThanEqual
+	}
+	l.emit(token.LessThan)
+	return lexStart
+}
+
+// lexLessThanEqual scans the '<=' lexeme.
+//
+// The initial '<' has already been consumed.
+func lexLessThanEqual(l *Lexer) lexFn {
+	l.pos++ // Consume the remaining '='
+	l.emit(token.LessThanEqual)
 	return lexStart
 }
 
