@@ -161,6 +161,8 @@ func lexStart(l *Lexer) lexFn {
 		return lexLessThan
 	case '"':
 		return lexString
+	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+		return lexNumber
 	case eof:
 		return nil
 	default:
@@ -335,7 +337,7 @@ func lexLessThanEqual(l *Lexer) lexFn {
 func lexString(l *Lexer) lexFn {
 	l.pos++ // Consume the opening '"'
 	for l.peek() != '"' && !l.atEOF() {
-		l.next()
+		l.next() // Consume everything until the next quote
 	}
 
 	if l.atEOF() {
@@ -346,6 +348,24 @@ func lexString(l *Lexer) lexFn {
 
 	// TODO(@FollowTheProcess): Do we need to strip the quotes off?
 	l.emit(token.String)
+	return lexStart
+}
+
+// lexNumber scans a number literal.
+func lexNumber(l *Lexer) lexFn {
+	for unicode.IsDigit(l.peek()) {
+		l.next()
+
+		if l.next() == '.' && unicode.IsDigit(l.peek()) {
+			l.next() // Consume the '.'
+			for unicode.IsDigit(l.peek()) {
+				l.next() // Absorb digits
+			}
+		}
+		l.backup() // Undo the l.next() call in the if above
+	}
+
+	l.emit(token.Number)
 	return lexStart
 }
 

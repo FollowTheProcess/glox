@@ -215,6 +215,22 @@ func TestLexer(t *testing.T) {
 				{Kind: token.EOF, Offset: 21},
 			},
 		},
+		{
+			name: "integer",
+			src:  "42",
+			want: []token.Token{
+				{Kind: token.Number, Text: []byte("42"), Offset: 0},
+				{Kind: token.EOF, Offset: 2},
+			},
+		},
+		{
+			name: "float",
+			src:  "42.69",
+			want: []token.Token{
+				{Kind: token.Number, Text: []byte("42.69"), Offset: 0},
+				{Kind: token.EOF, Offset: 5},
+			},
+		},
 	}
 
 	for _, tt := range tests {

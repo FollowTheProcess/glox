@@ -123,6 +123,11 @@ func TestToken(t *testing.T) {
 			tok:  token.Token{Kind: token.String, Text: []byte("I'm a string literal"), Offset: 1, Width: 22},
 			want: `<Token::String text="I'm a string literal", offset=1, width=22>`,
 		},
+		{
+			name: "number",
+			tok:  token.Token{Kind: token.Number, Text: []byte("42"), Offset: 0, Width: 2},
+			want: `<Token::Number text="42", offset=0, width=2>`,
+		},
 	}
 
 	for _, tt := range tests {

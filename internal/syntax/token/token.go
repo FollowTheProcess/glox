@@ -29,6 +29,7 @@ const (
 	GreaterThanEqual             // '>='
 	LessThanEqual                // '<='
 	String                       // String literal, quoted with '"'
+	Number                       // Number literal
 )
 
 // String returns the string representation of [Kind].
@@ -78,6 +79,8 @@ func (k Kind) String() string { //nolint: cyclop // This is technically high but
 		return "LessThanEqual"
 	case String:
 		return "String"
+	case Number:
+		return "Number"
 	default:
 		return "<BadToken>"
 	}
