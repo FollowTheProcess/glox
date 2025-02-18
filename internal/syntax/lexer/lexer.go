@@ -53,6 +53,13 @@ func (l *Lexer) next() rune {
 	return r
 }
 
+// peek returns, but does not consume, the next rune in the input.
+func (l *Lexer) peek() rune {
+	r := l.next()
+	l.backup()
+	return r
+}
+
 // current returns the rune the lexer is currently sat on.
 func (l *Lexer) current() rune {
 	if l.atEOF() {

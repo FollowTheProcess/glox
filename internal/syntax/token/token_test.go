@@ -78,6 +78,41 @@ func TestToken(t *testing.T) {
 			tok:  token.Token{Kind: token.Star, Text: []byte("*"), Offset: 12},
 			want: `<Token::Star text="*", offset=12>`,
 		},
+		{
+			name: "bang",
+			tok:  token.Token{Kind: token.Bang, Text: []byte("!"), Offset: 7},
+			want: `<Token::Bang text="!", offset=7>`,
+		},
+		{
+			name: "bang equal",
+			tok:  token.Token{Kind: token.BangEqual, Text: []byte("!="), Offset: 1},
+			want: `<Token::BangEqual text="!=", offset=1>`,
+		},
+		{
+			name: "double equal",
+			tok:  token.Token{Kind: token.DoubleEqual, Text: []byte("=="), Offset: 174},
+			want: `<Token::DoubleEqual text="==", offset=174>`,
+		},
+		{
+			name: "greater than",
+			tok:  token.Token{Kind: token.GreaterThan, Text: []byte(">"), Offset: 22},
+			want: `<Token::GreaterThan text=">", offset=22>`,
+		},
+		{
+			name: "less than",
+			tok:  token.Token{Kind: token.LessThan, Text: []byte("<"), Offset: 63},
+			want: `<Token::LessThan text="<", offset=63>`,
+		},
+		{
+			name: "greater than equal",
+			tok:  token.Token{Kind: token.GreaterThanEqual, Text: []byte(">="), Offset: 3},
+			want: `<Token::GreaterThanEqual text=">=", offset=3>`,
+		},
+		{
+			name: "less than equal",
+			tok:  token.Token{Kind: token.LessThanEqual, Text: []byte("<="), Offset: 7},
+			want: `<Token::LessThanEqual text="<=", offset=7>`,
+		},
 	}
 
 	for _, tt := range tests {

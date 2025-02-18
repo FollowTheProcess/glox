@@ -38,8 +38,8 @@ tasks:
       - "**/*.go"
       - go.mod
       - go.sum
-    cmds: 
-      - go test -race ./... {{ .CLI_ARGS }}
+    cmds:
+      - go test -race -cover ./... {{ .CLI_ARGS }}
 
   build:
     desc: Compile the project binary
@@ -59,7 +59,7 @@ tasks:
     desc: Run all project benchmarks
     sources:
       - "**/*.go"
-    cmds: 
+    cmds:
       - go test ./... -run None -benchmem -bench . {{ .CLI_ARGS }}
 
   lint:

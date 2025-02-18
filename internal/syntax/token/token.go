@@ -7,23 +7,31 @@ import "fmt"
 type Kind int
 
 const (
-	EOF          Kind = iota // EOF
-	Error                    // Lex error e.g. unexpected token
-	OpenParen                // '('
-	CloseParen               // ')'
-	OpenBrace                // '{'
-	CloseBrace               // '}'
-	Comma                    // ','
-	Dot                      // '.'
-	Minus                    // '-'
-	Plus                     // '+'
-	SemiColon                // ';'
-	ForwardSlash             // '/'
-	Star                     // '*'
+	EOF              Kind = iota // EOF
+	Error                        // Lex error e.g. unexpected token
+	OpenParen                    // '('
+	CloseParen                   // ')'
+	OpenBrace                    // '{'
+	CloseBrace                   // '}'
+	Comma                        // ','
+	Dot                          // '.'
+	Minus                        // '-'
+	Plus                         // '+'
+	SemiColon                    // ';'
+	ForwardSlash                 // '/'
+	Star                         // '*'
+	Bang                         // '!'
+	Equal                        // '='
+	BangEqual                    // '!='
+	DoubleEqual                  // '=='
+	GreaterThan                  // '>'
+	LessThan                     // '<'
+	GreaterThanEqual             // '>='
+	LessThanEqual                // '<='
 )
 
 // String returns the string representation of [Kind].
-func (k Kind) String() string {
+func (k Kind) String() string { //nolint: cyclop // This is technically high but obviously trivial
 	switch k {
 	case EOF:
 		return "EOF"
@@ -51,6 +59,22 @@ func (k Kind) String() string {
 		return "ForwardSlash"
 	case Star:
 		return "Star"
+	case Bang:
+		return "Bang"
+	case Equal:
+		return "Equal"
+	case BangEqual:
+		return "BangEqual"
+	case DoubleEqual:
+		return "DoubleEqual"
+	case GreaterThan:
+		return "GreaterThan"
+	case LessThan:
+		return "LessThan"
+	case GreaterThanEqual:
+		return "GreaterThanEqual"
+	case LessThanEqual:
+		return "LessThanEqual"
 	default:
 		return "<BadToken>"
 	}
