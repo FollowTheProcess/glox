@@ -33,6 +33,51 @@ func TestToken(t *testing.T) {
 			tok:  token.Token{Kind: token.CloseParen, Text: []byte(")"), Offset: 1},
 			want: `<Token::CloseParen text=")", offset=1>`,
 		},
+		{
+			name: "open brace",
+			tok:  token.Token{Kind: token.OpenBrace, Text: []byte("{"), Offset: 1},
+			want: `<Token::OpenBrace text="{", offset=1>`,
+		},
+		{
+			name: "close brace",
+			tok:  token.Token{Kind: token.CloseBrace, Text: []byte("}"), Offset: 1},
+			want: `<Token::CloseBrace text="}", offset=1>`,
+		},
+		{
+			name: "comma",
+			tok:  token.Token{Kind: token.Comma, Text: []byte(","), Offset: 27},
+			want: `<Token::Comma text=",", offset=27>`,
+		},
+		{
+			name: "dot",
+			tok:  token.Token{Kind: token.Dot, Text: []byte("."), Offset: 2},
+			want: `<Token::Dot text=".", offset=2>`,
+		},
+		{
+			name: "minus",
+			tok:  token.Token{Kind: token.Minus, Text: []byte("-"), Offset: 32},
+			want: `<Token::Minus text="-", offset=32>`,
+		},
+		{
+			name: "plus",
+			tok:  token.Token{Kind: token.Plus, Text: []byte("+"), Offset: 185},
+			want: `<Token::Plus text="+", offset=185>`,
+		},
+		{
+			name: "semicolon",
+			tok:  token.Token{Kind: token.SemiColon, Text: []byte(";"), Offset: 86},
+			want: `<Token::SemiColon text=";", offset=86>`,
+		},
+		{
+			name: "forward slash",
+			tok:  token.Token{Kind: token.ForwardSlash, Text: []byte("/"), Offset: 17},
+			want: `<Token::ForwardSlash text="/", offset=17>`,
+		},
+		{
+			name: "star",
+			tok:  token.Token{Kind: token.Star, Text: []byte("*"), Offset: 12},
+			want: `<Token::Star text="*", offset=12>`,
+		},
 	}
 
 	for _, tt := range tests {
