@@ -122,6 +122,24 @@ func lexStart(l *Lexer) lexFn {
 		return lexOpenParen
 	case ')':
 		return lexCloseParen
+	case '{':
+		return lexOpenBrace
+	case '}':
+		return lexCloseBrace
+	case ',':
+		return lexComma
+	case '.':
+		return lexDot
+	case '-':
+		return lexMinus
+	case '+':
+		return lexPlus
+	case ';':
+		return lexSemiColon
+	case '/':
+		return lexForwardSlash
+	case '*':
+		return lexStar
 	case eof:
 		return nil
 	default:
@@ -140,6 +158,69 @@ func lexOpenParen(l *Lexer) lexFn {
 func lexCloseParen(l *Lexer) lexFn {
 	l.pos++
 	l.emit(token.CloseParen)
+	return lexStart
+}
+
+// lexOpenBrace scans a '{' char.
+func lexOpenBrace(l *Lexer) lexFn {
+	l.pos++
+	l.emit(token.OpenBrace)
+	return lexStart
+}
+
+// lexCloseBrace scans a '}' char.
+func lexCloseBrace(l *Lexer) lexFn {
+	l.pos++
+	l.emit(token.CloseBrace)
+	return lexStart
+}
+
+// lexComma scans a ',' char.
+func lexComma(l *Lexer) lexFn {
+	l.pos++
+	l.emit(token.Comma)
+	return lexStart
+}
+
+// lexDot scans a '.' char.
+func lexDot(l *Lexer) lexFn {
+	l.pos++
+	l.emit(token.Dot)
+	return lexStart
+}
+
+// lexMinus scans a '-' char.
+func lexMinus(l *Lexer) lexFn {
+	l.pos++
+	l.emit(token.Minus)
+	return lexStart
+}
+
+// lexPlus scans a '+' char.
+func lexPlus(l *Lexer) lexFn {
+	l.pos++
+	l.emit(token.Plus)
+	return lexStart
+}
+
+// lexSemiColon scans a ';' char.
+func lexSemiColon(l *Lexer) lexFn {
+	l.pos++
+	l.emit(token.SemiColon)
+	return lexStart
+}
+
+// lexForwardSlash scans a '/' char.
+func lexForwardSlash(l *Lexer) lexFn {
+	l.pos++
+	l.emit(token.ForwardSlash)
+	return lexStart
+}
+
+// lexStar scans a '*' char.
+func lexStar(l *Lexer) lexFn {
+	l.pos++
+	l.emit(token.Star)
 	return lexStart
 }
 

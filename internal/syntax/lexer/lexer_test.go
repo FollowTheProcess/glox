@@ -46,6 +46,78 @@ func TestLexer(t *testing.T) {
 				{Kind: token.EOF, Offset: 1},
 			},
 		},
+		{
+			name: "open brace",
+			src:  "{",
+			want: []token.Token{
+				{Kind: token.OpenBrace, Text: []byte("{"), Offset: 1},
+				{Kind: token.EOF, Offset: 1},
+			},
+		},
+		{
+			name: "close brace",
+			src:  "}",
+			want: []token.Token{
+				{Kind: token.CloseBrace, Text: []byte("}"), Offset: 1},
+				{Kind: token.EOF, Offset: 1},
+			},
+		},
+		{
+			name: "comma",
+			src:  ",",
+			want: []token.Token{
+				{Kind: token.Comma, Text: []byte(","), Offset: 1},
+				{Kind: token.EOF, Offset: 1},
+			},
+		},
+		{
+			name: "dot",
+			src:  ".",
+			want: []token.Token{
+				{Kind: token.Dot, Text: []byte("."), Offset: 1},
+				{Kind: token.EOF, Offset: 1},
+			},
+		},
+		{
+			name: "minus",
+			src:  "-",
+			want: []token.Token{
+				{Kind: token.Minus, Text: []byte("-"), Offset: 1},
+				{Kind: token.EOF, Offset: 1},
+			},
+		},
+		{
+			name: "plus",
+			src:  "+",
+			want: []token.Token{
+				{Kind: token.Plus, Text: []byte("+"), Offset: 1},
+				{Kind: token.EOF, Offset: 1},
+			},
+		},
+		{
+			name: "semicolon",
+			src:  ";",
+			want: []token.Token{
+				{Kind: token.SemiColon, Text: []byte(";"), Offset: 1},
+				{Kind: token.EOF, Offset: 1},
+			},
+		},
+		{
+			name: "forward slash",
+			src:  "/",
+			want: []token.Token{
+				{Kind: token.ForwardSlash, Text: []byte("/"), Offset: 1},
+				{Kind: token.EOF, Offset: 1},
+			},
+		},
+		{
+			name: "star",
+			src:  "*",
+			want: []token.Token{
+				{Kind: token.Star, Text: []byte("*"), Offset: 1},
+				{Kind: token.EOF, Offset: 1},
+			},
+		},
 	}
 
 	for _, tt := range tests {

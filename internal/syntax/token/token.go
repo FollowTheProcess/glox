@@ -7,10 +7,19 @@ import "fmt"
 type Kind int
 
 const (
-	EOF        Kind = iota // EOF
-	Error                  // Lex error e.g. unexpected token
-	OpenParen              // '('
-	CloseParen             // ')'
+	EOF          Kind = iota // EOF
+	Error                    // Lex error e.g. unexpected token
+	OpenParen                // '('
+	CloseParen               // ')'
+	OpenBrace                // '{'
+	CloseBrace               // '}'
+	Comma                    // ','
+	Dot                      // '.'
+	Minus                    // '-'
+	Plus                     // '+'
+	SemiColon                // ';'
+	ForwardSlash             // '/'
+	Star                     // '*'
 )
 
 // String returns the string representation of [Kind].
@@ -24,6 +33,24 @@ func (k Kind) String() string {
 		return "OpenParen"
 	case CloseParen:
 		return "CloseParen"
+	case OpenBrace:
+		return "OpenBrace"
+	case CloseBrace:
+		return "CloseBrace"
+	case Comma:
+		return "Comma"
+	case Dot:
+		return "Dot"
+	case Minus:
+		return "Minus"
+	case Plus:
+		return "Plus"
+	case SemiColon:
+		return "SemiColon"
+	case ForwardSlash:
+		return "ForwardSlash"
+	case Star:
+		return "Star"
 	default:
 		return "<BadToken>"
 	}
