@@ -2,6 +2,7 @@
 package lexer
 
 import (
+	"errors"
 	"unicode"
 	"unicode/utf8"
 
@@ -53,6 +54,13 @@ func (l *Lexer) next() rune {
 	return r
 }
 
+// peek returns, but does not consume, the next rune in the input.
+func (l *Lexer) peek() rune {
+	r := l.next()
+	l.backup()
+	return r
+}
+
 // current returns the rune the lexer is currently sat on.
 func (l *Lexer) current() rune {
 	if l.atEOF() {
@@ -96,10 +104,13 @@ func (l *Lexer) skipWhitespace() {
 
 // emit emits a token over the tokens channel.
 func (l *Lexer) emit(kind token.Kind) {
+	src := l.src[l.start:l.pos]
+	width := len(src)
 	l.tokens <- token.Token{
-		Text:   l.src[l.start:l.pos],
+		Text:   src,
 		Kind:   kind,
-		Offset: l.pos,
+		Offset: l.pos - width, // The start position of this token
+		Width:  width,
 	}
 	l.start = l.pos
 }
@@ -114,33 +125,48 @@ func (l *Lexer) run() {
 }
 
 // lexStart is the initial state of the lexer.
-func lexStart(l *Lexer) lexFn {
+func lexStart(l *Lexer) lexFn { //nolint: cyclop // Technically yes, but it's trivial really
 	l.skipWhitespace()
 
-	switch l.current() {
-	case '(':
+	char := l.current()
+	switch {
+	case char == '(':
 		return lexOpenParen
-	case ')':
+	case char == ')':
 		return lexCloseParen
-	case '{':
+	case char == '{':
 		return lexOpenBrace
-	case '}':
+	case char == '}':
 		return lexCloseBrace
-	case ',':
+	case char == ',':
 		return lexComma
-	case '.':
+	case char == '.':
 		return lexDot
-	case '-':
+	case char == '-':
 		return lexMinus
-	case '+':
+	case char == '+':
 		return lexPlus
-	case ';':
+	case char == ';':
 		return lexSemiColon
-	case '/':
+	case char == '/':
 		return lexForwardSlash
-	case '*':
+	case char == '*':
 		return lexStar
-	case eof:
+	case char == '!':
+		return lexBang
+	case char == '=':
+		return lexEqual
+	case char == '>':
+		return lexGreaterThan
+	case char == '<':
+		return lexLessThan
+	case char == '"':
+		return lexString
+	case unicode.IsDigit(char):
+		return lexNumber
+	case isAlpha(char):
+		return lexIdent
+	case char == eof:
 		return nil
 	default:
 		return lexUnexpectedChar
@@ -212,7 +238,14 @@ func lexSemiColon(l *Lexer) lexFn {
 
 // lexForwardSlash scans a '/' char.
 func lexForwardSlash(l *Lexer) lexFn {
-	l.pos++
+	l.pos++ // Consume the first '/'
+	if l.peek() == '/' {
+		// It's a comment, absorb the whole line
+		for l.peek() != '\n' && !l.atEOF() {
+			l.next()
+		}
+		return lexStart
+	}
 	l.emit(token.ForwardSlash)
 	return lexStart
 }
@@ -222,6 +255,143 @@ func lexStar(l *Lexer) lexFn {
 	l.pos++
 	l.emit(token.Star)
 	return lexStart
+}
+
+// lexBang scans a '!' char.
+func lexBang(l *Lexer) lexFn {
+	l.pos++ // Consume the '!'
+	if l.peek() == '=' {
+		return lexBangEqual
+	}
+	l.emit(token.Bang)
+	return lexStart
+}
+
+// lexBangEqual scans the '!=' lexeme.
+//
+// The '!' has already been consumed by lexBang.
+func lexBangEqual(l *Lexer) lexFn {
+	l.pos++ // Consume the remaining '='
+	l.emit(token.BangEqual)
+	return lexStart
+}
+
+// lexEqual scans a '=' char.
+func lexEqual(l *Lexer) lexFn {
+	l.pos++ // Consume the '='
+	if l.peek() == '=' {
+		// Its a '=='
+		return lexDoubleEqual
+	}
+	l.emit(token.Equal)
+	return lexStart
+}
+
+// lexDoubleEqual scans the '==' lexeme.
+//
+// The first '=' has already been consumed.
+func lexDoubleEqual(l *Lexer) lexFn {
+	l.pos++ // Consume the remaining '='
+	l.emit(token.DoubleEqual)
+	return lexStart
+}
+
+// lexGreaterThan scans the '>' char.
+func lexGreaterThan(l *Lexer) lexFn {
+	l.pos++ // Consume the '>'
+	if l.peek() == '=' {
+		// Its a '>='
+		return lexGreaterThanEqual
+	}
+	l.emit(token.GreaterThan)
+	return lexStart
+}
+
+// lexGreaterThanEqual scans the '>=' lexeme.
+//
+// The initial '>' has already been consumed.
+func lexGreaterThanEqual(l *Lexer) lexFn {
+	l.pos++ // Consume the remaining '='
+	l.emit(token.GreaterThanEqual)
+	return lexStart
+}
+
+// lexLessThan scans the '>' char.
+func lexLessThan(l *Lexer) lexFn {
+	l.pos++ // Consume the '<'
+	if l.peek() == '=' {
+		// Its a '<='
+		return lexLessThanEqual
+	}
+	l.emit(token.LessThan)
+	return lexStart
+}
+
+// lexLessThanEqual scans the '<=' lexeme.
+//
+// The initial '<' has already been consumed.
+func lexLessThanEqual(l *Lexer) lexFn {
+	l.pos++ // Consume the remaining '='
+	l.emit(token.LessThanEqual)
+	return lexStart
+}
+
+// lexString scans a quoted string literal.
+func lexString(l *Lexer) lexFn {
+	l.pos++ // Consume the opening '"'
+	for l.peek() != '"' && !l.atEOF() {
+		l.next() // Consume everything until the next quote
+	}
+
+	if l.atEOF() {
+		return l.error(errors.New("unterminated string literal"))
+	}
+
+	l.pos++ // Consume the closing '"'
+
+	// TODO(@FollowTheProcess): Do we need to strip the quotes off?
+	l.emit(token.String)
+	return lexStart
+}
+
+// lexNumber scans a number literal.
+func lexNumber(l *Lexer) lexFn {
+	for unicode.IsDigit(l.peek()) {
+		l.next()
+
+		if l.next() == '.' && unicode.IsDigit(l.peek()) {
+			l.next() // Consume the '.'
+			for unicode.IsDigit(l.peek()) {
+				l.next() // Absorb digits
+			}
+		}
+		l.backup() // Undo the l.next() call in the if above
+	}
+
+	l.emit(token.Number)
+	return lexStart
+}
+
+// lexIdent scans an identifier.
+func lexIdent(l *Lexer) lexFn {
+	l.pos++ // Absorb the first ident char
+	for isAlphaNumeric(l.peek()) {
+		l.next() // Absorb any alphanumeric characters
+	}
+
+	l.emit(token.Ident)
+	return lexStart
+}
+
+// error emits an error token and terminates the scan by returning nil, halting
+// the state machine in l.run().
+func (l *Lexer) error(err error) lexFn {
+	l.tokens <- token.Token{
+		Text:   []byte(err.Error()),
+		Kind:   token.Error,
+		Offset: l.pos,
+	}
+	return nil
 }
 
 // lexUnexpectedChar handles any unrecognised char in the input by
@@ -235,4 +405,14 @@ func lexUnexpectedChar(l *Lexer) lexFn {
 		Offset: l.pos,
 	}
 	return nil
+}
+
+// isAlpha reports whether the rune is a valid identifier.
+func isAlpha(r rune) bool {
+	return (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r == '_')
+}
+
+// isAlphaNumeric reports whether the rune is an alpha numeric character.
+func isAlphaNumeric(r rune) bool {
+	return isAlpha(r) || unicode.IsDigit(r)
 }
