@@ -53,13 +53,6 @@ func (l *Lexer) next() rune {
 	return r
 }
 
-// peek returns, but does not consume, the next rune in the input.
-func (l *Lexer) peek() rune {
-	r := l.next()
-	l.backup()
-	return r
-}
-
 // current returns the rune the lexer is currently sat on.
 func (l *Lexer) current() rune {
 	if l.atEOF() {
@@ -103,10 +96,13 @@ func (l *Lexer) skipWhitespace() {
 
 // emit emits a token over the tokens channel.
 func (l *Lexer) emit(kind token.Kind) {
+	src := l.src[l.start:l.pos]
+	width := len(src)
 	l.tokens <- token.Token{
-		Text:   l.src[l.start:l.pos],
+		Text:   src,
 		Kind:   kind,
-		Offset: l.pos,
+		Offset: l.pos - width, // The start position of this token
+		Width:  width,
 	}
 	l.start = l.pos
 }
@@ -147,6 +143,8 @@ func lexStart(l *Lexer) lexFn {
 		return lexForwardSlash
 	case '*':
 		return lexStar
+	case '!':
+		return lexBang
 	case eof:
 		return nil
 	default:
@@ -228,6 +226,24 @@ func lexForwardSlash(l *Lexer) lexFn {
 func lexStar(l *Lexer) lexFn {
 	l.pos++
 	l.emit(token.Star)
+	return lexStart
+}
+
+// lexBang scans a '!' char.
+func lexBang(l *Lexer) lexFn {
+	l.pos++              // Consume the '!'
+	if l.next() == '=' { // Consume the '='
+		return lexBangEqual
+	}
+	l.emit(token.Bang)
+	return lexStart
+}
+
+// lexBangEqual scans the '!=' lexeme.
+//
+// The '!=' has already been consumed by lexBang.
+func lexBangEqual(l *Lexer) lexFn {
+	l.emit(token.BangEqual)
 	return lexStart
 }
 

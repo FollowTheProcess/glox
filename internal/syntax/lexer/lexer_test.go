@@ -34,7 +34,7 @@ func TestLexer(t *testing.T) {
 			name: "open paren",
 			src:  "(",
 			want: []token.Token{
-				{Kind: token.OpenParen, Text: []byte("("), Offset: 1},
+				{Kind: token.OpenParen, Text: []byte("("), Offset: 0, Width: 1},
 				{Kind: token.EOF, Offset: 1},
 			},
 		},
@@ -42,7 +42,7 @@ func TestLexer(t *testing.T) {
 			name: "close paren",
 			src:  ")",
 			want: []token.Token{
-				{Kind: token.CloseParen, Text: []byte(")"), Offset: 1},
+				{Kind: token.CloseParen, Text: []byte(")"), Offset: 0, Width: 1},
 				{Kind: token.EOF, Offset: 1},
 			},
 		},
@@ -50,7 +50,7 @@ func TestLexer(t *testing.T) {
 			name: "open brace",
 			src:  "{",
 			want: []token.Token{
-				{Kind: token.OpenBrace, Text: []byte("{"), Offset: 1},
+				{Kind: token.OpenBrace, Text: []byte("{"), Offset: 0, Width: 1},
 				{Kind: token.EOF, Offset: 1},
 			},
 		},
@@ -58,7 +58,7 @@ func TestLexer(t *testing.T) {
 			name: "close brace",
 			src:  "}",
 			want: []token.Token{
-				{Kind: token.CloseBrace, Text: []byte("}"), Offset: 1},
+				{Kind: token.CloseBrace, Text: []byte("}"), Offset: 0, Width: 1},
 				{Kind: token.EOF, Offset: 1},
 			},
 		},
@@ -66,7 +66,7 @@ func TestLexer(t *testing.T) {
 			name: "comma",
 			src:  ",",
 			want: []token.Token{
-				{Kind: token.Comma, Text: []byte(","), Offset: 1},
+				{Kind: token.Comma, Text: []byte(","), Offset: 0, Width: 1},
 				{Kind: token.EOF, Offset: 1},
 			},
 		},
@@ -74,7 +74,7 @@ func TestLexer(t *testing.T) {
 			name: "dot",
 			src:  ".",
 			want: []token.Token{
-				{Kind: token.Dot, Text: []byte("."), Offset: 1},
+				{Kind: token.Dot, Text: []byte("."), Offset: 0, Width: 1},
 				{Kind: token.EOF, Offset: 1},
 			},
 		},
@@ -82,7 +82,7 @@ func TestLexer(t *testing.T) {
 			name: "minus",
 			src:  "-",
 			want: []token.Token{
-				{Kind: token.Minus, Text: []byte("-"), Offset: 1},
+				{Kind: token.Minus, Text: []byte("-"), Offset: 0, Width: 1},
 				{Kind: token.EOF, Offset: 1},
 			},
 		},
@@ -90,7 +90,7 @@ func TestLexer(t *testing.T) {
 			name: "plus",
 			src:  "+",
 			want: []token.Token{
-				{Kind: token.Plus, Text: []byte("+"), Offset: 1},
+				{Kind: token.Plus, Text: []byte("+"), Offset: 0, Width: 1},
 				{Kind: token.EOF, Offset: 1},
 			},
 		},
@@ -98,7 +98,7 @@ func TestLexer(t *testing.T) {
 			name: "semicolon",
 			src:  ";",
 			want: []token.Token{
-				{Kind: token.SemiColon, Text: []byte(";"), Offset: 1},
+				{Kind: token.SemiColon, Text: []byte(";"), Offset: 0, Width: 1},
 				{Kind: token.EOF, Offset: 1},
 			},
 		},
@@ -106,7 +106,7 @@ func TestLexer(t *testing.T) {
 			name: "forward slash",
 			src:  "/",
 			want: []token.Token{
-				{Kind: token.ForwardSlash, Text: []byte("/"), Offset: 1},
+				{Kind: token.ForwardSlash, Text: []byte("/"), Offset: 0, Width: 1},
 				{Kind: token.EOF, Offset: 1},
 			},
 		},
@@ -114,8 +114,24 @@ func TestLexer(t *testing.T) {
 			name: "star",
 			src:  "*",
 			want: []token.Token{
-				{Kind: token.Star, Text: []byte("*"), Offset: 1},
+				{Kind: token.Star, Text: []byte("*"), Offset: 0, Width: 1},
 				{Kind: token.EOF, Offset: 1},
+			},
+		},
+		{
+			name: "bang",
+			src:  "!",
+			want: []token.Token{
+				{Kind: token.Bang, Text: []byte("!"), Offset: 0, Width: 1},
+				{Kind: token.EOF, Offset: 1},
+			},
+		},
+		{
+			name: "bang equal",
+			src:  "!=",
+			want: []token.Token{
+				{Kind: token.BangEqual, Text: []byte("!="), Offset: 0, Width: 2},
+				{Kind: token.EOF, Offset: 2},
 			},
 		},
 	}

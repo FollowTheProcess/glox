@@ -84,12 +84,13 @@ func (k Kind) String() string { //nolint: cyclop // This is technically high but
 type Token struct {
 	Text   []byte // The src text of the token
 	Kind   Kind   // The kind of token
-	Offset int    // The offset in bytes starting from 0 from the start of the input
+	Offset int    // The offset in bytes starting from 0 from the start of the input to the start of this token
+	Width  int    // The width in bytes of this token's raw src text
 }
 
 // String returns the string representation of [Token].
 func (t Token) String() string {
-	return fmt.Sprintf("<Token::%s text=%q, offset=%d>", t.Kind, t.Text, t.Offset)
+	return fmt.Sprintf("<Token::%s text=%q, offset=%d, width=%d>", t.Kind, t.Text, t.Offset, t.Width)
 }
 
 // Is reports whether the token is of a given [Kind].
