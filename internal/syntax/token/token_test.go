@@ -9,9 +9,9 @@ import (
 
 func TestToken(t *testing.T) {
 	tests := []struct {
-		name string
-		want string
-		tok  token.Token
+		name string      // Name of the test case
+		want string      // Expected return value from String()
+		tok  token.Token // The token under test
 	}{
 		{
 			name: "eof",
@@ -117,6 +117,11 @@ func TestToken(t *testing.T) {
 			name: "less than equal",
 			tok:  token.Token{Kind: token.LessThanEqual, Text: []byte("<="), Offset: 7, Width: 2},
 			want: `<Token::LessThanEqual text="<=", offset=7, width=2>`,
+		},
+		{
+			name: "string",
+			tok:  token.Token{Kind: token.String, Text: []byte("I'm a string literal"), Offset: 1, Width: 22},
+			want: `<Token::String text="I'm a string literal", offset=1, width=22>`,
 		},
 	}
 

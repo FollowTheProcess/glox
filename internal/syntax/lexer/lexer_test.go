@@ -199,6 +199,22 @@ func TestLexer(t *testing.T) {
 				{Kind: token.EOF, Offset: 11},
 			},
 		},
+		{
+			name: "string",
+			src:  `"I'm a string literal"`,
+			want: []token.Token{
+				{Kind: token.String, Text: []byte(`"I'm a string literal"`), Offset: 0, Width: 22},
+				{Kind: token.EOF, Offset: 22},
+			},
+		},
+		{
+			name: "unterminated string",
+			src:  `"I'm a string literal`,
+			want: []token.Token{
+				{Kind: token.Error, Text: []byte("unterminated string literal"), Offset: 21},
+				{Kind: token.EOF, Offset: 21},
+			},
+		},
 	}
 
 	for _, tt := range tests {

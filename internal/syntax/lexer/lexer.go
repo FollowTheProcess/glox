@@ -2,6 +2,7 @@
 package lexer
 
 import (
+	"errors"
 	"unicode"
 	"unicode/utf8"
 
@@ -158,6 +159,8 @@ func lexStart(l *Lexer) lexFn {
 		return lexGreaterThan
 	case '<':
 		return lexLessThan
+	case '"':
+		return lexString
 	case eof:
 		return nil
 	default:
@@ -326,6 +329,35 @@ func lexLessThanEqual(l *Lexer) lexFn {
 	l.pos++ // Consume the remaining '='
 	l.emit(token.LessThanEqual)
 	return lexStart
+}
+
+// lexString scans a quoted string literal.
+func lexString(l *Lexer) lexFn {
+	l.pos++ // Consume the opening '"'
+	for l.peek() != '"' && !l.atEOF() {
+		l.next()
+	}
+
+	if l.atEOF() {
+		return l.error(errors.New("unterminated string literal"))
+	}
+
+	l.pos++ // Consume the closing '"'
+
+	// TODO(@FollowTheProcess): Do we need to strip the quotes off?
+	l.emit(token.String)
+	return lexStart
+}
+
+// error emits an error token and terminates the scan by returning nil, halting
+// the state machine in l.run().
+func (l *Lexer) error(err error) lexFn {
+	l.tokens <- token.Token{
+		Text:   []byte(err.Error()),
+		Kind:   token.Error,
+		Offset: l.pos,
+	}
+	return nil
 }
 
 // lexUnexpectedChar handles any unrecognised char in the input by
