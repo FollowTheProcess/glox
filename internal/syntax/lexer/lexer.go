@@ -125,45 +125,48 @@ func (l *Lexer) run() {
 }
 
 // lexStart is the initial state of the lexer.
-func lexStart(l *Lexer) lexFn {
+func lexStart(l *Lexer) lexFn { //nolint: cyclop // Technically yes, but it's trivial really
 	l.skipWhitespace()
 
-	switch l.current() {
-	case '(':
+	char := l.current()
+	switch {
+	case char == '(':
 		return lexOpenParen
-	case ')':
+	case char == ')':
 		return lexCloseParen
-	case '{':
+	case char == '{':
 		return lexOpenBrace
-	case '}':
+	case char == '}':
 		return lexCloseBrace
-	case ',':
+	case char == ',':
 		return lexComma
-	case '.':
+	case char == '.':
 		return lexDot
-	case '-':
+	case char == '-':
 		return lexMinus
-	case '+':
+	case char == '+':
 		return lexPlus
-	case ';':
+	case char == ';':
 		return lexSemiColon
-	case '/':
+	case char == '/':
 		return lexForwardSlash
-	case '*':
+	case char == '*':
 		return lexStar
-	case '!':
+	case char == '!':
 		return lexBang
-	case '=':
+	case char == '=':
 		return lexEqual
-	case '>':
+	case char == '>':
 		return lexGreaterThan
-	case '<':
+	case char == '<':
 		return lexLessThan
-	case '"':
+	case char == '"':
 		return lexString
-	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+	case unicode.IsDigit(char):
 		return lexNumber
-	case eof:
+	case isAlpha(char):
+		return lexIdent
+	case char == eof:
 		return nil
 	default:
 		return lexUnexpectedChar
@@ -369,6 +372,17 @@ func lexNumber(l *Lexer) lexFn {
 	return lexStart
 }
 
+// lexIdent scans an identifier.
+func lexIdent(l *Lexer) lexFn {
+	l.pos++ // Absorb the first ident char
+	for isAlphaNumeric(l.peek()) {
+		l.next() // Absorb any alphanumeric characters
+	}
+
+	l.emit(token.Ident)
+	return lexStart
+}
+
 // error emits an error token and terminates the scan by returning nil, halting
 // the state machine in l.run().
 func (l *Lexer) error(err error) lexFn {
@@ -391,4 +405,14 @@ func lexUnexpectedChar(l *Lexer) lexFn {
 		Offset: l.pos,
 	}
 	return nil
+}
+
+// isAlpha reports whether the rune is a valid identifier.
+func isAlpha(r rune) bool {
+	return (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r == '_')
+}
+
+// isAlphaNumeric reports whether the rune is an alpha numeric character.
+func isAlphaNumeric(r rune) bool {
+	return isAlpha(r) || unicode.IsDigit(r)
 }

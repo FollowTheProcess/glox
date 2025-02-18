@@ -128,6 +128,11 @@ func TestToken(t *testing.T) {
 			tok:  token.Token{Kind: token.Number, Text: []byte("42"), Offset: 0, Width: 2},
 			want: `<Token::Number text="42", offset=0, width=2>`,
 		},
+		{
+			name: "ident",
+			tok:  token.Token{Kind: token.Ident, Text: []byte("class"), Offset: 0, Width: 5},
+			want: `<Token::Ident text="class", offset=0, width=5>`,
+		},
 	}
 
 	for _, tt := range tests {

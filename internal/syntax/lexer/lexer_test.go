@@ -231,6 +231,14 @@ func TestLexer(t *testing.T) {
 				{Kind: token.EOF, Offset: 5},
 			},
 		},
+		{
+			name: "ident",
+			src:  "some_variable",
+			want: []token.Token{
+				{Kind: token.Ident, Text: []byte("some_variable"), Offset: 0},
+				{Kind: token.EOF, Offset: 13},
+			},
+		},
 	}
 
 	for _, tt := range tests {

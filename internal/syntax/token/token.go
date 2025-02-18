@@ -30,6 +30,7 @@ const (
 	LessThanEqual                // '<='
 	String                       // String literal, quoted with '"'
 	Number                       // Number literal
+	Ident                        // Identifier
 )
 
 // String returns the string representation of [Kind].
@@ -81,6 +82,8 @@ func (k Kind) String() string { //nolint: cyclop // This is technically high but
 		return "String"
 	case Number:
 		return "Number"
+	case Ident:
+		return "Ident"
 	default:
 		return "<BadToken>"
 	}
