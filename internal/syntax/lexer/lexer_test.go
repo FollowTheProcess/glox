@@ -382,7 +382,9 @@ func TestLexer(t *testing.T) {
 }
 
 func TestLexerIntegration(t *testing.T) {
-	files, err := filepath.Glob("testdata/lex/*.txtar")
+	base := filepath.Join("testdata", "lex")
+	pattern := filepath.Join(base, "*.txtar")
+	files, err := filepath.Glob(pattern)
 	test.Ok(t, err)
 
 	for _, file := range files {
