@@ -2,11 +2,15 @@ package lexer_test
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/FollowTheProcess/glox/internal/syntax/lexer"
 	"github.com/FollowTheProcess/glox/internal/syntax/token"
 	"github.com/FollowTheProcess/test"
+	"golang.org/x/tools/txtar"
 )
 
 func TestLexer(t *testing.T) {
@@ -377,10 +381,81 @@ func TestLexer(t *testing.T) {
 	}
 }
 
+func TestLexerIntegration(t *testing.T) {
+	files, err := filepath.Glob("testdata/lex/*.txtar")
+	test.Ok(t, err)
+
+	for _, file := range files {
+		name := filepath.Base(file)
+		t.Run(name, func(t *testing.T) {
+			archive, err := txtar.ParseFile(file)
+			test.Ok(t, err)
+
+			if len(archive.Files) != 2 {
+				t.Fatalf("%s expected to contain 2 files, actual: %d", file, len(archive.Files))
+			}
+
+			if archive.Files[0].Name != "src.lox" {
+				t.Fatalf("%s expected first file to be 'src.lox' got %s", file, archive.Files[0].Name)
+			}
+
+			if archive.Files[1].Name != "expected.txt" {
+				t.Fatalf("%s expected second file to be 'expected.txt' got %s", file, archive.Files[1].Name)
+			}
+
+			src := archive.Files[0].Data
+			expected := archive.Files[1].Data
+
+			tokens := collectBytes(src)
+
+			var formattedTokens strings.Builder
+			for _, tok := range tokens {
+				formattedTokens.WriteString(tok.String())
+				formattedTokens.WriteByte('\n')
+			}
+
+			test.Diff(t, formattedTokens.String(), string(expected))
+		})
+	}
+}
+
+func BenchmarkLexer(b *testing.B) {
+	file := filepath.Join("testdata", "bench", "binary_trees.lox")
+
+	contents, err := os.ReadFile(file)
+	test.Ok(b, err)
+
+	for b.Loop() {
+		// Must initialise the lexer inside the loop as it's internal state is
+		// modified on each scan
+		lex := lexer.New(contents)
+		for {
+			tok := lex.NextToken()
+			if tok.Is(token.EOF) || tok.Is(token.Error) {
+				break
+			}
+		}
+	}
+}
+
 // collect gathers the emitted tokens into a slice for comparison.
 func collect(src string) []token.Token {
 	var tokens []token.Token
 	l := lexer.New([]byte(src))
+	for {
+		tok := l.NextToken()
+		tokens = append(tokens, tok)
+		if tok.Kind == token.EOF {
+			break
+		}
+	}
+	return tokens
+}
+
+// collect gathers the emitted tokens into a slice for comparison.
+func collectBytes(src []byte) []token.Token {
+	var tokens []token.Token
+	l := lexer.New(src)
 	for {
 		tok := l.NextToken()
 		tokens = append(tokens, tok)

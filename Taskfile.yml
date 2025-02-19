@@ -36,6 +36,7 @@ tasks:
     desc: Run the test suite
     sources:
       - "**/*.go"
+      - "**/testdata/**/*"
       - go.mod
       - go.sum
     cmds:
