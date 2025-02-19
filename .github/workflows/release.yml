@@ -58,4 +58,4 @@ jobs:
       - name: Generate Binary Attestation
         uses: actions/attest-build-provenance@v2
         with:
-          subject-path: "dist/*"
+          subject-checksums: dist/checksums.txt
