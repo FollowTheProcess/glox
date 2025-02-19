@@ -219,7 +219,7 @@ func TestLexer(t *testing.T) {
 			name: "integer",
 			src:  "42",
 			want: []token.Token{
-				{Kind: token.Number, Text: []byte("42"), Offset: 0},
+				{Kind: token.Number, Text: []byte("42"), Offset: 0, Width: 2},
 				{Kind: token.EOF, Offset: 2},
 			},
 		},
@@ -227,7 +227,7 @@ func TestLexer(t *testing.T) {
 			name: "float",
 			src:  "42.69",
 			want: []token.Token{
-				{Kind: token.Number, Text: []byte("42.69"), Offset: 0},
+				{Kind: token.Number, Text: []byte("42.69"), Offset: 0, Width: 5},
 				{Kind: token.EOF, Offset: 5},
 			},
 		},
@@ -235,8 +235,136 @@ func TestLexer(t *testing.T) {
 			name: "ident",
 			src:  "some_variable",
 			want: []token.Token{
-				{Kind: token.Ident, Text: []byte("some_variable"), Offset: 0},
+				{Kind: token.Ident, Text: []byte("some_variable"), Offset: 0, Width: 13},
 				{Kind: token.EOF, Offset: 13},
+			},
+		},
+		{
+			name: "keyword if",
+			src:  "if",
+			want: []token.Token{
+				{Kind: token.If, Text: []byte("if"), Offset: 0, Width: 2},
+				{Kind: token.EOF, Offset: 2},
+			},
+		},
+		{
+			name: "keyword else",
+			src:  "else",
+			want: []token.Token{
+				{Kind: token.Else, Text: []byte("else"), Offset: 0, Width: 4},
+				{Kind: token.EOF, Offset: 4},
+			},
+		},
+		{
+			name: "keyword or",
+			src:  "or",
+			want: []token.Token{
+				{Kind: token.Or, Text: []byte("or"), Offset: 0, Width: 2},
+				{Kind: token.EOF, Offset: 2},
+			},
+		},
+		{
+			name: "keyword and",
+			src:  "and",
+			want: []token.Token{
+				{Kind: token.And, Text: []byte("and"), Offset: 0, Width: 3},
+				{Kind: token.EOF, Offset: 3},
+			},
+		},
+		{
+			name: "keyword for",
+			src:  "for",
+			want: []token.Token{
+				{Kind: token.For, Text: []byte("for"), Offset: 0, Width: 3},
+				{Kind: token.EOF, Offset: 3},
+			},
+		},
+		{
+			name: "keyword while",
+			src:  "while",
+			want: []token.Token{
+				{Kind: token.While, Text: []byte("while"), Offset: 0, Width: 5},
+				{Kind: token.EOF, Offset: 5},
+			},
+		},
+		{
+			name: "keyword true",
+			src:  "true",
+			want: []token.Token{
+				{Kind: token.True, Text: []byte("true"), Offset: 0, Width: 4},
+				{Kind: token.EOF, Offset: 4},
+			},
+		},
+		{
+			name: "keyword false",
+			src:  "false",
+			want: []token.Token{
+				{Kind: token.False, Text: []byte("false"), Offset: 0, Width: 5},
+				{Kind: token.EOF, Offset: 5},
+			},
+		},
+		{
+			name: "keyword class",
+			src:  "class",
+			want: []token.Token{
+				{Kind: token.Class, Text: []byte("class"), Offset: 0, Width: 5},
+				{Kind: token.EOF, Offset: 5},
+			},
+		},
+		{
+			name: "keyword super",
+			src:  "super",
+			want: []token.Token{
+				{Kind: token.Super, Text: []byte("super"), Offset: 0, Width: 5},
+				{Kind: token.EOF, Offset: 5},
+			},
+		},
+		{
+			name: "keyword this",
+			src:  "this",
+			want: []token.Token{
+				{Kind: token.This, Text: []byte("this"), Offset: 0, Width: 4},
+				{Kind: token.EOF, Offset: 4},
+			},
+		},
+		{
+			name: "keyword fun",
+			src:  "fun",
+			want: []token.Token{
+				{Kind: token.Fun, Text: []byte("fun"), Offset: 0, Width: 3},
+				{Kind: token.EOF, Offset: 3},
+			},
+		},
+		{
+			name: "keyword var",
+			src:  "var",
+			want: []token.Token{
+				{Kind: token.Var, Text: []byte("var"), Offset: 0, Width: 3},
+				{Kind: token.EOF, Offset: 3},
+			},
+		},
+		{
+			name: "keyword nil",
+			src:  "nil",
+			want: []token.Token{
+				{Kind: token.Nil, Text: []byte("nil"), Offset: 0, Width: 3},
+				{Kind: token.EOF, Offset: 3},
+			},
+		},
+		{
+			name: "keyword print",
+			src:  "print",
+			want: []token.Token{
+				{Kind: token.Print, Text: []byte("print"), Offset: 0, Width: 5},
+				{Kind: token.EOF, Offset: 5},
+			},
+		},
+		{
+			name: "keyword return",
+			src:  "return",
+			want: []token.Token{
+				{Kind: token.Return, Text: []byte("return"), Offset: 0, Width: 6},
+				{Kind: token.EOF, Offset: 6},
 			},
 		},
 	}
@@ -277,6 +405,10 @@ func tokenStreamEqual(t1, t2 []token.Token) bool {
 		}
 
 		if t1[i].Offset != t2[i].Offset {
+			return false
+		}
+
+		if t1[i].Width != t2[i].Width {
 			return false
 		}
 	}

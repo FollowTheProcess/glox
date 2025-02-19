@@ -379,6 +379,14 @@ func lexIdent(l *Lexer) lexFn {
 		l.next() // Absorb any alphanumeric characters
 	}
 
+	// Is it a keyword?
+	text := string(l.src[l.start:l.pos])
+	if kind, ok := token.Keyword(text); ok {
+		// Yes, it is
+		l.emit(kind)
+		return lexStart
+	}
+
 	l.emit(token.Ident)
 	return lexStart
 }
