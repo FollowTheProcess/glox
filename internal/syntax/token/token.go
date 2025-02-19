@@ -31,6 +31,22 @@ const (
 	String                       // String literal, quoted with '"'
 	Number                       // Number literal
 	Ident                        // Identifier
+	If                           // Keyword: 'if'
+	Else                         // Keyword: 'else'
+	Or                           // Keyword: 'or'
+	And                          // Keyword: 'and'
+	For                          // Keyword: 'for'
+	While                        // Keyword: 'while'
+	True                         // Keyword: 'true'
+	False                        // Keyword: 'false'
+	Class                        // Keyword: 'class'
+	Super                        // Keyword: 'super'
+	This                         // Keyword: 'this'
+	Fun                          // Keyword: 'fun'
+	Var                          // Keyword: 'var'
+	Nil                          // Keyword: 'nil'
+	Print                        // Keyword: 'print'
+	Return                       // Keyword: 'return'
 )
 
 // String returns the string representation of [Kind].
@@ -84,9 +100,61 @@ func (k Kind) String() string { //nolint: cyclop // This is technically high but
 		return "Number"
 	case Ident:
 		return "Ident"
+	case If:
+		return "If"
+	case Else:
+		return "Else"
+	case Or:
+		return "Or"
+	case And:
+		return "And"
+	case For:
+		return "For"
+	case While:
+		return "While"
+	case True:
+		return "True"
+	case False:
+		return "False"
+	case Class:
+		return "Class"
+	case Super:
+		return "Super"
+	case This:
+		return "This"
+	case Fun:
+		return "Fun"
+	case Var:
+		return "Var"
+	case Nil:
+		return "Nil"
+	case Print:
+		return "Print"
+	case Return:
+		return "Return"
 	default:
 		return "<BadToken>"
 	}
+}
+
+// All keywords in the Lox language, mapped to their token Kind.
+var keywords = map[string]Kind{
+	"if":     If,
+	"else":   Else,
+	"or":     Or,
+	"and":    And,
+	"for":    For,
+	"while":  While,
+	"true":   True,
+	"false":  False,
+	"class":  Class,
+	"super":  Super,
+	"this":   This,
+	"fun":    Fun,
+	"var":    Var,
+	"nil":    Nil,
+	"print":  Print,
+	"return": Return,
 }
 
 // Token is a lexical token in Lox.
@@ -105,4 +173,17 @@ func (t Token) String() string {
 // Is reports whether the token is of a given [Kind].
 func (t Token) Is(kind Kind) bool {
 	return t.Kind == kind
+}
+
+// Keyword looks up an identifier in the set of Lox keywords, returning it's
+// [Kind] if it was a keyword.
+//
+// If the ident is a keyword, the keyword Kind is returned and ok = true, if not
+// the [Error] Kind is returned with ok = false.
+func Keyword(ident string) (kind Kind, ok bool) {
+	kw, ok := keywords[ident]
+	if !ok {
+		return Error, false
+	}
+	return kw, true
 }

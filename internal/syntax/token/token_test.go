@@ -14,6 +14,11 @@ func TestToken(t *testing.T) {
 		tok  token.Token // The token under test
 	}{
 		{
+			name: "bad",
+			tok:  token.Token{Kind: token.Kind(9999)},
+			want: `<Token::<BadToken> text="", offset=0, width=0>`,
+		},
+		{
 			name: "eof",
 			tok:  token.Token{Kind: token.EOF},
 			want: `<Token::EOF text="", offset=0, width=0>`,
@@ -130,8 +135,88 @@ func TestToken(t *testing.T) {
 		},
 		{
 			name: "ident",
-			tok:  token.Token{Kind: token.Ident, Text: []byte("class"), Offset: 0, Width: 5},
-			want: `<Token::Ident text="class", offset=0, width=5>`,
+			tok:  token.Token{Kind: token.Ident, Text: []byte("something"), Offset: 0, Width: 9},
+			want: `<Token::Ident text="something", offset=0, width=9>`,
+		},
+		{
+			name: "if",
+			tok:  token.Token{Kind: token.If, Text: []byte("if"), Offset: 17, Width: 2},
+			want: `<Token::If text="if", offset=17, width=2>`,
+		},
+		{
+			name: "else",
+			tok:  token.Token{Kind: token.Else, Text: []byte("else"), Offset: 37, Width: 4},
+			want: `<Token::Else text="else", offset=37, width=4>`,
+		},
+		{
+			name: "or",
+			tok:  token.Token{Kind: token.Or, Text: []byte("or"), Offset: 145, Width: 2},
+			want: `<Token::Or text="or", offset=145, width=2>`,
+		},
+		{
+			name: "and",
+			tok:  token.Token{Kind: token.And, Text: []byte("and"), Offset: 1, Width: 3},
+			want: `<Token::And text="and", offset=1, width=3>`,
+		},
+		{
+			name: "for",
+			tok:  token.Token{Kind: token.For, Text: []byte("for"), Offset: 5, Width: 3},
+			want: `<Token::For text="for", offset=5, width=3>`,
+		},
+		{
+			name: "while",
+			tok:  token.Token{Kind: token.While, Text: []byte("while"), Offset: 2, Width: 5},
+			want: `<Token::While text="while", offset=2, width=5>`,
+		},
+		{
+			name: "true",
+			tok:  token.Token{Kind: token.True, Text: []byte("true"), Offset: 0, Width: 4},
+			want: `<Token::True text="true", offset=0, width=4>`,
+		},
+		{
+			name: "false",
+			tok:  token.Token{Kind: token.False, Text: []byte("false"), Offset: 19, Width: 5},
+			want: `<Token::False text="false", offset=19, width=5>`,
+		},
+		{
+			name: "class",
+			tok:  token.Token{Kind: token.Class, Text: []byte("class"), Offset: 21, Width: 5},
+			want: `<Token::Class text="class", offset=21, width=5>`,
+		},
+		{
+			name: "super",
+			tok:  token.Token{Kind: token.Super, Text: []byte("super"), Offset: 67, Width: 5},
+			want: `<Token::Super text="super", offset=67, width=5>`,
+		},
+		{
+			name: "this",
+			tok:  token.Token{Kind: token.This, Text: []byte("this"), Offset: 2, Width: 4},
+			want: `<Token::This text="this", offset=2, width=4>`,
+		},
+		{
+			name: "fun",
+			tok:  token.Token{Kind: token.Fun, Text: []byte("fun"), Offset: 0, Width: 3},
+			want: `<Token::Fun text="fun", offset=0, width=3>`,
+		},
+		{
+			name: "var",
+			tok:  token.Token{Kind: token.Var, Text: []byte("var"), Offset: 73, Width: 3},
+			want: `<Token::Var text="var", offset=73, width=3>`,
+		},
+		{
+			name: "nil",
+			tok:  token.Token{Kind: token.Nil, Text: []byte("nil"), Offset: 189, Width: 3},
+			want: `<Token::Nil text="nil", offset=189, width=3>`,
+		},
+		{
+			name: "print",
+			tok:  token.Token{Kind: token.Print, Text: []byte("print"), Offset: 0, Width: 5},
+			want: `<Token::Print text="print", offset=0, width=5>`,
+		},
+		{
+			name: "return",
+			tok:  token.Token{Kind: token.Return, Text: []byte("return"), Offset: 17, Width: 6},
+			want: `<Token::Return text="return", offset=17, width=6>`,
 		},
 	}
 
@@ -139,6 +224,61 @@ func TestToken(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			test.Equal(t, tt.tok.String(), tt.want)
 			test.True(t, tt.tok.Is(tt.tok.Kind))
+		})
+	}
+}
+
+func TestKeyword(t *testing.T) {
+	tests := []struct {
+		name  string     // Name of the test
+		ident string     // Ident to lookup in the set of keywords
+		want  token.Kind // Expected return kind
+		ok    bool       // Expected return bool
+	}{
+		{
+			name:  "empty",
+			ident: "",
+			want:  token.Error,
+			ok:    false,
+		},
+		{
+			name:  "garbage",
+			ident: "$%^&*vhbjj",
+			want:  token.Error,
+			ok:    false,
+		},
+		{
+			name:  "non keyword",
+			ident: "some_variable",
+			want:  token.Error,
+			ok:    false,
+		},
+		{
+			name:  "if",
+			ident: "if",
+			want:  token.If,
+			ok:    true,
+		},
+		{
+			name:  "while",
+			ident: "while",
+			want:  token.While,
+			ok:    true,
+		},
+		{
+			name:  "super",
+			ident: "super",
+			want:  token.Super,
+			ok:    true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, ok := token.Keyword(tt.ident)
+
+			test.Equal(t, ok, tt.ok)
+			test.Equal(t, got, tt.want)
 		})
 	}
 }

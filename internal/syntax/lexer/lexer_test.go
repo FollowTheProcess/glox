@@ -2,11 +2,15 @@ package lexer_test
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/FollowTheProcess/glox/internal/syntax/lexer"
 	"github.com/FollowTheProcess/glox/internal/syntax/token"
 	"github.com/FollowTheProcess/test"
+	"golang.org/x/tools/txtar"
 )
 
 func TestLexer(t *testing.T) {
@@ -219,7 +223,7 @@ func TestLexer(t *testing.T) {
 			name: "integer",
 			src:  "42",
 			want: []token.Token{
-				{Kind: token.Number, Text: []byte("42"), Offset: 0},
+				{Kind: token.Number, Text: []byte("42"), Offset: 0, Width: 2},
 				{Kind: token.EOF, Offset: 2},
 			},
 		},
@@ -227,7 +231,7 @@ func TestLexer(t *testing.T) {
 			name: "float",
 			src:  "42.69",
 			want: []token.Token{
-				{Kind: token.Number, Text: []byte("42.69"), Offset: 0},
+				{Kind: token.Number, Text: []byte("42.69"), Offset: 0, Width: 5},
 				{Kind: token.EOF, Offset: 5},
 			},
 		},
@@ -235,8 +239,136 @@ func TestLexer(t *testing.T) {
 			name: "ident",
 			src:  "some_variable",
 			want: []token.Token{
-				{Kind: token.Ident, Text: []byte("some_variable"), Offset: 0},
+				{Kind: token.Ident, Text: []byte("some_variable"), Offset: 0, Width: 13},
 				{Kind: token.EOF, Offset: 13},
+			},
+		},
+		{
+			name: "keyword if",
+			src:  "if",
+			want: []token.Token{
+				{Kind: token.If, Text: []byte("if"), Offset: 0, Width: 2},
+				{Kind: token.EOF, Offset: 2},
+			},
+		},
+		{
+			name: "keyword else",
+			src:  "else",
+			want: []token.Token{
+				{Kind: token.Else, Text: []byte("else"), Offset: 0, Width: 4},
+				{Kind: token.EOF, Offset: 4},
+			},
+		},
+		{
+			name: "keyword or",
+			src:  "or",
+			want: []token.Token{
+				{Kind: token.Or, Text: []byte("or"), Offset: 0, Width: 2},
+				{Kind: token.EOF, Offset: 2},
+			},
+		},
+		{
+			name: "keyword and",
+			src:  "and",
+			want: []token.Token{
+				{Kind: token.And, Text: []byte("and"), Offset: 0, Width: 3},
+				{Kind: token.EOF, Offset: 3},
+			},
+		},
+		{
+			name: "keyword for",
+			src:  "for",
+			want: []token.Token{
+				{Kind: token.For, Text: []byte("for"), Offset: 0, Width: 3},
+				{Kind: token.EOF, Offset: 3},
+			},
+		},
+		{
+			name: "keyword while",
+			src:  "while",
+			want: []token.Token{
+				{Kind: token.While, Text: []byte("while"), Offset: 0, Width: 5},
+				{Kind: token.EOF, Offset: 5},
+			},
+		},
+		{
+			name: "keyword true",
+			src:  "true",
+			want: []token.Token{
+				{Kind: token.True, Text: []byte("true"), Offset: 0, Width: 4},
+				{Kind: token.EOF, Offset: 4},
+			},
+		},
+		{
+			name: "keyword false",
+			src:  "false",
+			want: []token.Token{
+				{Kind: token.False, Text: []byte("false"), Offset: 0, Width: 5},
+				{Kind: token.EOF, Offset: 5},
+			},
+		},
+		{
+			name: "keyword class",
+			src:  "class",
+			want: []token.Token{
+				{Kind: token.Class, Text: []byte("class"), Offset: 0, Width: 5},
+				{Kind: token.EOF, Offset: 5},
+			},
+		},
+		{
+			name: "keyword super",
+			src:  "super",
+			want: []token.Token{
+				{Kind: token.Super, Text: []byte("super"), Offset: 0, Width: 5},
+				{Kind: token.EOF, Offset: 5},
+			},
+		},
+		{
+			name: "keyword this",
+			src:  "this",
+			want: []token.Token{
+				{Kind: token.This, Text: []byte("this"), Offset: 0, Width: 4},
+				{Kind: token.EOF, Offset: 4},
+			},
+		},
+		{
+			name: "keyword fun",
+			src:  "fun",
+			want: []token.Token{
+				{Kind: token.Fun, Text: []byte("fun"), Offset: 0, Width: 3},
+				{Kind: token.EOF, Offset: 3},
+			},
+		},
+		{
+			name: "keyword var",
+			src:  "var",
+			want: []token.Token{
+				{Kind: token.Var, Text: []byte("var"), Offset: 0, Width: 3},
+				{Kind: token.EOF, Offset: 3},
+			},
+		},
+		{
+			name: "keyword nil",
+			src:  "nil",
+			want: []token.Token{
+				{Kind: token.Nil, Text: []byte("nil"), Offset: 0, Width: 3},
+				{Kind: token.EOF, Offset: 3},
+			},
+		},
+		{
+			name: "keyword print",
+			src:  "print",
+			want: []token.Token{
+				{Kind: token.Print, Text: []byte("print"), Offset: 0, Width: 5},
+				{Kind: token.EOF, Offset: 5},
+			},
+		},
+		{
+			name: "keyword return",
+			src:  "return",
+			want: []token.Token{
+				{Kind: token.Return, Text: []byte("return"), Offset: 0, Width: 6},
+				{Kind: token.EOF, Offset: 6},
 			},
 		},
 	}
@@ -249,10 +381,83 @@ func TestLexer(t *testing.T) {
 	}
 }
 
+func TestLexerIntegration(t *testing.T) {
+	base := filepath.Join("testdata", "lex")
+	pattern := filepath.Join(base, "*.txtar")
+	files, err := filepath.Glob(pattern)
+	test.Ok(t, err)
+
+	for _, file := range files {
+		name := filepath.Base(file)
+		t.Run(name, func(t *testing.T) {
+			archive, err := txtar.ParseFile(file)
+			test.Ok(t, err)
+
+			if len(archive.Files) != 2 {
+				t.Fatalf("%s expected to contain 2 files, actual: %d", file, len(archive.Files))
+			}
+
+			if archive.Files[0].Name != "src.lox" {
+				t.Fatalf("%s expected first file to be 'src.lox' got %s", file, archive.Files[0].Name)
+			}
+
+			if archive.Files[1].Name != "expected.txt" {
+				t.Fatalf("%s expected second file to be 'expected.txt' got %s", file, archive.Files[1].Name)
+			}
+
+			src := archive.Files[0].Data
+			expected := archive.Files[1].Data
+
+			tokens := collectBytes(src)
+
+			var formattedTokens strings.Builder
+			for _, tok := range tokens {
+				formattedTokens.WriteString(tok.String())
+				formattedTokens.WriteByte('\n')
+			}
+
+			test.Diff(t, formattedTokens.String(), string(expected))
+		})
+	}
+}
+
+func BenchmarkLexer(b *testing.B) {
+	file := filepath.Join("testdata", "bench", "binary_trees.lox")
+
+	contents, err := os.ReadFile(file)
+	test.Ok(b, err)
+
+	for b.Loop() {
+		// Must initialise the lexer inside the loop as it's internal state is
+		// modified on each scan
+		lex := lexer.New(contents)
+		for {
+			tok := lex.NextToken()
+			if tok.Is(token.EOF) || tok.Is(token.Error) {
+				break
+			}
+		}
+	}
+}
+
 // collect gathers the emitted tokens into a slice for comparison.
 func collect(src string) []token.Token {
 	var tokens []token.Token
 	l := lexer.New([]byte(src))
+	for {
+		tok := l.NextToken()
+		tokens = append(tokens, tok)
+		if tok.Kind == token.EOF {
+			break
+		}
+	}
+	return tokens
+}
+
+// collect gathers the emitted tokens into a slice for comparison.
+func collectBytes(src []byte) []token.Token {
+	var tokens []token.Token
+	l := lexer.New(src)
 	for {
 		tok := l.NextToken()
 		tokens = append(tokens, tok)
@@ -277,6 +482,10 @@ func tokenStreamEqual(t1, t2 []token.Token) bool {
 		}
 
 		if t1[i].Offset != t2[i].Offset {
+			return false
+		}
+
+		if t1[i].Width != t2[i].Width {
 			return false
 		}
 	}

@@ -1,0 +1,7 @@
+-- src.lox --
+""
+"string"
+-- expected.txt --
+<Token::String text="\"\"", offset=0, width=2>
+<Token::String text="\"string\"", offset=3, width=8>
+<Token::EOF text="", offset=12, width=0>
