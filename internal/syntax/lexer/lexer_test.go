@@ -10,7 +10,7 @@ import (
 	"github.com/FollowTheProcess/glox/internal/syntax/lexer"
 	"github.com/FollowTheProcess/glox/internal/syntax/token"
 	"github.com/FollowTheProcess/test"
-	"golang.org/x/tools/txtar"
+	"github.com/FollowTheProcess/txtar"
 )
 
 func TestLexer(t *testing.T) {
@@ -393,20 +393,11 @@ func TestLexerIntegration(t *testing.T) {
 			archive, err := txtar.ParseFile(file)
 			test.Ok(t, err)
 
-			if len(archive.Files) != 2 {
-				t.Fatalf("%s expected to contain 2 files, actual: %d", file, len(archive.Files))
-			}
+			src, err := archive.Read("src.lox")
+			test.Ok(t, err)
 
-			if archive.Files[0].Name != "src.lox" {
-				t.Fatalf("%s expected first file to be 'src.lox' got %s", file, archive.Files[0].Name)
-			}
-
-			if archive.Files[1].Name != "expected.txt" {
-				t.Fatalf("%s expected second file to be 'expected.txt' got %s", file, archive.Files[1].Name)
-			}
-
-			src := archive.Files[0].Data
-			expected := archive.Files[1].Data
+			expected, err := archive.Read("expected.txt")
+			test.Ok(t, err)
 
 			tokens := collectBytes(src)
 
