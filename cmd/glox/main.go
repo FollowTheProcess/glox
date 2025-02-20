@@ -1,11 +1,14 @@
 package main
 
 import (
-	"errors"
+	"fmt"
 	"os"
+	"time"
 
 	"github.com/FollowTheProcess/cli"
 	"github.com/FollowTheProcess/glox/internal/repl"
+	"github.com/FollowTheProcess/glox/internal/syntax/lexer"
+	"github.com/FollowTheProcess/glox/internal/syntax/token"
 	"github.com/FollowTheProcess/msg"
 )
 
@@ -29,12 +32,30 @@ func run() error {
 		cli.Version(version),
 		cli.Commit(commit),
 		cli.BuildDate(date),
+		cli.OptionalArg("file", "Path to a .lox source file to execute", "repl"),
 		cli.Run(func(cmd *cli.Command, args []string) error {
-			if len(args) != 0 {
-				return errors.New("only the REPL is supported at the moment")
+			file := cmd.Arg("file")
+			if file == "repl" {
+				return repl.Start(os.Stdin, os.Stdout)
 			}
 
-			return repl.Start(os.Stdin, os.Stdout)
+			start := time.Now()
+			contents, err := os.ReadFile(file)
+			if err != nil {
+				return err
+			}
+
+			tokenCount := 0
+
+			lex := lexer.New(contents)
+			for tok := lex.NextToken(); tok.Kind != token.EOF; tok = lex.NextToken() {
+				tokenCount++
+				fmt.Fprintf(os.Stdout, "%s\n", tok)
+			}
+
+			fmt.Printf("\nLexed %d tokens in %s", tokenCount, time.Since(start))
+
+			return nil
 		}),
 	)
 	if err != nil {
