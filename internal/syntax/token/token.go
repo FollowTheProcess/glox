@@ -49,6 +49,15 @@ const (
 	Return                       // Keyword: 'return'
 )
 
+const (
+	PrecedenceMin         = 0 // Lowest operator precedence
+	PrecedenceOr          = 1 // Precedence of the 'or' binary operator
+	PrecedenceAnd         = 2 // Precedence of the 'and' binary operator
+	PrecedenceComp        = 3 // Precedence of comparson operators like '==', '!=' etc.
+	PrecedenceAddSubtract = 4 // Precedence of addition '+' and subtraction '-'
+	PrecedenceMulDivide   = 5 // Precedence of multiplication '*' and division '/'
+)
+
 // String returns the string representation of [Kind].
 func (k Kind) String() string { //nolint: cyclop // This is technically high but obviously trivial
 	switch k {
@@ -186,4 +195,27 @@ func Keyword(ident string) (kind Kind, ok bool) {
 		return Error, false
 	}
 	return kw, true
+}
+
+// Precedence returns the precedence of the binary expression operator token.
+//
+// If the token is not a binary operator, the lowest precedence is returned.
+func (t Token) Precedence() int {
+	// TODO(@FollowTheProcess): What about a binding power thing like
+	// https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html
+	// we could return left and right binding power?
+	switch t.Kind {
+	case Or:
+		return PrecedenceOr
+	case And:
+		return PrecedenceAnd
+	case Equal, BangEqual, LessThan, LessThanEqual, GreaterThan, GreaterThanEqual:
+		return PrecedenceComp
+	case Plus, Minus:
+		return PrecedenceAddSubtract
+	case Star, ForwardSlash:
+		return PrecedenceMulDivide
+	default:
+		return PrecedenceMin
+	}
 }
