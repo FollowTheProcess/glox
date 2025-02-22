@@ -15,13 +15,7 @@ A Go implementation of the Lox language from [Crafting Interpreters]
 
 ## Project Description
 
-## Installation
-
-Compiled binaries for all supported platforms can be found in the [GitHub release]. There is also a [homebrew] tap:
-
-```shell
-brew install FollowTheProcess/tap/glox
-```
+My implementation of the Lox programming language from [Crafting Interpreters], hacking my way through translating the Java/C code to idiomatic Go on the fly.
 
 ## Quickstart
 
@@ -31,6 +25,4 @@ This package was created with [copier] and the [FollowTheProcess/go_copier] proj
 
 [copier]: https://copier.readthedocs.io/en/stable/
 [FollowTheProcess/go_copier]: https://github.com/FollowTheProcess/go_copier
-[GitHub release]: https://github.com/FollowTheProcess/glox/releases
-[homebrew]: https://brew.sh
 [Crafting Interpreters]: https://craftinginterpreters.com
