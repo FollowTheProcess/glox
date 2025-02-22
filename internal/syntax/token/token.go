@@ -60,6 +60,9 @@ const (
 	PrecedenceMulDivide   = 5 // Precedence of multiplication '*' and division '/'
 )
 
+// TODO(@FollowTheProcess): Replace the switch case with a labelled index into a static slice
+// see go/token for ref.
+
 // String returns the string representation of [Kind].
 func (k Kind) String() string { //nolint: cyclop // This is technically high but obviously trivial
 	switch k {
@@ -169,6 +172,9 @@ var keywords = map[string]Kind{
 }
 
 // Token is a lexical token in Lox.
+//
+// It stores the text, type and the offset only. Line and column information
+// is calculated when needed by the parser based on this offset.
 type Token struct {
 	Text   []byte // The src text of the token
 	Kind   Kind   // The kind of token

@@ -12,16 +12,18 @@ import (
 
 // Parser is the glox parser.
 type Parser struct {
-	tokeniser    lexer.Tokeniser
-	src          []byte
-	errs         []error
-	currentToken token.Token
-	nextToken    token.Token
+	name         string          // The name of the source file or "stdin" if REPL
+	tokeniser    lexer.Tokeniser // The tokeniser
+	src          []byte          // The raw source code
+	errs         []error         // List of [SyntaxError], collected while parsing
+	currentToken token.Token     // The current token the parser is sat on
+	nextToken    token.Token     // The next token in the stream
 }
 
 // New returns a new Parser.
-func New(src []byte, tokeniser lexer.Tokeniser) *Parser {
+func New(name string, src []byte, tokeniser lexer.Tokeniser) *Parser {
 	parser := &Parser{
+		name:      name,
 		src:       src,
 		tokeniser: tokeniser,
 	}
@@ -44,21 +46,43 @@ func (p *Parser) next() {
 // appended to the error list.
 func (p *Parser) expect(kind token.Kind) {
 	if !p.nextToken.Is(kind) {
-		p.errorf("expected %s, got %s: %q", kind, p.nextToken.Kind, string(p.nextToken.Text))
+		p.syntaxError("expected %s, got %s: %q", kind, p.nextToken.Kind, string(p.nextToken.Text))
 	}
 
 	// Make progress
 	p.next()
 }
 
-// error emits a plain parse error.
-func (p *Parser) error(err error) {
-	p.errs = append(p.errs, err)
-}
+// syntaxError emits a [SyntaxError], populating it with line/col info using
+// the parser's current state.
+func (p *Parser) syntaxError(format string, args ...any) {
+	// Calculate line and col based on the offending token's offset
+	line := 1              // Line counter
+	lastNewLineOffset := 0 // The byte offset of the last newline seen
+	for index, byt := range p.src {
+		if byt == '\n' {
+			line++
+			lastNewLineOffset = index
+		}
 
-// errorf emits a formatted parse error.
-func (p *Parser) errorf(format string, args ...any) {
-	p.errs = append(p.errs, fmt.Errorf(format, args...))
+		if index > p.currentToken.Offset {
+			break
+		}
+	}
+
+	// The column is therefore the number of bytes from the position of the most recent newline
+	// encountered before the token, and the offset of the token itself
+	col := p.currentToken.Offset - lastNewLineOffset
+
+	err := SyntaxError{
+		File:  p.name,
+		Msg:   fmt.Sprintf(format, args...),
+		Token: p.currentToken,
+		Line:  line,
+		Col:   col,
+	}
+
+	p.errs = append(p.errs, err)
 }
 
 // Parse is the top level parsing method, and will parse an entire Lox
@@ -71,7 +95,7 @@ func (p *Parser) Parse() (ast.Program, error) {
 		case token.Var:
 			statement = p.ParseVarDecl()
 		default:
-			return prog, fmt.Errorf("todo handle %s", p.currentToken.Kind)
+			p.syntaxError("TODO: handle %s", p.currentToken.Kind)
 		}
 
 		prog.Statements = append(prog.Statements, statement)
@@ -101,8 +125,7 @@ func (p *Parser) ParseVarDecl() ast.Statement {
 	for !p.currentToken.Is(token.SemiColon) {
 		p.next()
 		if p.currentToken.Is(token.EOF) {
-			// TODO(@FollowTheProcess): Sort this out, we need a structured error type
-			p.error(ErrUnexpectedEOF)
+			p.syntaxError("unexpected EOF")
 			return nil
 		}
 	}
