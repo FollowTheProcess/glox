@@ -60,115 +60,56 @@ const (
 	PrecedenceMulDivide   = 5 // Precedence of multiplication '*' and division '/'
 )
 
-// TODO(@FollowTheProcess): Replace the switch case with a labelled index into a static slice
-// see go/token for ref.
-
-// String returns the string representation of [Kind].
-func (k Kind) String() string { //nolint: cyclop // This is technically high but obviously trivial
-	switch k {
-	case EOF:
-		return "EOF"
-	case Error:
-		return "Error"
-	case OpenParen:
-		return "OpenParen"
-	case CloseParen:
-		return "CloseParen"
-	case OpenBrace:
-		return "OpenBrace"
-	case CloseBrace:
-		return "CloseBrace"
-	case Comma:
-		return "Comma"
-	case Dot:
-		return "Dot"
-	case Minus:
-		return "Minus"
-	case Plus:
-		return "Plus"
-	case SemiColon:
-		return "SemiColon"
-	case ForwardSlash:
-		return "ForwardSlash"
-	case Star:
-		return "Star"
-	case Bang:
-		return "Bang"
-	case Equal:
-		return "Equal"
-	case BangEqual:
-		return "BangEqual"
-	case DoubleEqual:
-		return "DoubleEqual"
-	case GreaterThan:
-		return "GreaterThan"
-	case LessThan:
-		return "LessThan"
-	case GreaterThanEqual:
-		return "GreaterThanEqual"
-	case LessThanEqual:
-		return "LessThanEqual"
-	case String:
-		return "String"
-	case Number:
-		return "Number"
-	case Ident:
-		return "Ident"
-	case If:
-		return "If"
-	case Else:
-		return "Else"
-	case Or:
-		return "Or"
-	case And:
-		return "And"
-	case For:
-		return "For"
-	case While:
-		return "While"
-	case True:
-		return "True"
-	case False:
-		return "False"
-	case Class:
-		return "Class"
-	case Super:
-		return "Super"
-	case This:
-		return "This"
-	case Fun:
-		return "Fun"
-	case Var:
-		return "Var"
-	case Nil:
-		return "Nil"
-	case Print:
-		return "Print"
-	case Return:
-		return "Return"
-	default:
-		return "<BadToken>"
-	}
+var tokenStrings = [...]string{
+	EOF:              "EOF",
+	Error:            "Error",
+	OpenParen:        "OpenParen",
+	CloseParen:       "CloseParen",
+	OpenBrace:        "OpenBrace",
+	CloseBrace:       "CloseBrace",
+	Comma:            "Comma",
+	Dot:              "Dot",
+	Minus:            "Minus",
+	Plus:             "Plus",
+	SemiColon:        "SemiColon",
+	ForwardSlash:     "ForwardSlash",
+	Star:             "Star",
+	Bang:             "Bang",
+	Equal:            "Equal",
+	BangEqual:        "BangEqual",
+	DoubleEqual:      "DoubleEqual",
+	GreaterThan:      "GreaterThan",
+	LessThan:         "LessThan",
+	GreaterThanEqual: "GreaterThanEqual",
+	LessThanEqual:    "LessThanEqual",
+	String:           "String",
+	Number:           "Number",
+	Ident:            "Ident",
+	If:               "If",
+	Else:             "Else",
+	Or:               "Or",
+	And:              "And",
+	For:              "For",
+	While:            "While",
+	True:             "True",
+	False:            "False",
+	Class:            "Class",
+	Super:            "Super",
+	This:             "This",
+	Fun:              "Fun",
+	Var:              "Var",
+	Nil:              "Nil",
+	Print:            "Print",
+	Return:           "Return",
 }
 
-// All keywords in the Lox language, mapped to their token Kind.
-var keywords = map[string]Kind{
-	"if":     If,
-	"else":   Else,
-	"or":     Or,
-	"and":    And,
-	"for":    For,
-	"while":  While,
-	"true":   True,
-	"false":  False,
-	"class":  Class,
-	"super":  Super,
-	"this":   This,
-	"fun":    Fun,
-	"var":    Var,
-	"nil":    Nil,
-	"print":  Print,
-	"return": Return,
+// String returns the string representation of [Kind].
+func (k Kind) String() string {
+	if 0 <= k && k < Kind(len(tokenStrings)) {
+		return tokenStrings[k]
+	}
+
+	return "<BadToken>"
 }
 
 // Token is a lexical token in Lox.
@@ -200,13 +141,44 @@ func (t Token) Is(kind Kind) bool {
 // [Kind] if it was a keyword.
 //
 // If the ident is a keyword, the keyword Kind is returned and ok = true, if not
-// the [Error] Kind is returned with ok = false.
+// the [Ident] Kind is returned with ok = false.
 func Keyword(ident string) (kind Kind, ok bool) {
-	kw, ok := keywords[ident]
-	if !ok {
-		return Error, false
+	switch ident {
+	case "if":
+		return If, true
+	case "else":
+		return Else, true
+	case "or":
+		return Or, true
+	case "and":
+		return And, true
+	case "for":
+		return For, true
+	case "while":
+		return While, true
+	case "true":
+		return True, true
+	case "false":
+		return False, true
+	case "class":
+		return Class, true
+	case "super":
+		return Super, true
+	case "this":
+		return This, true
+	case "fun":
+		return Fun, true
+	case "var":
+		return Var, true
+	case "nil":
+		return Nil, true
+	case "print":
+		return Print, true
+	case "return":
+		return Return, true
+	default:
+		return Ident, false
 	}
-	return kw, true
 }
 
 // Precedence returns the precedence of the binary expression operator token.

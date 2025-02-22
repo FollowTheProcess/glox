@@ -358,7 +358,6 @@ func lexString(l *Lexer) lexFn {
 
 	l.pos++ // Consume the closing '"'
 
-	// TODO(@FollowTheProcess): Do we need to strip the quotes off?
 	l.emit(token.String)
 	return lexStart
 }

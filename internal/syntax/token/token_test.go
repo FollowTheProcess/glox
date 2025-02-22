@@ -235,42 +235,25 @@ func TestKeyword(t *testing.T) {
 		want  token.Kind // Expected return kind
 		ok    bool       // Expected return bool
 	}{
-		{
-			name:  "empty",
-			ident: "",
-			want:  token.Error,
-			ok:    false,
-		},
-		{
-			name:  "garbage",
-			ident: "$%^&*vhbjj",
-			want:  token.Error,
-			ok:    false,
-		},
-		{
-			name:  "non keyword",
-			ident: "some_variable",
-			want:  token.Error,
-			ok:    false,
-		},
-		{
-			name:  "if",
-			ident: "if",
-			want:  token.If,
-			ok:    true,
-		},
-		{
-			name:  "while",
-			ident: "while",
-			want:  token.While,
-			ok:    true,
-		},
-		{
-			name:  "super",
-			ident: "super",
-			want:  token.Super,
-			ok:    true,
-		},
+		{name: "empty", ident: "", want: token.Ident, ok: false},
+		{name: "garbage", ident: "$%^&*vhbjj", want: token.Ident, ok: false},
+		{name: "non keyword", ident: "some_variable", want: token.Ident, ok: false},
+		{name: "if", ident: "if", want: token.If, ok: true},
+		{name: "else", ident: "else", want: token.Else, ok: true},
+		{name: "or", ident: "or", want: token.Or, ok: true},
+		{name: "and", ident: "and", want: token.And, ok: true},
+		{name: "for", ident: "for", want: token.For, ok: true},
+		{name: "while", ident: "while", want: token.While, ok: true},
+		{name: "true", ident: "true", want: token.True, ok: true},
+		{name: "false", ident: "false", want: token.False, ok: true},
+		{name: "class", ident: "class", want: token.Class, ok: true},
+		{name: "super", ident: "super", want: token.Super, ok: true},
+		{name: "this", ident: "this", want: token.This, ok: true},
+		{name: "fun", ident: "fun", want: token.Fun, ok: true},
+		{name: "var", ident: "var", want: token.Var, ok: true},
+		{name: "nil", ident: "nil", want: token.Nil, ok: true},
+		{name: "print", ident: "print", want: token.Print, ok: true},
+		{name: "return", ident: "return", want: token.Return, ok: true},
 	}
 
 	for _, tt := range tests {
