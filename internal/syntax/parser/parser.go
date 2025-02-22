@@ -101,9 +101,6 @@ func (p *Parser) Parse() (ast.Program, error) {
 		prog.Statements = append(prog.Statements, statement)
 	}
 
-	// TODO(@FollowTheProcess): Better error handling, we need a structured error
-	// with source locations and stuff so we can hand that off to a handler which
-	// shows a nice representation to the user
 	return prog, errors.Join(p.errs...)
 }
 
