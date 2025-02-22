@@ -125,7 +125,7 @@ func TestToken(t *testing.T) {
 		},
 		{
 			name: "string",
-			tok:  token.Token{Kind: token.String, Text: []byte("I'm a string literal"), Offset: 1, Width: 22},
+			tok:  token.Token{Kind: token.String, Text: []byte(`"I'm a string literal"`), Offset: 1, Width: 22},
 			want: `<Token::String text="I'm a string literal", offset=1, width=22>`,
 		},
 		{

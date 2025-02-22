@@ -1,7 +1,9 @@
 // Package token defines the lexical tokens of the Lox language.
 package token
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Kind is the kind of token.
 type Kind int
@@ -176,6 +178,10 @@ type Token struct {
 
 // String returns the string representation of [Token].
 func (t Token) String() string {
+	if t.Kind == String {
+		// Don't double quote the value if it's a string
+		return fmt.Sprintf("<Token::%s text=%s, offset=%d, width=%d>", t.Kind, t.Text, t.Offset, t.Width)
+	}
 	return fmt.Sprintf("<Token::%s text=%q, offset=%d, width=%d>", t.Kind, t.Text, t.Offset, t.Width)
 }
 
