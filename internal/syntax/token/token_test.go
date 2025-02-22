@@ -282,3 +282,35 @@ func TestKeyword(t *testing.T) {
 		})
 	}
 }
+
+func TestPrecedence(t *testing.T) {
+	tests := []struct {
+		kind token.Kind // The token kind under test
+		want int        // The expected precedence
+	}{
+		{kind: token.Or, want: token.PrecedenceOr},
+		{kind: token.And, want: token.PrecedenceAnd},
+		{kind: token.Equal, want: token.PrecedenceComp},
+		{kind: token.BangEqual, want: token.PrecedenceComp},
+		{kind: token.LessThan, want: token.PrecedenceComp},
+		{kind: token.LessThanEqual, want: token.PrecedenceComp},
+		{kind: token.GreaterThan, want: token.PrecedenceComp},
+		{kind: token.GreaterThanEqual, want: token.PrecedenceComp},
+		{kind: token.Plus, want: token.PrecedenceAddSubtract},
+		{kind: token.Minus, want: token.PrecedenceAddSubtract},
+		{kind: token.Star, want: token.PrecedenceMulDivide},
+		{kind: token.ForwardSlash, want: token.PrecedenceMulDivide},
+		{kind: token.Bang, want: token.PrecedenceMin},
+		{kind: token.Bang, want: token.PrecedenceMin},
+		{kind: token.Number, want: token.PrecedenceMin},
+		{kind: token.Ident, want: token.PrecedenceMin},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.kind.String(), func(t *testing.T) {
+			tok := token.Token{Kind: tt.kind}
+
+			test.Equal(t, tok.Precedence(), tt.want)
+		})
+	}
+}

@@ -40,18 +40,31 @@ type Expression interface {
 	expressionNode() // Private method enforcing type safety
 }
 
-// BinaryExpression represents a binary expression e.g. x != y.
-type BinaryExpression struct {
-	Left     Expression
-	Right    Expression
-	Operator token.Token
+// VarDeclaration is the ast node representing a var <ident> = <expression>; statement.
+type VarDeclaration struct {
+	Value Expression
+	Ident Ident
 }
 
-// Token implements [Node] for [BinaryExpression] and returns the first
-// token associated with the node, in this case the token of the left [Expression].
-func (b BinaryExpression) Token() token.Token {
-	return b.Left.Token()
+// Token implements the [Node] interface for VarDeclaration and returns the first
+// token associated with the node, in this case the ident token.
+func (v VarDeclaration) Token() token.Token {
+	return v.Ident.Token()
 }
 
-// expressionNode marks a [BinaryExpression] as an [Expression].
-func (b BinaryExpression) expressionNode() {}
+func (v VarDeclaration) statementNode() {}
+
+// Ident is the ast node representing an identifier.
+type Ident struct {
+	Tok token.Token // The underlying ident token
+}
+
+// Token implements the [Node] interface for Ident and returns the ident token.
+func (i Ident) Token() token.Token {
+	return i.Tok
+}
+
+// Name returns the literal name of the ident.
+func (i Ident) Name() string {
+	return string(i.Tok.Text)
+}
