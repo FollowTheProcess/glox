@@ -12,6 +12,8 @@ import (
 	"github.com/FollowTheProcess/msg"
 )
 
+const bytesPerMegaByte = 1024 * 1024
+
 var (
 	version = "dev"
 	commit  = ""
@@ -39,7 +41,6 @@ func run() error {
 				return repl.Start(os.Stdin, os.Stdout)
 			}
 
-			start := time.Now()
 			contents, err := os.ReadFile(file)
 			if err != nil {
 				return err
@@ -47,13 +48,24 @@ func run() error {
 
 			tokenCount := 0
 
+			start := time.Now()
 			lex := lexer.New(contents)
 			for tok := lex.NextToken(); tok.Kind != token.EOF; tok = lex.NextToken() {
 				tokenCount++
 				fmt.Fprintf(os.Stdout, "%s\n", tok)
 			}
 
-			fmt.Printf("\nLexed %d tokens in %s", tokenCount, time.Since(start))
+			duration := time.Since(start)
+			size := len(contents)
+			throughput := (float64(size) / duration.Seconds()) / bytesPerMegaByte
+
+			fmt.Printf(
+				"\nLexed %d tokens (%d bytes of source code) in %s (%.2f MB/s)",
+				tokenCount,
+				size,
+				duration,
+				throughput,
+			)
 
 			return nil
 		}),
