@@ -87,7 +87,7 @@ func syntaxErrorEqual(a, b parser.SyntaxError) bool {
 		return false
 	}
 
-	if !token.Equal(a.Token, b.Token) {
+	if a.Token != b.Token {
 		return false
 	}
 

@@ -4,6 +4,7 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -380,7 +381,7 @@ func TestLexer(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tokens := collect(tt.src)
-			test.EqualFunc(t, tokens, tt.want, tokenStreamEqual)
+			test.EqualFunc(t, tokens, tt.want, slices.Equal)
 		})
 	}
 }
@@ -461,17 +462,4 @@ func collect(src string) []token.Token {
 		}
 	}
 	return tokens
-}
-
-// tokenStreamEqual compares to slices of tokens for equality.
-func tokenStreamEqual(a, b []token.Token) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if !token.Equal(a[i], b[i]) {
-			return false
-		}
-	}
-	return true
 }

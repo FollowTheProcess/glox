@@ -254,21 +254,3 @@ func (t Token) Precedence() int {
 		return PrecedenceMin
 	}
 }
-
-// Equal compares two tokens for equality, returning true if they
-// are equal, false otherwise.
-func Equal(a, b Token) bool {
-	if a.Kind != b.Kind {
-		return false
-	}
-
-	if a.Start != b.Start {
-		return false
-	}
-
-	if a.End != b.End {
-		return false
-	}
-
-	return true
-}
