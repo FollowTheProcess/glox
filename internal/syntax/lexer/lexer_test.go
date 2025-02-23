@@ -20,7 +20,7 @@ const filePermissions = 0o644
 func TestLexer(t *testing.T) {
 	tests := []struct {
 		name string        // Name of the test case
-		src  string        // Source text to lex, string for convenience
+		src  string        // Source text to lex
 		want []token.Token // Expected tokens
 	}{
 		{
@@ -403,7 +403,7 @@ func TestLexerIntegration(t *testing.T) {
 			expected, err := archive.Read("expected.txt")
 			test.Ok(t, err)
 
-			tokens := collectBytes(src)
+			tokens := collect(string(src))
 
 			var formattedTokens strings.Builder
 			for _, tok := range tokens {
@@ -434,10 +434,12 @@ func BenchmarkLexer(b *testing.B) {
 	contents, err := os.ReadFile(file)
 	test.Ok(b, err)
 
+	src := string(contents)
+
 	for b.Loop() {
 		// Must initialise the lexer inside the loop as it's internal state is
 		// modified on each scan
-		lex := lexer.New(contents)
+		lex := lexer.New(src)
 		for {
 			tok := lex.NextToken()
 			if tok.Is(token.EOF) || tok.Is(token.Error) {
@@ -449,20 +451,6 @@ func BenchmarkLexer(b *testing.B) {
 
 // collect gathers the emitted tokens into a slice for comparison.
 func collect(src string) []token.Token {
-	var tokens []token.Token
-	l := lexer.New([]byte(src))
-	for {
-		tok := l.NextToken()
-		tokens = append(tokens, tok)
-		if tok.Kind == token.EOF {
-			break
-		}
-	}
-	return tokens
-}
-
-// collect gathers the emitted tokens into a slice for comparison.
-func collectBytes(src []byte) []token.Token {
 	var tokens []token.Token
 	l := lexer.New(src)
 	for {
