@@ -56,17 +56,11 @@ func (v VarDeclaration) statementNode() {}
 
 // Ident is the ast node representing an identifier.
 type Ident struct {
-	Tok token.Token // The underlying ident token
+	Name string      // The name of the ident
+	Tok  token.Token // The underlying ident token
 }
 
 // Token implements the [Node] interface for Ident and returns the ident token.
 func (i Ident) Token() token.Token {
 	return i.Tok
-}
-
-// Name returns the literal name of the ident.
-func (i Ident) Name() string {
-	// TODO(@FollowTheProcess): How do we get the name now tokens don't carry
-	// text
-	return "TODO"
 }

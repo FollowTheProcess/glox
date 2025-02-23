@@ -12,20 +12,20 @@ import (
 
 // Parser is the glox parser.
 type Parser struct {
-	name         string          // The name of the source file or "stdin" if REPL
-	tokeniser    lexer.Tokeniser // The tokeniser
-	src          []byte          // The raw source code
-	errs         []error         // List of [SyntaxError], collected while parsing
-	currentToken token.Token     // The current token the parser is sat on
-	nextToken    token.Token     // The next token in the stream
+	name         string       // The name of the source file or "stdin" if REPL
+	tokeniser    *lexer.Lexer // The lexer
+	src          string       // The raw source code
+	errs         []error      // List of [SyntaxError], collected while parsing
+	currentToken token.Token  // The current token the parser is sat on
+	nextToken    token.Token  // The next token in the stream
 }
 
 // New returns a new Parser.
-func New(name string, src []byte, tokeniser lexer.Tokeniser) *Parser {
+func New(name, src string) *Parser {
 	parser := &Parser{
 		name:      name,
 		src:       src,
-		tokeniser: tokeniser,
+		tokeniser: lexer.New(src),
 	}
 
 	// Read 2 tokens so current and next are set
@@ -50,7 +50,7 @@ func (p *Parser) expect(kind token.Kind) {
 			"expected %s, got %s: %q",
 			kind,
 			p.nextToken.Kind,
-			string(p.src[p.nextToken.Start:p.nextToken.End]),
+			p.src[p.nextToken.Start:p.nextToken.End],
 		)
 	}
 
@@ -118,7 +118,7 @@ func (p *Parser) Errors() []error {
 func (p *Parser) ParseVarDecl() ast.Statement {
 	var decl ast.VarDeclaration
 	p.expect(token.Ident)
-	decl.Ident = ast.Ident{Tok: p.currentToken}
+	decl.Ident = ast.Ident{Tok: p.currentToken, Name: p.src[p.currentToken.Start:p.currentToken.End]}
 
 	p.expect(token.Eq)
 
