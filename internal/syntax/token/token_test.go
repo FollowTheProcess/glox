@@ -27,6 +27,61 @@ func TestTokenString(t *testing.T) {
 	}
 }
 
+func TestTokenLexeme(t *testing.T) {
+	tests := []struct {
+		name string
+		want string
+		kind token.Kind
+	}{
+		{name: "eof", kind: token.EOF, want: "EOF"},
+		{name: "error", kind: token.Error, want: "Error"},
+		{name: "open paren", kind: token.OpenParen, want: "("},
+		{name: "close paren", kind: token.CloseParen, want: ")"},
+		{name: "open brace", kind: token.OpenBrace, want: "{"},
+		{name: "close brace", kind: token.CloseBrace, want: "}"},
+		{name: "comma", kind: token.Comma, want: ","},
+		{name: "dot", kind: token.Dot, want: "."},
+		{name: "minus", kind: token.Minus, want: "-"},
+		{name: "plus", kind: token.Plus, want: "+"},
+		{name: "semicolon", kind: token.SemiColon, want: ";"},
+		{name: "forward slash", kind: token.ForwardSlash, want: "/"},
+		{name: "star", kind: token.Star, want: "*"},
+		{name: "bang", kind: token.Bang, want: "!"},
+		{name: "eq", kind: token.Eq, want: "="},
+		{name: "bang eq", kind: token.BangEq, want: "!="},
+		{name: "double eq", kind: token.DoubleEq, want: "=="},
+		{name: "greater than", kind: token.GreaterThan, want: ">"},
+		{name: "less than", kind: token.LessThan, want: "<"},
+		{name: "greater than eq", kind: token.GreaterThanEq, want: ">="},
+		{name: "less than eq", kind: token.LessThanEq, want: "<="},
+		{name: "string", kind: token.String, want: "String"},
+		{name: "number", kind: token.Number, want: "Number"},
+		{name: "ident", kind: token.Ident, want: "Ident"},
+		{name: "if", kind: token.If, want: "if"},
+		{name: "else", kind: token.Else, want: "else"},
+		{name: "or", kind: token.Or, want: "or"},
+		{name: "and", kind: token.And, want: "and"},
+		{name: "for", kind: token.For, want: "for"},
+		{name: "while", kind: token.While, want: "while"},
+		{name: "true", kind: token.True, want: "true"},
+		{name: "false", kind: token.False, want: "false"},
+		{name: "class", kind: token.Class, want: "class"},
+		{name: "super", kind: token.Super, want: "super"},
+		{name: "this", kind: token.This, want: "this"},
+		{name: "fun", kind: token.Fun, want: "fun"},
+		{name: "var", kind: token.Var, want: "var"},
+		{name: "nil", kind: token.Nil, want: "nil"},
+		{name: "print", kind: token.Print, want: "print"},
+		{name: "return", kind: token.Return, want: "return"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			test.Equal(t, tt.kind.Lexeme(), tt.want)
+		})
+	}
+}
+
 func TestKeyword(t *testing.T) {
 	tests := []struct {
 		name  string     // Name of the test

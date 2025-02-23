@@ -103,10 +103,66 @@ var tokenStrings = [...]string{
 	Return:        "Return",
 }
 
+var tokenLexemes = [...]string{
+	EOF:           "EOF",
+	Error:         "Error",
+	OpenParen:     "(",
+	CloseParen:    ")",
+	OpenBrace:     "{",
+	CloseBrace:    "}",
+	Comma:         ",",
+	Dot:           ".",
+	Minus:         "-",
+	Plus:          "+",
+	SemiColon:     ";",
+	ForwardSlash:  "/",
+	Star:          "*",
+	Bang:          "!",
+	Eq:            "=",
+	BangEq:        "!=",
+	DoubleEq:      "==",
+	GreaterThan:   ">",
+	LessThan:      "<",
+	GreaterThanEq: ">=",
+	LessThanEq:    "<=",
+	String:        "String",
+	Number:        "Number",
+	Ident:         "Ident",
+	If:            "if",
+	Else:          "else",
+	Or:            "or",
+	And:           "and",
+	For:           "for",
+	While:         "while",
+	True:          "true",
+	False:         "false",
+	Class:         "class",
+	Super:         "super",
+	This:          "this",
+	Fun:           "fun",
+	Var:           "var",
+	Nil:           "nil",
+	Print:         "print",
+	Return:        "return",
+}
+
 // String returns the string representation of [Kind].
 func (k Kind) String() string {
 	if 0 <= k && k < Kind(len(tokenStrings)) {
 		return tokenStrings[k]
+	}
+
+	return "<BadToken>"
+}
+
+// Lexeme returns the actual text of a [Kind].
+//
+// For the kinds that are known ahead of time e.g. SemiColon (";"), OpenParen ("(") etc. this
+// returns the underlying character, for the likes of Ident, String etc. this returns their name
+// like [Kind.String] does.
+func (k Kind) Lexeme() string {
+	if 0 <= k && k < Kind(len(tokenLexemes)) {
+		return tokenLexemes[k]
 	}
 
 	return "<BadToken>"
