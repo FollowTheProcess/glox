@@ -2,12 +2,12 @@
 andy formless fo _ _123 _abc ab123
 abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_
 -- expected.txt --
-<Token::Ident text="andy", offset=0, width=4>
-<Token::Ident text="formless", offset=5, width=8>
-<Token::Ident text="fo", offset=14, width=2>
-<Token::Ident text="_", offset=17, width=1>
-<Token::Ident text="_123", offset=19, width=4>
-<Token::Ident text="_abc", offset=24, width=4>
-<Token::Ident text="ab123", offset=29, width=5>
-<Token::Ident text="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_", offset=35, width=63>
-<Token::EOF text="", offset=99, width=0>
+<Token::Ident start=0, end=4>
+<Token::Ident start=5, end=13>
+<Token::Ident start=14, end=16>
+<Token::Ident start=17, end=18>
+<Token::Ident start=19, end=23>
+<Token::Ident start=24, end=28>
+<Token::Ident start=29, end=34>
+<Token::Ident start=35, end=98>
+<Token::EOF start=99, end=99>

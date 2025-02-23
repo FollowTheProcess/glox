@@ -181,70 +181,70 @@ func lexStart(l *Lexer) lexFn { //nolint: cyclop // Technically yes, but it's tr
 
 // lexOpenParen scans a '(' char.
 func lexOpenParen(l *Lexer) lexFn {
-	l.pos++
+	l.next()
 	l.emit(token.OpenParen)
 	return lexStart
 }
 
 // lexCloseParen scans a ')' char.
 func lexCloseParen(l *Lexer) lexFn {
-	l.pos++
+	l.next()
 	l.emit(token.CloseParen)
 	return lexStart
 }
 
 // lexOpenBrace scans a '{' char.
 func lexOpenBrace(l *Lexer) lexFn {
-	l.pos++
+	l.next()
 	l.emit(token.OpenBrace)
 	return lexStart
 }
 
 // lexCloseBrace scans a '}' char.
 func lexCloseBrace(l *Lexer) lexFn {
-	l.pos++
+	l.next()
 	l.emit(token.CloseBrace)
 	return lexStart
 }
 
 // lexComma scans a ',' char.
 func lexComma(l *Lexer) lexFn {
-	l.pos++
+	l.next()
 	l.emit(token.Comma)
 	return lexStart
 }
 
 // lexDot scans a '.' char.
 func lexDot(l *Lexer) lexFn {
-	l.pos++
+	l.next()
 	l.emit(token.Dot)
 	return lexStart
 }
 
 // lexMinus scans a '-' char.
 func lexMinus(l *Lexer) lexFn {
-	l.pos++
+	l.next()
 	l.emit(token.Minus)
 	return lexStart
 }
 
 // lexPlus scans a '+' char.
 func lexPlus(l *Lexer) lexFn {
-	l.pos++
+	l.next()
 	l.emit(token.Plus)
 	return lexStart
 }
 
 // lexSemiColon scans a ';' char.
 func lexSemiColon(l *Lexer) lexFn {
-	l.pos++
+	l.next()
 	l.emit(token.SemiColon)
 	return lexStart
 }
 
 // lexForwardSlash scans a '/' char.
 func lexForwardSlash(l *Lexer) lexFn {
-	l.pos++ // Consume the first '/'
+	l.next() // Consume the first '/'
 	if l.peek() == '/' {
 		// It's a comment, absorb the whole line
 		for l.peek() != '\n' && !l.atEOF() {
@@ -258,14 +258,14 @@ func lexForwardSlash(l *Lexer) lexFn {
 
 // lexStar scans a '*' char.
 func lexStar(l *Lexer) lexFn {
-	l.pos++
+	l.next()
 	l.emit(token.Star)
 	return lexStart
 }
 
 // lexBang scans a '!' char.
 func lexBang(l *Lexer) lexFn {
-	l.pos++ // Consume the '!'
+	l.next() // Consume the '!'
 	if l.peek() == '=' {
 		return lexBangEqual
 	}
@@ -277,14 +277,14 @@ func lexBang(l *Lexer) lexFn {
 //
 // The '!' has already been consumed by lexBang.
 func lexBangEqual(l *Lexer) lexFn {
-	l.pos++ // Consume the remaining '='
+	l.next() // Consume the remaining '='
 	l.emit(token.BangEqual)
 	return lexStart
 }
 
 // lexEqual scans a '=' char.
 func lexEqual(l *Lexer) lexFn {
-	l.pos++ // Consume the '='
+	l.next() // Consume the '='
 	if l.peek() == '=' {
 		// Its a '=='
 		return lexDoubleEqual
@@ -297,14 +297,14 @@ func lexEqual(l *Lexer) lexFn {
 //
 // The first '=' has already been consumed.
 func lexDoubleEqual(l *Lexer) lexFn {
-	l.pos++ // Consume the remaining '='
+	l.next() // Consume the remaining '='
 	l.emit(token.DoubleEqual)
 	return lexStart
 }
 
 // lexGreaterThan scans the '>' char.
 func lexGreaterThan(l *Lexer) lexFn {
-	l.pos++ // Consume the '>'
+	l.next() // Consume the '>'
 	if l.peek() == '=' {
 		// Its a '>='
 		return lexGreaterThanEqual
@@ -317,14 +317,14 @@ func lexGreaterThan(l *Lexer) lexFn {
 //
 // The initial '>' has already been consumed.
 func lexGreaterThanEqual(l *Lexer) lexFn {
-	l.pos++ // Consume the remaining '='
+	l.next() // Consume the remaining '='
 	l.emit(token.GreaterThanEqual)
 	return lexStart
 }
 
 // lexLessThan scans the '>' char.
 func lexLessThan(l *Lexer) lexFn {
-	l.pos++ // Consume the '<'
+	l.next() // Consume the '<'
 	if l.peek() == '=' {
 		// Its a '<='
 		return lexLessThanEqual
@@ -337,23 +337,25 @@ func lexLessThan(l *Lexer) lexFn {
 //
 // The initial '<' has already been consumed.
 func lexLessThanEqual(l *Lexer) lexFn {
-	l.pos++ // Consume the remaining '='
+	l.next() // Consume the remaining '='
 	l.emit(token.LessThanEqual)
 	return lexStart
 }
 
 // lexString scans a quoted string literal.
 func lexString(l *Lexer) lexFn {
-	l.pos++ // Consume the opening '"'
+	l.next() // Consume the opening '"'
 	for l.peek() != '"' && !l.atEOF() {
 		l.next() // Consume everything until the next quote
 	}
 
 	if l.atEOF() {
+		// TODO(@FollowTheProcess): Pass it the opening quote index somehow
+		// and refactor l.error as the err is no longer needed now
 		return l.error(errors.New("unterminated string literal"))
 	}
 
-	l.pos++ // Consume the closing '"'
+	l.next() // Consume the closing '"'
 
 	l.emit(token.String)
 	return lexStart
@@ -379,7 +381,7 @@ func lexNumber(l *Lexer) lexFn {
 
 // lexIdent scans an identifier.
 func lexIdent(l *Lexer) lexFn {
-	l.pos++ // Absorb the first ident char
+	l.next() // Absorb the first ident char
 	for isAlphaNumeric(l.peek()) {
 		l.next() // Absorb any alphanumeric characters
 	}
@@ -411,9 +413,10 @@ func (l *Lexer) error(err error) lexFn {
 // emitting an error token with the information and returning nil
 // to halt the state machine.
 func lexUnexpectedChar(l *Lexer) lexFn {
+	l.next()
 	l.tokens <- token.Token{
 		Kind:  token.Error,
-		Start: l.pos,
+		Start: l.pos - l.width,
 		End:   l.pos,
 	}
 	return nil

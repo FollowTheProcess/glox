@@ -46,7 +46,12 @@ func (p *Parser) next() {
 // appended to the error list.
 func (p *Parser) expect(kind token.Kind) {
 	if !p.nextToken.Is(kind) {
-		p.syntaxError("expected %s, got %s: %q", kind, p.nextToken.Kind, string(p.nextToken.Text))
+		p.syntaxError(
+			"expected %s, got %s: %q",
+			kind,
+			p.nextToken.Kind,
+			string(p.src[p.nextToken.Start:p.nextToken.End]),
+		)
 	}
 
 	// Make progress
@@ -65,14 +70,14 @@ func (p *Parser) syntaxError(format string, args ...any) {
 			lastNewLineOffset = index
 		}
 
-		if index > p.currentToken.Offset {
+		if index > p.currentToken.Start {
 			break
 		}
 	}
 
 	// The column is therefore the number of bytes from the position of the most recent newline
 	// encountered before the token, and the offset of the token itself
-	col := p.currentToken.Offset - lastNewLineOffset
+	col := p.currentToken.Start - lastNewLineOffset
 
 	err := SyntaxError{
 		File:  p.name,

@@ -66,5 +66,7 @@ func (i Ident) Token() token.Token {
 
 // Name returns the literal name of the ident.
 func (i Ident) Name() string {
-	return string(i.Tok.Text)
+	// TODO(@FollowTheProcess): How do we get the name now tokens don't carry
+	// text
+	return "TODO"
 }

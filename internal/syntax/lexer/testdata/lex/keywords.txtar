@@ -1,19 +1,19 @@
 -- src.lox --
 and class else false for fun if nil or return super this true var while
 -- expected.txt --
-<Token::And text="and", offset=0, width=3>
-<Token::Class text="class", offset=4, width=5>
-<Token::Else text="else", offset=10, width=4>
-<Token::False text="false", offset=15, width=5>
-<Token::For text="for", offset=21, width=3>
-<Token::Fun text="fun", offset=25, width=3>
-<Token::If text="if", offset=29, width=2>
-<Token::Nil text="nil", offset=32, width=3>
-<Token::Or text="or", offset=36, width=2>
-<Token::Return text="return", offset=39, width=6>
-<Token::Super text="super", offset=46, width=5>
-<Token::This text="this", offset=52, width=4>
-<Token::True text="true", offset=57, width=4>
-<Token::Var text="var", offset=62, width=3>
-<Token::While text="while", offset=66, width=5>
-<Token::EOF text="", offset=72, width=0>
+<Token::And start=0, end=3>
+<Token::Class start=4, end=9>
+<Token::Else start=10, end=14>
+<Token::False start=15, end=20>
+<Token::For start=21, end=24>
+<Token::Fun start=25, end=28>
+<Token::If start=29, end=31>
+<Token::Nil start=32, end=35>
+<Token::Or start=36, end=38>
+<Token::Return start=39, end=45>
+<Token::Super start=46, end=51>
+<Token::This start=52, end=56>
+<Token::True start=57, end=61>
+<Token::Var start=62, end=65>
+<Token::While start=66, end=71>
+<Token::EOF start=72, end=72>

@@ -1,7 +1,6 @@
 package parser_test
 
 import (
-	"bytes"
 	"errors"
 	"slices"
 	"testing"
@@ -51,21 +50,16 @@ func TestParseVarDecl(t *testing.T) {
 		{
 			name: "valid",
 			tokens: []token.Token{
-				{Kind: token.Var, Text: []byte("var"), Offset: 0, Width: 3},
-				{Kind: token.Ident, Text: []byte("something"), Offset: 4, Width: 9},
-				{Kind: token.Equal, Text: []byte("="), Offset: 14, Width: 1},
-				{Kind: token.Number, Text: []byte("2"), Offset: 16, Width: 1},
-				{Kind: token.SemiColon, Text: []byte(";"), Offset: 17, Width: 1},
-				{Kind: token.EOF},
+				{Kind: token.Var, Start: 0, End: 3},
+				{Kind: token.Ident, Start: 4, End: 9},
+				{Kind: token.Equal, Start: 14, End: 15},
+				{Kind: token.Number, Start: 16, End: 17},
+				{Kind: token.SemiColon, Start: 17, End: 18},
+				{Kind: token.EOF, Start: 18, End: 18},
 			},
 			want: ast.VarDeclaration{
 				Ident: ast.Ident{
-					Tok: token.Token{
-						Kind:   token.Ident,
-						Text:   []byte("something"),
-						Offset: 4,
-						Width:  9,
-					},
+					Tok: token.Token{Kind: token.Ident, Start: 4, End: 9},
 				},
 			},
 			wantErr: false,
@@ -73,18 +67,19 @@ func TestParseVarDecl(t *testing.T) {
 		{
 			name: "missing semicolon",
 			tokens: []token.Token{
-				{Kind: token.Var, Text: []byte("var"), Offset: 0, Width: 3},
-				{Kind: token.Ident, Text: []byte("something"), Offset: 4, Width: 9},
-				{Kind: token.Equal, Text: []byte("="), Offset: 14, Width: 1},
-				{Kind: token.Number, Text: []byte("2"), Offset: 16, Width: 1},
-				{Kind: token.EOF, Text: nil, Offset: 17, Width: 0},
+				{Kind: token.Var, Start: 0, End: 3},
+				{Kind: token.Ident, Start: 4, End: 13},
+				{Kind: token.Equal, Start: 14, End: 15},
+				{Kind: token.Number, Start: 16, End: 17},
+				// {Kind: token.SemiColon, Start: 17, End: 18}, // <- This should be here but isn't
+				{Kind: token.EOF, Start: 17, End: 17}, // So the EOF occurs at pos 17
 			},
 			want:    ast.VarDeclaration{},
 			wantErr: true,
 			errs: []error{parser.SyntaxError{
 				File:  "TestParseVarDecl/missing_semicolon",
 				Msg:   "unexpected EOF",
-				Token: token.Token{Kind: token.EOF, Text: nil, Offset: 17, Width: 0},
+				Token: token.Token{Kind: token.EOF, Start: 17, End: 17},
 				Line:  1,
 				Col:   17,
 			}},
@@ -137,15 +132,11 @@ func syntaxErrorEqual(a, b parser.SyntaxError) bool {
 		return false
 	}
 
-	if a.Token.Width != b.Token.Width {
+	if a.Token.Start != b.Token.Start {
 		return false
 	}
 
-	if !bytes.Equal(a.Token.Text, b.Token.Text) {
-		return false
-	}
-
-	if a.Token.Offset != b.Token.Offset {
+	if a.Token.End != b.Token.End {
 		return false
 	}
 
