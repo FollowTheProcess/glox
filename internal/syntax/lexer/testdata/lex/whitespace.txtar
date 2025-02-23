@@ -6,8 +6,8 @@ space    tabs				newlines
 
 end
 -- expected.txt --
-<Token::Ident text="space", offset=0, width=5>
-<Token::Ident text="tabs", offset=9, width=4>
-<Token::Ident text="newlines", offset=17, width=8>
-<Token::Ident text="end", offset=30, width=3>
-<Token::EOF text="", offset=34, width=0>
+<Token::Ident start=0, end=5>
+<Token::Ident start=9, end=13>
+<Token::Ident start=17, end=25>
+<Token::Ident start=30, end=33>
+<Token::EOF start=34, end=34>

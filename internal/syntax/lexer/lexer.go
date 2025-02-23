@@ -2,7 +2,6 @@
 package lexer
 
 import (
-	"errors"
 	"unicode"
 	"unicode/utf8"
 
@@ -113,13 +112,10 @@ func (l *Lexer) skipWhitespace() {
 
 // emit emits a token over the tokens channel.
 func (l *Lexer) emit(kind token.Kind) {
-	src := l.src[l.start:l.pos]
-	width := len(src)
 	l.tokens <- token.Token{
-		Text:   src,
-		Kind:   kind,
-		Offset: l.pos - width, // The start position of this token
-		Width:  width,
+		Kind:  kind,
+		Start: l.start, // The start position of this token
+		End:   l.pos,   // The end position of this token
 	}
 	l.start = l.pos
 }
@@ -129,7 +125,7 @@ func (l *Lexer) run() {
 	for state := lexStart; state != nil; {
 		state = state(l)
 	}
-	l.tokens <- token.Token{Kind: token.EOF, Offset: l.pos}
+	l.tokens <- token.Token{Kind: token.EOF, Start: l.pos, End: l.pos}
 	close(l.tokens)
 }
 
@@ -184,70 +180,70 @@ func lexStart(l *Lexer) lexFn { //nolint: cyclop // Technically yes, but it's tr
 
 // lexOpenParen scans a '(' char.
 func lexOpenParen(l *Lexer) lexFn {
-	l.pos++
+	l.next()
 	l.emit(token.OpenParen)
 	return lexStart
 }
 
 // lexCloseParen scans a ')' char.
 func lexCloseParen(l *Lexer) lexFn {
-	l.pos++
+	l.next()
 	l.emit(token.CloseParen)
 	return lexStart
 }
 
 // lexOpenBrace scans a '{' char.
 func lexOpenBrace(l *Lexer) lexFn {
-	l.pos++
+	l.next()
 	l.emit(token.OpenBrace)
 	return lexStart
 }
 
 // lexCloseBrace scans a '}' char.
 func lexCloseBrace(l *Lexer) lexFn {
-	l.pos++
+	l.next()
 	l.emit(token.CloseBrace)
 	return lexStart
 }
 
 // lexComma scans a ',' char.
 func lexComma(l *Lexer) lexFn {
-	l.pos++
+	l.next()
 	l.emit(token.Comma)
 	return lexStart
 }
 
 // lexDot scans a '.' char.
 func lexDot(l *Lexer) lexFn {
-	l.pos++
+	l.next()
 	l.emit(token.Dot)
 	return lexStart
 }
 
 // lexMinus scans a '-' char.
 func lexMinus(l *Lexer) lexFn {
-	l.pos++
+	l.next()
 	l.emit(token.Minus)
 	return lexStart
 }
 
 // lexPlus scans a '+' char.
 func lexPlus(l *Lexer) lexFn {
-	l.pos++
+	l.next()
 	l.emit(token.Plus)
 	return lexStart
 }
 
 // lexSemiColon scans a ';' char.
 func lexSemiColon(l *Lexer) lexFn {
-	l.pos++
+	l.next()
 	l.emit(token.SemiColon)
 	return lexStart
 }
 
 // lexForwardSlash scans a '/' char.
 func lexForwardSlash(l *Lexer) lexFn {
-	l.pos++ // Consume the first '/'
+	l.next() // Consume the first '/'
 	if l.peek() == '/' {
 		// It's a comment, absorb the whole line
 		for l.peek() != '\n' && !l.atEOF() {
@@ -261,14 +257,14 @@ func lexForwardSlash(l *Lexer) lexFn {
 
 // lexStar scans a '*' char.
 func lexStar(l *Lexer) lexFn {
-	l.pos++
+	l.next()
 	l.emit(token.Star)
 	return lexStart
 }
 
 // lexBang scans a '!' char.
 func lexBang(l *Lexer) lexFn {
-	l.pos++ // Consume the '!'
+	l.next() // Consume the '!'
 	if l.peek() == '=' {
 		return lexBangEqual
 	}
@@ -280,19 +276,19 @@ func lexBang(l *Lexer) lexFn {
 //
 // The '!' has already been consumed by lexBang.
 func lexBangEqual(l *Lexer) lexFn {
-	l.pos++ // Consume the remaining '='
-	l.emit(token.BangEqual)
+	l.next() // Consume the remaining '='
+	l.emit(token.BangEq)
 	return lexStart
 }
 
 // lexEqual scans a '=' char.
 func lexEqual(l *Lexer) lexFn {
-	l.pos++ // Consume the '='
+	l.next() // Consume the '='
 	if l.peek() == '=' {
 		// Its a '=='
 		return lexDoubleEqual
 	}
-	l.emit(token.Equal)
+	l.emit(token.Eq)
 	return lexStart
 }
 
@@ -300,14 +296,14 @@ func lexEqual(l *Lexer) lexFn {
 //
 // The first '=' has already been consumed.
 func lexDoubleEqual(l *Lexer) lexFn {
-	l.pos++ // Consume the remaining '='
-	l.emit(token.DoubleEqual)
+	l.next() // Consume the remaining '='
+	l.emit(token.DoubleEq)
 	return lexStart
 }
 
 // lexGreaterThan scans the '>' char.
 func lexGreaterThan(l *Lexer) lexFn {
-	l.pos++ // Consume the '>'
+	l.next() // Consume the '>'
 	if l.peek() == '=' {
 		// Its a '>='
 		return lexGreaterThanEqual
@@ -320,14 +316,14 @@ func lexGreaterThan(l *Lexer) lexFn {
 //
 // The initial '>' has already been consumed.
 func lexGreaterThanEqual(l *Lexer) lexFn {
-	l.pos++ // Consume the remaining '='
-	l.emit(token.GreaterThanEqual)
+	l.next() // Consume the remaining '='
+	l.emit(token.GreaterThanEq)
 	return lexStart
 }
 
 // lexLessThan scans the '>' char.
 func lexLessThan(l *Lexer) lexFn {
-	l.pos++ // Consume the '<'
+	l.next() // Consume the '<'
 	if l.peek() == '=' {
 		// Its a '<='
 		return lexLessThanEqual
@@ -340,23 +336,26 @@ func lexLessThan(l *Lexer) lexFn {
 //
 // The initial '<' has already been consumed.
 func lexLessThanEqual(l *Lexer) lexFn {
-	l.pos++ // Consume the remaining '='
-	l.emit(token.LessThanEqual)
+	l.next() // Consume the remaining '='
+	l.emit(token.LessThanEq)
 	return lexStart
 }
 
 // lexString scans a quoted string literal.
 func lexString(l *Lexer) lexFn {
-	l.pos++ // Consume the opening '"'
+	l.next() // Consume the opening '"'
+	openingQuotePos := l.pos
+
 	for l.peek() != '"' && !l.atEOF() {
 		l.next() // Consume everything until the next quote
 	}
 
 	if l.atEOF() {
-		return l.error(errors.New("unterminated string literal"))
+		currentPos := l.pos
+		return l.error(openingQuotePos, currentPos)
 	}
 
-	l.pos++ // Consume the closing '"'
+	l.next() // Consume the closing '"'
 
 	l.emit(token.String)
 	return lexStart
@@ -382,7 +381,7 @@ func lexNumber(l *Lexer) lexFn {
 
 // lexIdent scans an identifier.
 func lexIdent(l *Lexer) lexFn {
-	l.pos++ // Absorb the first ident char
+	l.next() // Absorb the first ident char
 	for isAlphaNumeric(l.peek()) {
 		l.next() // Absorb any alphanumeric characters
 	}
@@ -401,11 +400,11 @@ func lexIdent(l *Lexer) lexFn {
 
 // error emits an error token and terminates the scan by returning nil, halting
 // the state machine in l.run().
-func (l *Lexer) error(err error) lexFn {
+func (l *Lexer) error(start, end int) lexFn {
 	l.tokens <- token.Token{
-		Text:   []byte(err.Error()),
-		Kind:   token.Error,
-		Offset: l.pos,
+		Kind:  token.Error,
+		Start: start,
+		End:   end,
 	}
 	return nil
 }
@@ -414,11 +413,11 @@ func (l *Lexer) error(err error) lexFn {
 // emitting an error token with the information and returning nil
 // to halt the state machine.
 func lexUnexpectedChar(l *Lexer) lexFn {
-	cur := string(l.current())
+	l.next()
 	l.tokens <- token.Token{
-		Text:   []byte("unexpected char " + cur),
-		Kind:   token.Error,
-		Offset: l.pos,
+		Kind:  token.Error,
+		Start: l.pos - l.width,
+		End:   l.pos,
 	}
 	return nil
 }
