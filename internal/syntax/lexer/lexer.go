@@ -2,7 +2,6 @@
 package lexer
 
 import (
-	"errors"
 	"unicode"
 	"unicode/utf8"
 
@@ -278,7 +277,7 @@ func lexBang(l *Lexer) lexFn {
 // The '!' has already been consumed by lexBang.
 func lexBangEqual(l *Lexer) lexFn {
 	l.next() // Consume the remaining '='
-	l.emit(token.BangEqual)
+	l.emit(token.BangEq)
 	return lexStart
 }
 
@@ -289,7 +288,7 @@ func lexEqual(l *Lexer) lexFn {
 		// Its a '=='
 		return lexDoubleEqual
 	}
-	l.emit(token.Equal)
+	l.emit(token.Eq)
 	return lexStart
 }
 
@@ -298,7 +297,7 @@ func lexEqual(l *Lexer) lexFn {
 // The first '=' has already been consumed.
 func lexDoubleEqual(l *Lexer) lexFn {
 	l.next() // Consume the remaining '='
-	l.emit(token.DoubleEqual)
+	l.emit(token.DoubleEq)
 	return lexStart
 }
 
@@ -318,7 +317,7 @@ func lexGreaterThan(l *Lexer) lexFn {
 // The initial '>' has already been consumed.
 func lexGreaterThanEqual(l *Lexer) lexFn {
 	l.next() // Consume the remaining '='
-	l.emit(token.GreaterThanEqual)
+	l.emit(token.GreaterThanEq)
 	return lexStart
 }
 
@@ -338,21 +337,22 @@ func lexLessThan(l *Lexer) lexFn {
 // The initial '<' has already been consumed.
 func lexLessThanEqual(l *Lexer) lexFn {
 	l.next() // Consume the remaining '='
-	l.emit(token.LessThanEqual)
+	l.emit(token.LessThanEq)
 	return lexStart
 }
 
 // lexString scans a quoted string literal.
 func lexString(l *Lexer) lexFn {
 	l.next() // Consume the opening '"'
+	openingQuotePos := l.pos
+
 	for l.peek() != '"' && !l.atEOF() {
 		l.next() // Consume everything until the next quote
 	}
 
 	if l.atEOF() {
-		// TODO(@FollowTheProcess): Pass it the opening quote index somehow
-		// and refactor l.error as the err is no longer needed now
-		return l.error(errors.New("unterminated string literal"))
+		currentPos := l.pos
+		return l.error(openingQuotePos, currentPos)
 	}
 
 	l.next() // Consume the closing '"'
@@ -400,11 +400,11 @@ func lexIdent(l *Lexer) lexFn {
 
 // error emits an error token and terminates the scan by returning nil, halting
 // the state machine in l.run().
-func (l *Lexer) error(err error) lexFn {
+func (l *Lexer) error(start, end int) lexFn {
 	l.tokens <- token.Token{
 		Kind:  token.Error,
-		Start: l.pos,
-		End:   l.pos,
+		Start: start,
+		End:   end,
 	}
 	return nil
 }

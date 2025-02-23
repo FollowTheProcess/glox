@@ -138,7 +138,7 @@ func TestLexer(t *testing.T) {
 			name: "bang equal",
 			src:  "!=",
 			want: []token.Token{
-				{Kind: token.BangEqual, Start: 0, End: 2},
+				{Kind: token.BangEq, Start: 0, End: 2},
 				{Kind: token.EOF, Start: 2, End: 2},
 			},
 		},
@@ -146,7 +146,7 @@ func TestLexer(t *testing.T) {
 			name: "equal",
 			src:  "=",
 			want: []token.Token{
-				{Kind: token.Equal, Start: 0, End: 1},
+				{Kind: token.Eq, Start: 0, End: 1},
 				{Kind: token.EOF, Start: 1, End: 1},
 			},
 		},
@@ -154,7 +154,7 @@ func TestLexer(t *testing.T) {
 			name: "double equal",
 			src:  "==",
 			want: []token.Token{
-				{Kind: token.DoubleEqual, Start: 0, End: 2},
+				{Kind: token.DoubleEq, Start: 0, End: 2},
 				{Kind: token.EOF, Start: 2, End: 2},
 			},
 		},
@@ -170,7 +170,7 @@ func TestLexer(t *testing.T) {
 			name: "greater than equal",
 			src:  ">=",
 			want: []token.Token{
-				{Kind: token.GreaterThanEqual, Start: 0, End: 2},
+				{Kind: token.GreaterThanEq, Start: 0, End: 2},
 				{Kind: token.EOF, Start: 2, End: 2},
 			},
 		},
@@ -186,7 +186,7 @@ func TestLexer(t *testing.T) {
 			name: "less than equal",
 			src:  "<=",
 			want: []token.Token{
-				{Kind: token.LessThanEqual, Start: 0, End: 2},
+				{Kind: token.LessThanEq, Start: 0, End: 2},
 				{Kind: token.EOF, Start: 2, End: 2},
 			},
 		},
@@ -203,7 +203,7 @@ func TestLexer(t *testing.T) {
 			want: []token.Token{
 				{Kind: token.OpenParen, Start: 7, End: 8},
 				{Kind: token.CloseParen, Start: 8, End: 9},
-				{Kind: token.BangEqual, Start: 9, End: 11},
+				{Kind: token.BangEq, Start: 9, End: 11},
 				{Kind: token.EOF, Start: 11, End: 11},
 			},
 		},
@@ -219,7 +219,7 @@ func TestLexer(t *testing.T) {
 			name: "unterminated string",
 			src:  `"I'm a string literal`,
 			want: []token.Token{
-				{Kind: token.Error, Start: 21, End: 21},
+				{Kind: token.Error, Start: 1, End: 21},
 				{Kind: token.EOF, Start: 21, End: 21},
 			},
 		},
@@ -476,20 +476,12 @@ func collectBytes(src []byte) []token.Token {
 }
 
 // tokenStreamEqual compares to slices of tokens for equality.
-func tokenStreamEqual(t1, t2 []token.Token) bool {
-	if len(t1) != len(t2) {
+func tokenStreamEqual(a, b []token.Token) bool {
+	if len(a) != len(b) {
 		return false
 	}
-	for i := range t1 {
-		if t1[i].Kind != t2[i].Kind {
-			return false
-		}
-
-		if t1[i].Start != t2[i].Start {
-			return false
-		}
-
-		if t1[i].End != t2[i].End {
+	for i := range a {
+		if !token.Equal(a[i], b[i]) {
 			return false
 		}
 	}

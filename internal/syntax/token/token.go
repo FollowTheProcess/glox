@@ -9,46 +9,46 @@ import (
 type Kind int
 
 const (
-	EOF              Kind = iota // EOF
-	Error                        // Lex error e.g. unexpected token
-	OpenParen                    // '('
-	CloseParen                   // ')'
-	OpenBrace                    // '{'
-	CloseBrace                   // '}'
-	Comma                        // ','
-	Dot                          // '.'
-	Minus                        // '-'
-	Plus                         // '+'
-	SemiColon                    // ';'
-	ForwardSlash                 // '/'
-	Star                         // '*'
-	Bang                         // '!'
-	Equal                        // '='
-	BangEqual                    // '!='
-	DoubleEqual                  // '=='
-	GreaterThan                  // '>'
-	LessThan                     // '<'
-	GreaterThanEqual             // '>='
-	LessThanEqual                // '<='
-	String                       // String literal, quoted with '"'
-	Number                       // Number literal
-	Ident                        // Identifier
-	If                           // Keyword: 'if'
-	Else                         // Keyword: 'else'
-	Or                           // Keyword: 'or'
-	And                          // Keyword: 'and'
-	For                          // Keyword: 'for'
-	While                        // Keyword: 'while'
-	True                         // Keyword: 'true'
-	False                        // Keyword: 'false'
-	Class                        // Keyword: 'class'
-	Super                        // Keyword: 'super'
-	This                         // Keyword: 'this'
-	Fun                          // Keyword: 'fun'
-	Var                          // Keyword: 'var'
-	Nil                          // Keyword: 'nil'
-	Print                        // Keyword: 'print'
-	Return                       // Keyword: 'return'
+	EOF           Kind = iota // EOF
+	Error                     // Lex error e.g. unexpected token
+	OpenParen                 // '('
+	CloseParen                // ')'
+	OpenBrace                 // '{'
+	CloseBrace                // '}'
+	Comma                     // ','
+	Dot                       // '.'
+	Minus                     // '-'
+	Plus                      // '+'
+	SemiColon                 // ';'
+	ForwardSlash              // '/'
+	Star                      // '*'
+	Bang                      // '!'
+	Eq                        // '='
+	BangEq                    // '!='
+	DoubleEq                  // '=='
+	GreaterThan               // '>'
+	LessThan                  // '<'
+	GreaterThanEq             // '>='
+	LessThanEq                // '<='
+	String                    // String literal, quoted with '"'
+	Number                    // Number literal
+	Ident                     // Identifier
+	If                        // Keyword: 'if'
+	Else                      // Keyword: 'else'
+	Or                        // Keyword: 'or'
+	And                       // Keyword: 'and'
+	For                       // Keyword: 'for'
+	While                     // Keyword: 'while'
+	True                      // Keyword: 'true'
+	False                     // Keyword: 'false'
+	Class                     // Keyword: 'class'
+	Super                     // Keyword: 'super'
+	This                      // Keyword: 'this'
+	Fun                       // Keyword: 'fun'
+	Var                       // Keyword: 'var'
+	Nil                       // Keyword: 'nil'
+	Print                     // Keyword: 'print'
+	Return                    // Keyword: 'return'
 )
 
 const (
@@ -61,46 +61,46 @@ const (
 )
 
 var tokenStrings = [...]string{
-	EOF:              "EOF",
-	Error:            "Error",
-	OpenParen:        "OpenParen",
-	CloseParen:       "CloseParen",
-	OpenBrace:        "OpenBrace",
-	CloseBrace:       "CloseBrace",
-	Comma:            "Comma",
-	Dot:              "Dot",
-	Minus:            "Minus",
-	Plus:             "Plus",
-	SemiColon:        "SemiColon",
-	ForwardSlash:     "ForwardSlash",
-	Star:             "Star",
-	Bang:             "Bang",
-	Equal:            "Equal",
-	BangEqual:        "BangEqual",
-	DoubleEqual:      "DoubleEqual",
-	GreaterThan:      "GreaterThan",
-	LessThan:         "LessThan",
-	GreaterThanEqual: "GreaterThanEqual",
-	LessThanEqual:    "LessThanEqual",
-	String:           "String",
-	Number:           "Number",
-	Ident:            "Ident",
-	If:               "If",
-	Else:             "Else",
-	Or:               "Or",
-	And:              "And",
-	For:              "For",
-	While:            "While",
-	True:             "True",
-	False:            "False",
-	Class:            "Class",
-	Super:            "Super",
-	This:             "This",
-	Fun:              "Fun",
-	Var:              "Var",
-	Nil:              "Nil",
-	Print:            "Print",
-	Return:           "Return",
+	EOF:           "EOF",
+	Error:         "Error",
+	OpenParen:     "OpenParen",
+	CloseParen:    "CloseParen",
+	OpenBrace:     "OpenBrace",
+	CloseBrace:    "CloseBrace",
+	Comma:         "Comma",
+	Dot:           "Dot",
+	Minus:         "Minus",
+	Plus:          "Plus",
+	SemiColon:     "SemiColon",
+	ForwardSlash:  "ForwardSlash",
+	Star:          "Star",
+	Bang:          "Bang",
+	Eq:            "Eq",
+	BangEq:        "BangEq",
+	DoubleEq:      "DoubleEq",
+	GreaterThan:   "GreaterThan",
+	LessThan:      "LessThan",
+	GreaterThanEq: "GreaterThanEq",
+	LessThanEq:    "LessThanEq",
+	String:        "String",
+	Number:        "Number",
+	Ident:         "Ident",
+	If:            "If",
+	Else:          "Else",
+	Or:            "Or",
+	And:           "And",
+	For:           "For",
+	While:         "While",
+	True:          "True",
+	False:         "False",
+	Class:         "Class",
+	Super:         "Super",
+	This:          "This",
+	Fun:           "Fun",
+	Var:           "Var",
+	Nil:           "Nil",
+	Print:         "Print",
+	Return:        "Return",
 }
 
 // String returns the string representation of [Kind].
@@ -188,7 +188,7 @@ func (t Token) Precedence() int {
 		return PrecedenceOr
 	case And:
 		return PrecedenceAnd
-	case Equal, BangEqual, LessThan, LessThanEqual, GreaterThan, GreaterThanEqual:
+	case Eq, BangEq, LessThan, LessThanEq, GreaterThan, GreaterThanEq:
 		return PrecedenceComp
 	case Plus, Minus:
 		return PrecedenceAddSubtract
@@ -197,4 +197,22 @@ func (t Token) Precedence() int {
 	default:
 		return PrecedenceMin
 	}
+}
+
+// Equal compares two tokens for equality, returning true if they
+// are equal, false otherwise.
+func Equal(a, b Token) bool {
+	if a.Kind != b.Kind {
+		return false
+	}
+
+	if a.Start != b.Start {
+		return false
+	}
+
+	if a.End != b.End {
+		return false
+	}
+
+	return true
 }

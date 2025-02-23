@@ -120,7 +120,7 @@ func (p *Parser) ParseVarDecl() ast.Statement {
 	p.expect(token.Ident)
 	decl.Ident = ast.Ident{Tok: p.currentToken}
 
-	p.expect(token.Equal)
+	p.expect(token.Eq)
 
 	// TODO(@FollowTheProcess): Parse the expression, currently just skip
 	// until ';' or EOF

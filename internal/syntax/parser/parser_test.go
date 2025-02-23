@@ -52,7 +52,7 @@ func TestParseVarDecl(t *testing.T) {
 			tokens: []token.Token{
 				{Kind: token.Var, Start: 0, End: 3},
 				{Kind: token.Ident, Start: 4, End: 9},
-				{Kind: token.Equal, Start: 14, End: 15},
+				{Kind: token.Eq, Start: 14, End: 15},
 				{Kind: token.Number, Start: 16, End: 17},
 				{Kind: token.SemiColon, Start: 17, End: 18},
 				{Kind: token.EOF, Start: 18, End: 18},
@@ -69,7 +69,7 @@ func TestParseVarDecl(t *testing.T) {
 			tokens: []token.Token{
 				{Kind: token.Var, Start: 0, End: 3},
 				{Kind: token.Ident, Start: 4, End: 13},
-				{Kind: token.Equal, Start: 14, End: 15},
+				{Kind: token.Eq, Start: 14, End: 15},
 				{Kind: token.Number, Start: 16, End: 17},
 				// {Kind: token.SemiColon, Start: 17, End: 18}, // <- This should be here but isn't
 				{Kind: token.EOF, Start: 17, End: 17}, // So the EOF occurs at pos 17
@@ -128,15 +128,7 @@ func syntaxErrorEqual(a, b parser.SyntaxError) bool {
 		return false
 	}
 
-	if a.Token.Kind != b.Token.Kind {
-		return false
-	}
-
-	if a.Token.Start != b.Token.Start {
-		return false
-	}
-
-	if a.Token.End != b.Token.End {
+	if !token.Equal(a.Token, b.Token) {
 		return false
 	}
 

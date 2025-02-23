@@ -1,229 +1,28 @@
 package token_test
 
 import (
+	"fmt"
+	"math/rand/v2"
 	"testing"
 
 	"github.com/FollowTheProcess/glox/internal/syntax/token"
 	"github.com/FollowTheProcess/test"
 )
 
-func TestToken(t *testing.T) {
-	tests := []struct {
-		name string      // Name of the test case
-		want string      // Expected return value from String()
-		tok  token.Token // The token under test
-	}{
-		{
-			name: "bad",
-			tok:  token.Token{Kind: token.Kind(9999)},
-			want: `<Token::<BadToken> start=0, end=0>`,
-		},
-		{
-			name: "eof",
-			tok:  token.Token{Kind: token.EOF},
-			want: `<Token::EOF start=0, end=0>`,
-		},
-		{
-			name: "error",
-			tok:  token.Token{Kind: token.Error, Start: 42, End: 4},
-			want: `<Token::Error start=42, end=4>`,
-		},
-		{
-			name: "open paren",
-			tok:  token.Token{Kind: token.OpenParen, Start: 1, End: 1},
-			want: `<Token::OpenParen start=1, end=1>`,
-		},
-		{
-			name: "close paren",
-			tok:  token.Token{Kind: token.CloseParen, Start: 1, End: 1},
-			want: `<Token::CloseParen start=1, end=1>`,
-		},
-		{
-			name: "open brace",
-			tok:  token.Token{Kind: token.OpenBrace, Start: 1, End: 1},
-			want: `<Token::OpenBrace start=1, end=1>`,
-		},
-		{
-			name: "close brace",
-			tok:  token.Token{Kind: token.CloseBrace, Start: 1, End: 1},
-			want: `<Token::CloseBrace start=1, end=1>`,
-		},
-		{
-			name: "comma",
-			tok:  token.Token{Kind: token.Comma, Start: 27, End: 1},
-			want: `<Token::Comma start=27, end=1>`,
-		},
-		{
-			name: "dot",
-			tok:  token.Token{Kind: token.Dot, Start: 2, End: 1},
-			want: `<Token::Dot start=2, end=1>`,
-		},
-		{
-			name: "minus",
-			tok:  token.Token{Kind: token.Minus, Start: 32, End: 1},
-			want: `<Token::Minus start=32, end=1>`,
-		},
-		{
-			name: "plus",
-			tok:  token.Token{Kind: token.Plus, Start: 185, End: 1},
-			want: `<Token::Plus start=185, end=1>`,
-		},
-		{
-			name: "semicolon",
-			tok:  token.Token{Kind: token.SemiColon, Start: 86, End: 1},
-			want: `<Token::SemiColon start=86, end=1>`,
-		},
-		{
-			name: "forward slash",
-			tok:  token.Token{Kind: token.ForwardSlash, Start: 17, End: 1},
-			want: `<Token::ForwardSlash start=17, end=1>`,
-		},
-		{
-			name: "star",
-			tok:  token.Token{Kind: token.Star, Start: 12, End: 1},
-			want: `<Token::Star start=12, end=1>`,
-		},
-		{
-			name: "bang",
-			tok:  token.Token{Kind: token.Bang, Start: 7, End: 1},
-			want: `<Token::Bang start=7, end=1>`,
-		},
-		{
-			name: "equal",
-			tok:  token.Token{Kind: token.Equal, Start: 2, End: 1},
-			want: `<Token::Equal start=2, end=1>`,
-		},
-		{
-			name: "bang equal",
-			tok:  token.Token{Kind: token.BangEqual, Start: 1, End: 2},
-			want: `<Token::BangEqual start=1, end=2>`,
-		},
-		{
-			name: "double equal",
-			tok:  token.Token{Kind: token.DoubleEqual, Start: 174, End: 2},
-			want: `<Token::DoubleEqual start=174, end=2>`,
-		},
-		{
-			name: "greater than",
-			tok:  token.Token{Kind: token.GreaterThan, Start: 22, End: 1},
-			want: `<Token::GreaterThan start=22, end=1>`,
-		},
-		{
-			name: "less than",
-			tok:  token.Token{Kind: token.LessThan, Start: 63, End: 1},
-			want: `<Token::LessThan start=63, end=1>`,
-		},
-		{
-			name: "greater than equal",
-			tok:  token.Token{Kind: token.GreaterThanEqual, Start: 3, End: 2},
-			want: `<Token::GreaterThanEqual start=3, end=2>`,
-		},
-		{
-			name: "less than equal",
-			tok:  token.Token{Kind: token.LessThanEqual, Start: 7, End: 2},
-			want: `<Token::LessThanEqual start=7, end=2>`,
-		},
-		{
-			name: "string",
-			tok:  token.Token{Kind: token.String, Start: 1, End: 22},
-			want: `<Token::String start=1, end=22>`,
-		},
-		{
-			name: "number",
-			tok:  token.Token{Kind: token.Number, Start: 0, End: 2},
-			want: `<Token::Number start=0, end=2>`,
-		},
-		{
-			name: "ident",
-			tok:  token.Token{Kind: token.Ident, Start: 0, End: 9},
-			want: `<Token::Ident start=0, end=9>`,
-		},
-		{
-			name: "if",
-			tok:  token.Token{Kind: token.If, Start: 17, End: 2},
-			want: `<Token::If start=17, end=2>`,
-		},
-		{
-			name: "else",
-			tok:  token.Token{Kind: token.Else, Start: 37, End: 4},
-			want: `<Token::Else start=37, end=4>`,
-		},
-		{
-			name: "or",
-			tok:  token.Token{Kind: token.Or, Start: 145, End: 2},
-			want: `<Token::Or start=145, end=2>`,
-		},
-		{
-			name: "and",
-			tok:  token.Token{Kind: token.And, Start: 1, End: 3},
-			want: `<Token::And start=1, end=3>`,
-		},
-		{
-			name: "for",
-			tok:  token.Token{Kind: token.For, Start: 5, End: 3},
-			want: `<Token::For start=5, end=3>`,
-		},
-		{
-			name: "while",
-			tok:  token.Token{Kind: token.While, Start: 2, End: 5},
-			want: `<Token::While start=2, end=5>`,
-		},
-		{
-			name: "true",
-			tok:  token.Token{Kind: token.True, Start: 0, End: 4},
-			want: `<Token::True start=0, end=4>`,
-		},
-		{
-			name: "false",
-			tok:  token.Token{Kind: token.False, Start: 19, End: 5},
-			want: `<Token::False start=19, end=5>`,
-		},
-		{
-			name: "class",
-			tok:  token.Token{Kind: token.Class, Start: 21, End: 5},
-			want: `<Token::Class start=21, end=5>`,
-		},
-		{
-			name: "super",
-			tok:  token.Token{Kind: token.Super, Start: 67, End: 5},
-			want: `<Token::Super start=67, end=5>`,
-		},
-		{
-			name: "this",
-			tok:  token.Token{Kind: token.This, Start: 2, End: 4},
-			want: `<Token::This start=2, end=4>`,
-		},
-		{
-			name: "fun",
-			tok:  token.Token{Kind: token.Fun, Start: 0, End: 3},
-			want: `<Token::Fun start=0, end=3>`,
-		},
-		{
-			name: "var",
-			tok:  token.Token{Kind: token.Var, Start: 73, End: 3},
-			want: `<Token::Var start=73, end=3>`,
-		},
-		{
-			name: "nil",
-			tok:  token.Token{Kind: token.Nil, Start: 189, End: 3},
-			want: `<Token::Nil start=189, end=3>`,
-		},
-		{
-			name: "print",
-			tok:  token.Token{Kind: token.Print, Start: 0, End: 5},
-			want: `<Token::Print start=0, end=5>`,
-		},
-		{
-			name: "return",
-			tok:  token.Token{Kind: token.Return, Start: 17, End: 6},
-			want: `<Token::Return start=17, end=6>`,
-		},
+func TestTokenString(t *testing.T) {
+	var kinds []token.Kind
+	for i := token.EOF; i <= token.Return; i++ {
+		kinds = append(kinds, i)
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			test.Equal(t, tt.tok.String(), tt.want)
-			test.True(t, tt.tok.Is(tt.tok.Kind))
+	for _, kind := range kinds {
+		t.Run(kind.String(), func(t *testing.T) {
+			start := rand.Int()
+			end := rand.Int()
+			tok := token.Token{Kind: kind, Start: start, End: end}
+
+			want := fmt.Sprintf("<Token::%s start=%d, end=%d>", kind, start, end)
+			test.Equal(t, tok.String(), want)
 		})
 	}
 }
@@ -273,12 +72,12 @@ func TestPrecedence(t *testing.T) {
 	}{
 		{kind: token.Or, want: token.PrecedenceOr},
 		{kind: token.And, want: token.PrecedenceAnd},
-		{kind: token.Equal, want: token.PrecedenceComp},
-		{kind: token.BangEqual, want: token.PrecedenceComp},
+		{kind: token.Eq, want: token.PrecedenceComp},
+		{kind: token.BangEq, want: token.PrecedenceComp},
 		{kind: token.LessThan, want: token.PrecedenceComp},
-		{kind: token.LessThanEqual, want: token.PrecedenceComp},
+		{kind: token.LessThanEq, want: token.PrecedenceComp},
 		{kind: token.GreaterThan, want: token.PrecedenceComp},
-		{kind: token.GreaterThanEqual, want: token.PrecedenceComp},
+		{kind: token.GreaterThanEq, want: token.PrecedenceComp},
 		{kind: token.Plus, want: token.PrecedenceAddSubtract},
 		{kind: token.Minus, want: token.PrecedenceAddSubtract},
 		{kind: token.Star, want: token.PrecedenceMulDivide},
@@ -294,6 +93,45 @@ func TestPrecedence(t *testing.T) {
 			tok := token.Token{Kind: tt.kind}
 
 			test.Equal(t, tok.Precedence(), tt.want)
+		})
+	}
+}
+
+func TestEqual(t *testing.T) {
+	tests := []struct {
+		name string      // Name of the test case
+		a, b token.Token // Tokens for comparison
+		want bool        // Expected return value
+	}{
+		{
+			name: "equal",
+			a:    token.Token{Kind: token.String, Start: 0, End: 3},
+			b:    token.Token{Kind: token.String, Start: 0, End: 3},
+			want: true,
+		},
+		{
+			name: "different kind",
+			a:    token.Token{Kind: token.Number, Start: 0, End: 3},
+			b:    token.Token{Kind: token.SemiColon, Start: 0, End: 3},
+			want: false,
+		},
+		{
+			name: "different start",
+			a:    token.Token{Kind: token.Eq, Start: 1, End: 3},
+			b:    token.Token{Kind: token.Eq, Start: 0, End: 3},
+			want: false,
+		},
+		{
+			name: "different end",
+			a:    token.Token{Kind: token.Eq, Start: 0, End: 4},
+			b:    token.Token{Kind: token.Eq, Start: 0, End: 3},
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			test.Equal(t, token.Equal(tt.a, tt.b), tt.want)
 		})
 	}
 }
