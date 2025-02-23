@@ -117,19 +117,14 @@ func (k Kind) String() string {
 // It stores the text, type and the offset only. Line and column information
 // is calculated when needed by the parser based on this offset.
 type Token struct {
-	Text   []byte // The src text of the token
-	Kind   Kind   // The kind of token
-	Offset int    // The offset in bytes starting from 0 from the start of the input to the start of this token
-	Width  int    // The width in bytes of this token's raw src text
+	Kind  Kind // The kind of token
+	Start int  // The offset in bytes starting from 0 from the start of the input to the first char in this token
+	End   int  // The byte offset of the last character in this token
 }
 
 // String returns the string representation of [Token].
 func (t Token) String() string {
-	if t.Kind == String {
-		// Don't double quote the value if it's a string
-		return fmt.Sprintf("<Token::%s text=%s, offset=%d, width=%d>", t.Kind, t.Text, t.Offset, t.Width)
-	}
-	return fmt.Sprintf("<Token::%s text=%q, offset=%d, width=%d>", t.Kind, t.Text, t.Offset, t.Width)
+	return fmt.Sprintf("<Token::%s start=%d, end=%d>", t.Kind, t.Start, t.End)
 }
 
 // Is reports whether the token is of a given [Kind].

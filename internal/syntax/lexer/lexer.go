@@ -113,13 +113,10 @@ func (l *Lexer) skipWhitespace() {
 
 // emit emits a token over the tokens channel.
 func (l *Lexer) emit(kind token.Kind) {
-	src := l.src[l.start:l.pos]
-	width := len(src)
 	l.tokens <- token.Token{
-		Text:   src,
-		Kind:   kind,
-		Offset: l.pos - width, // The start position of this token
-		Width:  width,
+		Kind:  kind,
+		Start: l.start, // The start position of this token
+		End:   l.pos,   // The end position of this token
 	}
 	l.start = l.pos
 }
@@ -129,7 +126,7 @@ func (l *Lexer) run() {
 	for state := lexStart; state != nil; {
 		state = state(l)
 	}
-	l.tokens <- token.Token{Kind: token.EOF, Offset: l.pos}
+	l.tokens <- token.Token{Kind: token.EOF, Start: l.pos, End: l.pos}
 	close(l.tokens)
 }
 
@@ -403,9 +400,9 @@ func lexIdent(l *Lexer) lexFn {
 // the state machine in l.run().
 func (l *Lexer) error(err error) lexFn {
 	l.tokens <- token.Token{
-		Text:   []byte(err.Error()),
-		Kind:   token.Error,
-		Offset: l.pos,
+		Kind:  token.Error,
+		Start: l.pos,
+		End:   l.pos,
 	}
 	return nil
 }
@@ -414,11 +411,10 @@ func (l *Lexer) error(err error) lexFn {
 // emitting an error token with the information and returning nil
 // to halt the state machine.
 func lexUnexpectedChar(l *Lexer) lexFn {
-	cur := string(l.current())
 	l.tokens <- token.Token{
-		Text:   []byte("unexpected char " + cur),
-		Kind:   token.Error,
-		Offset: l.pos,
+		Kind:  token.Error,
+		Start: l.pos,
+		End:   l.pos,
 	}
 	return nil
 }
