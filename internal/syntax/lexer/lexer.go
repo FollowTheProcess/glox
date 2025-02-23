@@ -22,6 +22,9 @@ type lexFn func(*Lexer) lexFn
 
 const eof = rune(0)
 
+// Benchmarking suggests this as the balance between performance and memory.
+const bufferSize = 128
+
 // Lexer is the lexical scanner.
 type Lexer struct {
 	tokens chan token.Token // Channel on which to emit lexed tokens
@@ -34,8 +37,10 @@ type Lexer struct {
 
 // New creates a new lexer for the input string and sets it off in a goroutine.
 func New(src []byte) *Lexer {
+	// Note: the tokens channel is buffered allowing the Lexer to make progress
+	// concurrently behind the scenes before the parser asks for the next token
 	l := &Lexer{
-		tokens: make(chan token.Token),
+		tokens: make(chan token.Token, bufferSize),
 		src:    src,
 		start:  0,
 		pos:    0,
