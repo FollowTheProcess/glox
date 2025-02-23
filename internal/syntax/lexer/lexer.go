@@ -28,7 +28,7 @@ const bufferSize = 128
 // Lexer is the lexical scanner.
 type Lexer struct {
 	tokens chan token.Token // Channel on which to emit lexed tokens
-	src    []byte           // The src being scanned
+	src    string           // The src being scanned
 	start  int              // Start position of the current token
 	pos    int              // Current position in the input
 	line   int              // Current line in the input
@@ -36,7 +36,7 @@ type Lexer struct {
 }
 
 // New creates a new lexer for the input string and sets it off in a goroutine.
-func New(src []byte) *Lexer {
+func New(src string) *Lexer {
 	// Note: the tokens channel is buffered allowing the Lexer to make progress
 	// concurrently behind the scenes before the parser asks for the next token
 	l := &Lexer{
@@ -58,7 +58,7 @@ func (l *Lexer) NextToken() token.Token {
 
 // next returns, and consumes, the next rune in the input.
 func (l *Lexer) next() rune {
-	r, width := utf8.DecodeRune(l.rest())
+	r, width := utf8.DecodeRuneInString(l.rest())
 	l.width = width
 	l.pos += l.width
 	if r == '\n' {
@@ -83,9 +83,9 @@ func (l *Lexer) current() rune {
 }
 
 // rest returns the string from the current lexer position to the end of the input.
-func (l *Lexer) rest() []byte {
+func (l *Lexer) rest() string {
 	if l.atEOF() {
-		return nil
+		return ""
 	}
 	return l.src[l.pos:]
 }
@@ -392,7 +392,7 @@ func lexIdent(l *Lexer) lexFn {
 	}
 
 	// Is it a keyword?
-	text := string(l.src[l.start:l.pos])
+	text := l.src[l.start:l.pos]
 	if kind, ok := token.Keyword(text); ok {
 		// Yes, it is
 		l.emit(kind)

@@ -46,10 +46,12 @@ func run() error {
 				return err
 			}
 
+			src := string(contents)
+
 			tokenCount := 0
 
 			start := time.Now()
-			lex := lexer.New(contents)
+			lex := lexer.New(src)
 			for tok := lex.NextToken(); tok.Kind != token.EOF; tok = lex.NextToken() {
 				tokenCount++
 				fmt.Fprintf(os.Stdout, "%s\n", tok)

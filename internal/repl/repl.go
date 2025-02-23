@@ -24,7 +24,7 @@ func Start(in io.Reader, out io.Writer) error {
 			return scanner.Err()
 		}
 
-		line := scanner.Bytes()
+		line := scanner.Text()
 		lex := lexer.New(line)
 
 		for tok := lex.NextToken(); tok.Kind != token.EOF; tok = lex.NextToken() {
