@@ -8,15 +8,6 @@ import (
 	"github.com/FollowTheProcess/glox/internal/syntax/token"
 )
 
-// Tokeniser is the interface wrapping the NextToken method.
-//
-// It is implemented by the [Lexer] below but can be stubbed out for testing
-// higher level components without coupling to the implementation.
-type Tokeniser interface {
-	// NextToken returns the next lexical token in the stream.
-	NextToken() token.Token
-}
-
 // lexFn represents the state of the scanner as a function that returns the next state.
 type lexFn func(*Lexer) lexFn
 

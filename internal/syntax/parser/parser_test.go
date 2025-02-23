@@ -11,69 +11,28 @@ import (
 	"github.com/FollowTheProcess/test"
 )
 
-// testLexer is a lexer that implements the Tokeniser interface simply
-// by returning tokens from a list.
-//
-// It allows us to decouple the parser from the implementation of the lexer.
-type testLexer struct {
-	tokens []token.Token
-}
-
-// NextToken implements the Tokeniser interface for our testLexer.
-func (t *testLexer) NextToken() token.Token {
-	if len(t.tokens) == 0 {
-		return token.Token{Kind: token.EOF}
-	}
-
-	// Get the first token in the stream, "consume" it and return it
-	tok := t.tokens[0]
-	t.tokens = t.tokens[1:]
-
-	return tok
-}
-
-// newTestParser returns a Parser configured with a testLexer emitting a given stream of tokens.
-func newTestParser(t *testing.T, tokens []token.Token) *parser.Parser {
-	t.Helper()
-	lexer := &testLexer{tokens: tokens}
-	return parser.New(t.Name(), nil, lexer)
-}
-
 func TestParseVarDecl(t *testing.T) {
 	tests := []struct {
 		name    string
-		tokens  []token.Token
+		src     string
 		errs    []error
 		want    ast.VarDeclaration
 		wantErr bool
 	}{
 		{
 			name: "valid",
-			tokens: []token.Token{
-				{Kind: token.Var, Start: 0, End: 3},
-				{Kind: token.Ident, Start: 4, End: 9},
-				{Kind: token.Eq, Start: 14, End: 15},
-				{Kind: token.Number, Start: 16, End: 17},
-				{Kind: token.SemiColon, Start: 17, End: 18},
-				{Kind: token.EOF, Start: 18, End: 18},
-			},
+			src:  "var something = 2;",
 			want: ast.VarDeclaration{
 				Ident: ast.Ident{
-					Tok: token.Token{Kind: token.Ident, Start: 4, End: 9},
+					Name: "something",
+					Tok:  token.Token{Kind: token.Ident, Start: 4, End: 9},
 				},
 			},
 			wantErr: false,
 		},
 		{
-			name: "missing semicolon",
-			tokens: []token.Token{
-				{Kind: token.Var, Start: 0, End: 3},
-				{Kind: token.Ident, Start: 4, End: 13},
-				{Kind: token.Eq, Start: 14, End: 15},
-				{Kind: token.Number, Start: 16, End: 17},
-				// {Kind: token.SemiColon, Start: 17, End: 18}, // <- This should be here but isn't
-				{Kind: token.EOF, Start: 17, End: 17}, // So the EOF occurs at pos 17
-			},
+			name:    "missing semicolon",
+			src:     "var something = 2", // <- no semicolon at the end
 			want:    ast.VarDeclaration{},
 			wantErr: true,
 			errs: []error{parser.SyntaxError{
@@ -88,7 +47,7 @@ func TestParseVarDecl(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := newTestParser(t, tt.tokens)
+			p := parser.New(t.Name(), tt.src)
 
 			statement := p.ParseVarDecl()
 
@@ -106,7 +65,7 @@ func TestParseVarDecl(t *testing.T) {
 			decl, ok := statement.(ast.VarDeclaration)
 			test.True(t, ok, test.Context("expected ast.VarDeclaration, got %T", statement))
 
-			test.Equal(t, decl.Ident.Name(), tt.want.Ident.Name())
+			test.Equal(t, decl.Ident.Name, tt.want.Ident.Name)
 		})
 	}
 }
