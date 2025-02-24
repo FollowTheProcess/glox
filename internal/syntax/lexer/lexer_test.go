@@ -16,8 +16,6 @@ import (
 
 var update = flag.Bool("update", false, "Update snapshots and testdata")
 
-const filePermissions = 0o644
-
 func TestLexer(t *testing.T) {
 	tests := []struct {
 		name string        // Name of the test case
@@ -416,10 +414,10 @@ func TestLexerIntegration(t *testing.T) {
 
 			if *update {
 				// Update the expected with what's actually been seen
-				err := archive.Add("expected.txt", []byte(got))
+				err := archive.Write("expected.txt", []byte(got))
 				test.Ok(t, err)
 
-				err = os.WriteFile(file, []byte(archive.String()), filePermissions)
+				err = txtar.DumpFile(file, archive)
 				test.Ok(t, err)
 				return
 			}
