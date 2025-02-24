@@ -402,7 +402,7 @@ func TestLexerIntegration(t *testing.T) {
 			expected, err := archive.Read("expected.txt")
 			test.Ok(t, err)
 
-			tokens := collect(string(src))
+			tokens := collect(src)
 
 			var formattedTokens strings.Builder
 			for _, tok := range tokens {
@@ -414,7 +414,7 @@ func TestLexerIntegration(t *testing.T) {
 
 			if *update {
 				// Update the expected with what's actually been seen
-				err := archive.Write("expected.txt", []byte(got))
+				err := archive.Write("expected.txt", got)
 				test.Ok(t, err)
 
 				err = txtar.DumpFile(file, archive)
@@ -422,7 +422,7 @@ func TestLexerIntegration(t *testing.T) {
 				return
 			}
 
-			test.Diff(t, got, string(expected))
+			test.Diff(t, got, expected)
 		})
 	}
 }
