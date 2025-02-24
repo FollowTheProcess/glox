@@ -6,7 +6,7 @@ require (
 	github.com/FollowTheProcess/cli v0.13.0
 	github.com/FollowTheProcess/msg v1.5.0
 	github.com/FollowTheProcess/test v0.20.2
-	github.com/FollowTheProcess/txtar v0.2.0
+	github.com/FollowTheProcess/txtar v0.3.0
 )
 
 require (

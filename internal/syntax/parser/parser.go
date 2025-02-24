@@ -94,19 +94,26 @@ func (p *Parser) syntaxError(format string, args ...any) {
 // source file to completion.
 func (p *Parser) Parse() (ast.Program, error) {
 	prog := ast.Program{}
-	var statement ast.Statement
 	for !p.currentToken.Is(token.EOF) {
-		switch p.currentToken.Kind {
-		case token.Var:
-			statement = p.ParseVarDecl()
-		default:
-			p.syntaxError("TODO: handle %s", p.currentToken.Kind)
+		statement := p.parseStatement()
+		if statement != nil {
+			prog.Statements = append(prog.Statements, statement)
 		}
-
-		prog.Statements = append(prog.Statements, statement)
+		p.next()
 	}
 
 	return prog, errors.Join(p.errs...)
+}
+
+// parseStatement parses statements of all kinds.
+func (p *Parser) parseStatement() ast.Statement {
+	switch p.currentToken.Kind {
+	case token.Var:
+		return p.parseVarDecl()
+	default:
+		p.syntaxError("TODO: Handle %s", p.currentToken.Kind)
+		return nil
+	}
 }
 
 // Errors returns any parsing errors that have been collected during parsing.
@@ -114,8 +121,8 @@ func (p *Parser) Errors() []error {
 	return p.errs
 }
 
-// ParseVarDecl parses a `var <ident> = <expr>` statement.
-func (p *Parser) ParseVarDecl() ast.Statement {
+// parseVarDecl parses a `var <ident> = <expr>` statement.
+func (p *Parser) parseVarDecl() ast.Statement {
 	var decl ast.VarDeclaration
 	p.expect(token.Ident)
 	decl.Ident = ast.Ident{Tok: p.currentToken, Name: p.src[p.currentToken.Start:p.currentToken.End]}

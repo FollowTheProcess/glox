@@ -3,6 +3,10 @@ package ast
 
 import "github.com/FollowTheProcess/glox/internal/syntax/token"
 
+// TODO(@FollowTheProcess): Make all AST nodes pretty print themselves and then tests can just be
+// comparing a diff of the produced strings, possibly even in .txtar files with automatic snapshot
+// updating
+
 // Node is a generic Abstract Syntax Tree node.
 //
 // All AST nodes implement this interface.
