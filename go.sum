@@ -1,7 +1,5 @@
 github.com/FollowTheProcess/cli v0.13.0 h1:FRW4R16wZIX/o/mFduPU70wWVQTRea5CcHD00Hdm2rw=
 github.com/FollowTheProcess/cli v0.13.0/go.mod h1:xO6uc81RNHVrFe2Vu+AjLWgLUh7GGx0lz/h7Bqt6URU=
-github.com/FollowTheProcess/hue v0.5.0 h1:MrvBx8icb/GM8osVEnH7xPxcBW9x6P7MaBJ68PUW/ao=
-github.com/FollowTheProcess/hue v0.5.0/go.mod h1:7E7L4ybEYTyZpGnQUWvbk7UjIvCX1bbj7JE4VaNLrkg=
 github.com/FollowTheProcess/hue v0.5.1 h1:Q+1xbRTG3tzLIIOq3316dCsvoN3eUrcZy6Vfm1mzDjI=
 github.com/FollowTheProcess/hue v0.5.1/go.mod h1:7E7L4ybEYTyZpGnQUWvbk7UjIvCX1bbj7JE4VaNLrkg=
 github.com/FollowTheProcess/msg v1.5.0 h1:F3kYQVVLwqDGzeWzWaasbB57YxWPD1APGrgYUEKcQAM=
@@ -10,8 +8,8 @@ github.com/FollowTheProcess/snapshot v0.4.1 h1:WIwvs+yZrK9886frLbNB98QWkAXTjIGnu
 github.com/FollowTheProcess/snapshot v0.4.1/go.mod h1:hb3V3azvp8FVrl4pvyhvq/ZYOnFSgyKHfXt96Jgg4e0=
 github.com/FollowTheProcess/test v0.20.2 h1:8/Yw7ny7IVMHIp/dmkGOdDYSUbAy77c+jDq86nfAhOw=
 github.com/FollowTheProcess/test v0.20.2/go.mod h1:4XBQyPoORSO1ZQcXpuopbv1INCAQNB1TY4SF6lGfBwU=
-github.com/FollowTheProcess/txtar v0.2.0 h1:lYkGQe+tuwxdde1FEdivE9NCtvcLcw8tYQQhw/XiUlQ=
-github.com/FollowTheProcess/txtar v0.2.0/go.mod h1:AnlB34itYqpAjr/ognxVq0ja0TOtTH62RIbBlcWyliY=
+github.com/FollowTheProcess/txtar v0.3.0 h1:Y4Nru0LXNN7G4pQMwQxOIFnCXrT8P/x3PLElx+LctHI=
+github.com/FollowTheProcess/txtar v0.3.0/go.mod h1:AnlB34itYqpAjr/ognxVq0ja0TOtTH62RIbBlcWyliY=
 golang.org/x/sys v0.30.0 h1:QjkSwP/36a20jFYWkSue1YwXzLmsV5Gfq7Eiy72C1uc=
 golang.org/x/sys v0.30.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
 golang.org/x/term v0.29.0 h1:L6pJp37ocefwRRtYPKSWOWzOtWSxVajvz2ldH/xi3iU=
