@@ -68,3 +68,17 @@ type Ident struct {
 func (i Ident) Token() token.Token {
 	return i.Tok
 }
+
+// ReturnStatement is the ast node representing a return <expression>; statement.
+type ReturnStatement struct {
+	Value Expression
+	Tok   token.Token
+}
+
+// Token implements [Node] for a ReturnStatement and returns the token
+// corresponding to the "return" keyword.
+func (r ReturnStatement) Token() token.Token {
+	return r.Tok
+}
+
+func (r ReturnStatement) statementNode() {}

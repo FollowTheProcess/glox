@@ -6,8 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/FollowTheProcess/glox/internal/syntax/lexer"
-	"github.com/FollowTheProcess/glox/internal/syntax/token"
+	"github.com/FollowTheProcess/glox/internal/syntax/parser"
 )
 
 const prompt = "-> "
@@ -25,10 +24,13 @@ func Start(in io.Reader, out io.Writer) error {
 		}
 
 		line := scanner.Text()
-		lex := lexer.New(line)
+		p := parser.New("REPL", line)
 
-		for tok := lex.NextToken(); tok.Kind != token.EOF; tok = lex.NextToken() {
-			fmt.Fprintf(out, "%s\n", tok)
+		program, err := p.Parse()
+		if err != nil {
+			return err
 		}
+
+		fmt.Fprintf(out, "%#v\n", program)
 	}
 }

@@ -110,6 +110,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	switch p.currentToken.Kind {
 	case token.Var:
 		return p.parseVarDecl()
+	case token.Return:
+		return p.parseReturnStatement()
 	default:
 		p.syntaxError("TODO: Handle %s", p.currentToken.Kind)
 		return nil
@@ -123,9 +125,9 @@ func (p *Parser) Errors() []error {
 
 // parseVarDecl parses a `var <ident> = <expr>` statement.
 func (p *Parser) parseVarDecl() ast.Statement {
-	var decl ast.VarDeclaration
+	var statement ast.VarDeclaration
 	p.expect(token.Ident)
-	decl.Ident = ast.Ident{Tok: p.currentToken, Name: p.src[p.currentToken.Start:p.currentToken.End]}
+	statement.Ident = ast.Ident{Tok: p.currentToken, Name: p.src[p.currentToken.Start:p.currentToken.End]}
 
 	p.expect(token.Eq)
 
@@ -139,5 +141,24 @@ func (p *Parser) parseVarDecl() ast.Statement {
 		}
 	}
 
-	return decl
+	return statement
+}
+
+// parseReturnStatement parses a `return <expr>;` statement.
+func (p *Parser) parseReturnStatement() ast.Statement {
+	statement := ast.ReturnStatement{Tok: p.currentToken}
+
+	p.next()
+
+	// TODO(@FollowTheProcess): Parse the expression, currently just skip
+	// until ';' or EOF
+	for !p.currentToken.Is(token.SemiColon) {
+		p.next()
+		if p.currentToken.Is(token.EOF) {
+			p.syntaxError("unexpected EOF")
+			return nil
+		}
+	}
+
+	return statement
 }
