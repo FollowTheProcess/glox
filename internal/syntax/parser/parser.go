@@ -125,9 +125,9 @@ func (p *Parser) Errors() []error {
 
 // parseVarDecl parses a `var <ident> = <expr>` statement.
 func (p *Parser) parseVarDecl() ast.Statement {
-	var statement ast.VarDeclaration
+	var statement ast.VarStatement
 	p.expect(token.Ident)
-	statement.Ident = ast.Ident{Tok: p.currentToken, Name: p.src[p.currentToken.Start:p.currentToken.End]}
+	statement.Ident = ast.IdentExpression{Tok: p.currentToken, Name: p.src[p.currentToken.Start:p.currentToken.End]}
 
 	p.expect(token.Eq)
 
