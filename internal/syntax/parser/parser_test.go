@@ -22,8 +22,8 @@ func TestParseVarDecl(t *testing.T) {
 			src:  "var something = 2;",
 			want: ast.Program{
 				Statements: []ast.Statement{
-					ast.VarDeclaration{
-						Ident: ast.Ident{
+					ast.VarStatement{
+						Ident: ast.IdentExpression{
 							Name: "something",
 							Tok:  token.Token{Kind: token.Ident, Start: 4, End: 13},
 						},
@@ -64,35 +64,102 @@ func TestParseVarDecl(t *testing.T) {
 				return
 			}
 
-			// We didn't want an error
-			test.EqualFunc(t, p.Errors(), nil, slices.Equal, test.Context("found unexpected parser errors"))
-
-			test.Equal(
-				t,
-				len(got.Statements),
-				len(tt.want.Statements),
-				test.Context("Mismatch in number of statements"),
-			)
-
-			for i, wantStatement := range tt.want.Statements {
-				gotStatement := got.Statements[i]
-
-				gotDecl, ok := gotStatement.(ast.VarDeclaration)
-				test.True(
-					t,
-					ok,
-					test.Context("expected got statement %d to be ast.VarDeclaration got %T: %[2]#v", i, gotStatement))
-
-				wantDecl, ok := wantStatement.(ast.VarDeclaration)
-				test.True(
-					t,
-					ok,
-					test.Context("expected want statement %d to be ast.VarDeclaration got %T: %[2]#v", i, wantStatement),
-				)
-
-				test.Equal(t, gotDecl.Ident.Name, wantDecl.Ident.Name, test.Context("ident name mismatch"))
-				test.Equal(t, gotDecl.Ident.Token(), wantDecl.Ident.Token(), test.Context("ident token mismatch"))
-			}
+			parseTest(t, got, tt.want)
 		})
 	}
+}
+
+func TestParseReturnStatement(t *testing.T) {
+	tests := []struct {
+		name string      // Name of the test case
+		src  string      // Source code
+		errs []error     // Expected parse errors
+		want ast.Program // Expected program
+	}{
+		{
+			name: "valid",
+			src:  "return 3;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ReturnStatement{
+						Tok: token.Token{Kind: token.Return, Start: 0, End: 6},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := parser.New(t.Name(), tt.src)
+			got, err := p.Parse()
+
+			// Whether or not we wanted an error is encoded in the length of tt.errs:
+			// 	0:	No, any error is unexpected and should fail the test
+			// 	>0:	Yes, we wanted very specific errors and should test for them
+			wantedError := len(tt.errs) != 0
+			test.WantErr(t, err, wantedError)
+
+			if wantedError {
+				// If we wanted an error, the Program should be empty, and our errs list
+				// should contain the right parse errors
+				test.Equal(t, len(got.Statements), 0, test.Context("expected empty program"))
+				test.EqualFunc(t, p.Errors(), tt.errs, slices.Equal, test.Context("syntax errors did not match"))
+				return
+			}
+
+			parseTest(t, got, tt.want)
+		})
+	}
+}
+
+// parseTest tests two ast.Programs are identical, failing the test if not.
+func parseTest(tb testing.TB, got, want ast.Program) {
+	tb.Helper()
+
+	test.Equal(tb, len(got.Statements), len(want.Statements), test.Context("mismatch in number of statements"))
+
+	for index, wantStatement := range want.Statements {
+		gotStatement := got.Statements[index]
+
+		switch wantStatement := wantStatement.(type) {
+		case ast.VarStatement:
+			testVarStatement(tb, gotStatement, wantStatement)
+		case ast.ReturnStatement:
+			testReturnStatement(tb, gotStatement, wantStatement)
+		default:
+			tb.Fatalf("unhandled ast Node in parseTest: %T", wantStatement)
+		}
+	}
+}
+
+// testVarStatement tests two VarDeclaration nodes for equality, failing the test if they
+// are not identical.
+func testVarStatement(tb testing.TB, statement, expected ast.Statement) {
+	tb.Helper()
+
+	got, ok := statement.(ast.VarStatement)
+	test.True(tb, ok, test.Context("expected got to be ast.VarDeclaration, got %T: %[1]#v", statement))
+
+	want, ok := expected.(ast.VarStatement)
+	test.True(tb, ok, test.Context("expected want to be ast.VarDeclaration, got %T: %[1]#v", expected))
+
+	// TODO(@FollowTheProcess): Test Value once expressions are implemented
+	test.Equal(tb, got.Ident.Name, want.Ident.Name, test.Context("ident name mismatch"))
+	test.Equal(tb, got.Ident.Token(), want.Ident.Token(), test.Context("ident token mismatch"))
+}
+
+// testReturnStatement test two ReturnStatement nodes for equality, failing the test if they
+// are not identical.
+func testReturnStatement(tb testing.TB, statement, expected ast.Statement) {
+	tb.Helper()
+
+	got, ok := statement.(ast.ReturnStatement)
+	test.True(tb, ok, test.Context("expected got to be ast.ReturnStatement, got %T: %[1]#v", statement))
+
+	want, ok := expected.(ast.ReturnStatement)
+	test.True(tb, ok, test.Context("expected want to be ast.ReturnStatement, got %T: %[1]#v", expected))
+
+	// TODO(@FollowTheProcess): Test Value once expressions are implemented
+	test.Equal(tb, got.Tok, want.Tok, test.Context("ReturnStatement token mismatch"))
 }
