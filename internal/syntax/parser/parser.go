@@ -54,7 +54,7 @@ func (p *Parser) expect(kind token.Kind) {
 		)
 	}
 
-	// Make progress
+	// Make progress, so that p.next above is now p.current
 	p.advance()
 }
 
