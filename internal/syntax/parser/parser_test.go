@@ -10,13 +10,17 @@ import (
 	"github.com/FollowTheProcess/test"
 )
 
+// parseTest is a table driven test where we parse a full program and make assertions
+// about the AST that gets produced.
+type parseTest struct {
+	name string      // name of the test case
+	src  string      // source code to lex and parse
+	errs []error     // Expected parse errors, empty signals no errors expected
+	want ast.Program // The full AST we expect to see
+}
+
 func TestParseVarStatement(t *testing.T) {
-	tests := []struct {
-		name string      // Name of the test case
-		src  string      // Source code
-		errs []error     // Expected parse errors
-		want ast.Program // Expected program
-	}{
+	tests := []parseTest{
 		{
 			name: "valid",
 			src:  "var something = 2;",
@@ -64,18 +68,13 @@ func TestParseVarStatement(t *testing.T) {
 				return
 			}
 
-			parseTest(t, got, tt.want)
+			testParse(t, got, tt.want)
 		})
 	}
 }
 
 func TestParseReturnStatement(t *testing.T) {
-	tests := []struct {
-		name string      // Name of the test case
-		src  string      // Source code
-		errs []error     // Expected parse errors
-		want ast.Program // Expected program
-	}{
+	tests := []parseTest{
 		{
 			name: "valid",
 			src:  "return 3;",
@@ -108,18 +107,13 @@ func TestParseReturnStatement(t *testing.T) {
 				return
 			}
 
-			parseTest(t, got, tt.want)
+			testParse(t, got, tt.want)
 		})
 	}
 }
 
 func TestParsePrintStatement(t *testing.T) {
-	tests := []struct {
-		name string      // Name of the test case
-		src  string      // Source code
-		errs []error     // Expected parse errors
-		want ast.Program // Expected program
-	}{
+	tests := []parseTest{
 		{
 			name: "valid",
 			src:  "print x == y;",
@@ -152,18 +146,13 @@ func TestParsePrintStatement(t *testing.T) {
 				return
 			}
 
-			parseTest(t, got, tt.want)
+			testParse(t, got, tt.want)
 		})
 	}
 }
 
 func TestParseIdentifierExpression(t *testing.T) {
-	tests := []struct {
-		name string      // Name of the test case
-		src  string      // Source code
-		errs []error     // Expected parse errors
-		want ast.Program // Expected program
-	}{
+	tests := []parseTest{
 		{
 			name: "valid",
 			src:  "foo;",
@@ -200,13 +189,13 @@ func TestParseIdentifierExpression(t *testing.T) {
 				return
 			}
 
-			parseTest(t, got, tt.want)
+			testParse(t, got, tt.want)
 		})
 	}
 }
 
-// parseTest tests two ast.Programs are identical, failing the test if not.
-func parseTest(tb testing.TB, got, want ast.Program) {
+// testParse tests two ast.Programs are identical, failing the test if not.
+func testParse(tb testing.TB, got, want ast.Program) {
 	tb.Helper()
 
 	test.Equal(tb, len(got.Statements), len(want.Statements), test.Context("mismatch in number of statements"))
