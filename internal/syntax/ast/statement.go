@@ -27,7 +27,7 @@ type (
 	// A PrintStatement is the AST node representing a print statement
 	// i.e. `print <expression>;`.
 	PrintStatement struct {
-		Value Expression  // The thing to print
+		Value Expression
 		Tok   token.Token // The "print" keyword
 	}
 )
