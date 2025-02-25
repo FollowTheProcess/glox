@@ -12,12 +12,12 @@ import (
 
 // Parser is the glox parser.
 type Parser struct {
-	name         string       // The name of the source file or "stdin" if REPL
-	tokeniser    *lexer.Lexer // The lexer
-	src          string       // The raw source code
-	errs         []error      // List of [SyntaxError], collected while parsing
-	currentToken token.Token  // The current token the parser is sat on
-	nextToken    token.Token  // The next token in the stream
+	name      string       // The name of the source file or "stdin" if REPL
+	tokeniser *lexer.Lexer // The lexer
+	src       string       // The raw source code
+	errs      []error      // List of [SyntaxError], collected while parsing
+	current   token.Token  // The current token the parser is sat on
+	next      token.Token  // The next token in the stream
 }
 
 // New returns a new Parser.
@@ -29,33 +29,33 @@ func New(name, src string) *Parser {
 	}
 
 	// Read 2 tokens so current and next are set
-	parser.next()
-	parser.next()
+	parser.advance()
+	parser.advance()
 
 	return parser
 }
 
-// next advances the parser by a single token.
-func (p *Parser) next() {
-	p.currentToken = p.nextToken
-	p.nextToken = p.tokeniser.NextToken()
+// advance advances the parser by a single token.
+func (p *Parser) advance() {
+	p.current = p.next
+	p.next = p.tokeniser.NextToken()
 }
 
 // expect advances the parser by a single token, and asserts that the token
 // is of a particular kind. If not, a parsing error will be produced and
 // appended to the error list.
 func (p *Parser) expect(kind token.Kind) {
-	if !p.nextToken.Is(kind) {
+	if !p.next.Is(kind) {
 		p.syntaxError(
 			"expected %s, got %s: %q",
 			kind,
-			p.nextToken.Kind,
-			p.src[p.nextToken.Start:p.nextToken.End],
+			p.next.Kind,
+			p.src[p.next.Start:p.next.End],
 		)
 	}
 
 	// Make progress
-	p.next()
+	p.advance()
 }
 
 // syntaxError emits a [SyntaxError], populating it with line/col info using
@@ -70,19 +70,19 @@ func (p *Parser) syntaxError(format string, args ...any) {
 			lastNewLineOffset = index
 		}
 
-		if index > p.currentToken.Start {
+		if index > p.current.Start {
 			break
 		}
 	}
 
 	// The column is therefore the number of bytes from the position of the most recent newline
 	// encountered before the token, and the offset of the token itself
-	col := p.currentToken.Start - lastNewLineOffset
+	col := p.current.Start - lastNewLineOffset
 
 	err := SyntaxError{
 		File:  p.name,
 		Msg:   fmt.Sprintf(format, args...),
-		Token: p.currentToken,
+		Token: p.current,
 		Line:  line,
 		Col:   col,
 	}
@@ -94,12 +94,12 @@ func (p *Parser) syntaxError(format string, args ...any) {
 // source file to completion.
 func (p *Parser) Parse() (ast.Program, error) {
 	prog := ast.Program{}
-	for !p.currentToken.Is(token.EOF) {
+	for !p.current.Is(token.EOF) {
 		statement := p.parseStatement()
 		if statement != nil {
 			prog.Statements = append(prog.Statements, statement)
 		}
-		p.next()
+		p.advance()
 	}
 
 	return prog, errors.Join(p.errs...)
@@ -107,7 +107,7 @@ func (p *Parser) Parse() (ast.Program, error) {
 
 // parseStatement parses statements of all kinds.
 func (p *Parser) parseStatement() ast.Statement {
-	switch p.currentToken.Kind {
+	switch p.current.Kind {
 	case token.Var:
 		return p.parseVarDecl()
 	case token.Return:
@@ -115,8 +115,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.Print:
 		return p.parsePrintStatement()
 	default:
-		p.syntaxError("TODO: Handle %s", p.currentToken.Kind)
-		return nil
+		return p.parseExpressionStatement()
 	}
 }
 
@@ -129,15 +128,15 @@ func (p *Parser) Errors() []error {
 func (p *Parser) parseVarDecl() ast.Statement {
 	var statement ast.VarStatement
 	p.expect(token.Ident)
-	statement.Ident = ast.IdentExpression{Tok: p.currentToken, Name: p.src[p.currentToken.Start:p.currentToken.End]}
+	statement.Ident = ast.IdentExpression{Tok: p.current, Name: p.src[p.current.Start:p.current.End]}
 
 	p.expect(token.Eq)
 
 	// TODO(@FollowTheProcess): Parse the expression, currently just skip
 	// until ';' or EOF
-	for !p.currentToken.Is(token.SemiColon) {
-		p.next()
-		if p.currentToken.Is(token.EOF) {
+	for !p.current.Is(token.SemiColon) {
+		p.advance()
+		if p.current.Is(token.EOF) {
 			p.syntaxError("unexpected EOF")
 			return nil
 		}
@@ -148,15 +147,15 @@ func (p *Parser) parseVarDecl() ast.Statement {
 
 // parseReturnStatement parses a `return <expr>;` statement.
 func (p *Parser) parseReturnStatement() ast.Statement {
-	statement := ast.ReturnStatement{Tok: p.currentToken}
+	statement := ast.ReturnStatement{Tok: p.current}
 
-	p.next()
+	p.advance()
 
 	// TODO(@FollowTheProcess): Parse the expression, currently just skip
 	// until ';' or EOF
-	for !p.currentToken.Is(token.SemiColon) {
-		p.next()
-		if p.currentToken.Is(token.EOF) {
+	for !p.current.Is(token.SemiColon) {
+		p.advance()
+		if p.current.Is(token.EOF) {
 			p.syntaxError("unexpected EOF")
 			return nil
 		}
@@ -167,19 +166,52 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 
 // parsePrintStatement parses a `print <expr>;` statement.
 func (p *Parser) parsePrintStatement() ast.Statement {
-	statement := ast.PrintStatement{Tok: p.currentToken}
+	statement := ast.PrintStatement{Tok: p.current}
 
-	p.next()
+	p.advance()
 
 	// TODO(@FollowTheProcess): Parse the expression, currently just skip
 	// until ';' or EOF
-	for !p.currentToken.Is(token.SemiColon) {
-		p.next()
-		if p.currentToken.Is(token.EOF) {
+	for !p.current.Is(token.SemiColon) {
+		p.advance()
+		if p.current.Is(token.EOF) {
 			p.syntaxError("unexpected EOF")
 			return nil
 		}
 	}
 
 	return statement
+}
+
+// parseExpressionStatement parses a generic expression statement
+// i.e. `<expr>;`.
+func (p *Parser) parseExpressionStatement() ast.Statement {
+	statement := ast.ExpressionStatement{Tok: p.current}
+
+	// TODO(@FollowTheProcess): Precedence
+
+	statement.Value = p.parseExpression()
+
+	if p.next.Is(token.SemiColon) {
+		p.advance()
+	}
+
+	return statement
+}
+
+// parseExpression is the top level parse function for precedence based
+// expression parsing.
+func (p *Parser) parseExpression() ast.Expression {
+	switch p.current.Kind {
+	case token.Ident:
+		return p.parseIdentifierExpression()
+	default:
+		p.syntaxError("TODO: handle %s in parseExpression", p.current.Kind)
+		return nil
+	}
+}
+
+// parseIdentifierExpression parses a single ident expression.
+func (p *Parser) parseIdentifierExpression() ast.Expression {
+	return ast.IdentExpression{Tok: p.current, Name: p.src[p.current.Start:p.current.End]}
 }

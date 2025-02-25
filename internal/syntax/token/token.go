@@ -58,6 +58,7 @@ const (
 	PrecedenceComp        = 3 // Precedence of comparson operators like '==', '!=' etc.
 	PrecedenceAddSubtract = 4 // Precedence of addition '+' and subtraction '-'
 	PrecedenceMulDivide   = 5 // Precedence of multiplication '*' and division '/'
+	PrecedenceMax         = 6 // Things like call, selector etc.
 )
 
 var tokenStrings = [...]string{
