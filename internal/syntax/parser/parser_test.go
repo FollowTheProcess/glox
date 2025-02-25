@@ -10,13 +10,17 @@ import (
 	"github.com/FollowTheProcess/test"
 )
 
-func TestParseVarDecl(t *testing.T) {
-	tests := []struct {
-		name string      // Name of the test case
-		src  string      // Source code
-		errs []error     // Expected parse errors
-		want ast.Program // Expected program
-	}{
+// parseTest is a table driven test where we parse a full program and make assertions
+// about the AST that gets produced.
+type parseTest struct {
+	name string      // name of the test case
+	src  string      // source code to lex and parse
+	errs []error     // Expected parse errors, empty signals no errors expected
+	want ast.Program // The full AST we expect to see
+}
+
+func TestParseVarStatement(t *testing.T) {
+	tests := []parseTest{
 		{
 			name: "valid",
 			src:  "var something = 2;",
@@ -36,7 +40,7 @@ func TestParseVarDecl(t *testing.T) {
 			src:  "var something = 2", // <- no semicolon at the end
 			want: ast.Program{},
 			errs: []error{parser.SyntaxError{
-				File:  "TestParseVarDecl/missing_semicolon",
+				File:  "TestParseVarStatement/missing_semicolon",
 				Msg:   "unexpected EOF",
 				Token: token.Token{Kind: token.EOF, Start: 17, End: 17},
 				Line:  1,
@@ -64,18 +68,13 @@ func TestParseVarDecl(t *testing.T) {
 				return
 			}
 
-			parseTest(t, got, tt.want)
+			testParse(t, got, tt.want)
 		})
 	}
 }
 
 func TestParseReturnStatement(t *testing.T) {
-	tests := []struct {
-		name string      // Name of the test case
-		src  string      // Source code
-		errs []error     // Expected parse errors
-		want ast.Program // Expected program
-	}{
+	tests := []parseTest{
 		{
 			name: "valid",
 			src:  "return 3;",
@@ -108,18 +107,13 @@ func TestParseReturnStatement(t *testing.T) {
 				return
 			}
 
-			parseTest(t, got, tt.want)
+			testParse(t, got, tt.want)
 		})
 	}
 }
 
 func TestParsePrintStatement(t *testing.T) {
-	tests := []struct {
-		name string      // Name of the test case
-		src  string      // Source code
-		errs []error     // Expected parse errors
-		want ast.Program // Expected program
-	}{
+	tests := []parseTest{
 		{
 			name: "valid",
 			src:  "print x == y;",
@@ -152,13 +146,56 @@ func TestParsePrintStatement(t *testing.T) {
 				return
 			}
 
-			parseTest(t, got, tt.want)
+			testParse(t, got, tt.want)
 		})
 	}
 }
 
-// parseTest tests two ast.Programs are identical, failing the test if not.
-func parseTest(tb testing.TB, got, want ast.Program) {
+func TestParseIdentifierExpression(t *testing.T) {
+	tests := []parseTest{
+		{
+			name: "valid",
+			src:  "foo;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.IdentExpression{
+							Name: "foo",
+							Tok:  token.Token{Kind: token.Ident, Start: 0, End: 3},
+						},
+						Tok: token.Token{Kind: token.Ident, Start: 0, End: 3},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := parser.New(t.Name(), tt.src)
+			got, err := p.Parse()
+
+			// Whether or not we wanted an error is encoded in the length of tt.errs:
+			// 	0:	No, any error is unexpected and should fail the test
+			// 	>0:	Yes, we wanted very specific errors and should test for them
+			wantedError := len(tt.errs) != 0
+			test.WantErr(t, err, wantedError)
+
+			if wantedError {
+				// If we wanted an error, the Program should be empty, and our errs list
+				// should contain the right parse errors
+				test.Equal(t, len(got.Statements), 0, test.Context("expected empty program"))
+				test.EqualFunc(t, p.Errors(), tt.errs, slices.Equal, test.Context("syntax errors did not match"))
+				return
+			}
+
+			testParse(t, got, tt.want)
+		})
+	}
+}
+
+// testParse tests two ast.Programs are identical, failing the test if not.
+func testParse(tb testing.TB, got, want ast.Program) {
 	tb.Helper()
 
 	test.Equal(tb, len(got.Statements), len(want.Statements), test.Context("mismatch in number of statements"))
@@ -173,6 +210,8 @@ func parseTest(tb testing.TB, got, want ast.Program) {
 			testReturnStatement(tb, gotStatement, wantStatement)
 		case ast.PrintStatement:
 			testPrintStatement(tb, gotStatement, wantStatement)
+		case ast.ExpressionStatement:
+			testExpressionStatement(tb, gotStatement, wantStatement)
 		default:
 			tb.Fatalf("unhandled ast Node in parseTest: %T", wantStatement)
 		}
@@ -195,7 +234,7 @@ func testVarStatement(tb testing.TB, statement, expected ast.Statement) {
 	test.Equal(tb, got.Ident.Token(), want.Ident.Token(), test.Context("ident token mismatch"))
 }
 
-// testReturnStatement test two [ast.ReturnStatement] nodes for equality, failing the test if they
+// testReturnStatement tests two [ast.ReturnStatement] nodes for equality, failing the test if they
 // are not identical.
 func testReturnStatement(tb testing.TB, statement, expected ast.Statement) {
 	tb.Helper()
@@ -210,7 +249,7 @@ func testReturnStatement(tb testing.TB, statement, expected ast.Statement) {
 	test.Equal(tb, got.Tok, want.Tok, test.Context("ReturnStatement token mismatch"))
 }
 
-// testReturnStatement test two [ast.PrintStatement] nodes for equality, failing the test if they
+// testReturnStatement tests two [ast.PrintStatement] nodes for equality, failing the test if they
 // are not identical.
 func testPrintStatement(tb testing.TB, statement, expected ast.Statement) {
 	tb.Helper()
@@ -223,4 +262,39 @@ func testPrintStatement(tb testing.TB, statement, expected ast.Statement) {
 
 	// TODO(@FollowTheProcess): Test Value once expressions are implemented
 	test.Equal(tb, got.Tok, want.Tok, test.Context("PrintStatement token mismatch"))
+}
+
+// testExpressionStatement tests two [ast.ExpressionStatement] nodes for equality, failing the test
+// if they are not identical.
+func testExpressionStatement(tb testing.TB, statement, expected ast.Statement) {
+	tb.Helper()
+
+	got, ok := statement.(ast.ExpressionStatement)
+	test.True(tb, ok, test.Context("expected got to be ast.ExpressionStatement, got %T: %[1]#v", statement))
+
+	want, ok := expected.(ast.ExpressionStatement)
+	test.True(tb, ok, test.Context("expected want to be ast.ExpressionStatement, got %T: %[1]#v", expected))
+
+	switch want.Value.(type) {
+	case ast.IdentExpression:
+		testIdentExpression(tb, got, want)
+	default:
+		tb.Fatalf("unhandled ast Node in testExpressionStatement: %T", want)
+	}
+}
+
+// testIdentExpression tests two [ast.IdentExpression] nodes for equality, failing the test
+// if they are not identical.
+func testIdentExpression(tb testing.TB, statement, expected ast.ExpressionStatement) {
+	tb.Helper()
+
+	test.Equal(tb, statement.Tok, expected.Tok, test.Context("ExpressionStatement token mismatch"))
+
+	got, ok := statement.Value.(ast.IdentExpression)
+	test.True(tb, ok, test.Context("expected got to be ast.IdentExpression, got %T: %[1]#v", statement.Value))
+
+	want, ok := expected.Value.(ast.IdentExpression)
+	test.True(tb, ok, test.Context("expected want to be ast.IdentExpression, got %T: %[1]#v", expected.Value))
+
+	test.Equal(tb, got, want, test.Context("IdentExpression mismatch"))
 }

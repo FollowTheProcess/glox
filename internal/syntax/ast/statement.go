@@ -8,6 +8,9 @@ type Statement interface {
 	statementNode() // Private method enforcing type safety
 }
 
+// TODO(@FollowTheProcess): VarStatement will actually get turned into VarDeclaration
+// so we'll need a new file and node type
+
 // Concrete AST Statement node types, all implementing [Node] and [Statement].
 type (
 	// A VarStatement is the AST node representing a var declaration
@@ -30,16 +33,25 @@ type (
 		Value Expression
 		Tok   token.Token // The "print" keyword
 	}
+
+	// An ExpressionStatement is the AST node representing a top level
+	// expression as a statement.
+	ExpressionStatement struct {
+		Value Expression
+		Tok   token.Token // The first token of the expression
+	}
 )
 
 // [Node] implementations
 
-func (v VarStatement) Token() token.Token    { return v.Ident.Tok }
-func (r ReturnStatement) Token() token.Token { return r.Tok }
-func (p PrintStatement) Token() token.Token  { return p.Tok }
+func (v VarStatement) Token() token.Token        { return v.Ident.Tok }
+func (r ReturnStatement) Token() token.Token     { return r.Tok }
+func (p PrintStatement) Token() token.Token      { return p.Tok }
+func (e ExpressionStatement) Token() token.Token { return e.Tok }
 
 // [Statement] implementations
 
-func (r ReturnStatement) statementNode() {}
-func (v VarStatement) statementNode()    {}
-func (p PrintStatement) statementNode()  {}
+func (r ReturnStatement) statementNode()     {}
+func (v VarStatement) statementNode()        {}
+func (p PrintStatement) statementNode()      {}
+func (e ExpressionStatement) statementNode() {}

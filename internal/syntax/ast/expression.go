@@ -16,12 +16,22 @@ type (
 		Name string      // The name of the ident
 		Tok  token.Token // The underlying ident token
 	}
+
+	// BinaryExpression is the AST node representing a binary expression
+	// i.e. `x != y`.
+	BinaryExpression struct {
+		Left  Expression
+		Right Expression
+		Op    token.Token
+	}
 )
 
 // [Node] implementations
 
-func (i IdentExpression) Token() token.Token { return i.Tok }
+func (i IdentExpression) Token() token.Token  { return i.Tok }
+func (b BinaryExpression) Token() token.Token { return b.Left.Token() }
 
 // [Expression] implementations
 
-func (i IdentExpression) expressionNode() {}
+func (i IdentExpression) expressionNode()  {}
+func (b BinaryExpression) expressionNode() {}
