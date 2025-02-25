@@ -4,6 +4,7 @@ package parser
 import (
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/FollowTheProcess/glox/internal/syntax/ast"
 	"github.com/FollowTheProcess/glox/internal/syntax/lexer"
@@ -47,8 +48,8 @@ func (p *Parser) advance() {
 func (p *Parser) expect(kind token.Kind) {
 	if !p.next.Is(kind) {
 		p.syntaxError(
-			"expected %s, got %s: %q",
-			kind,
+			"expected %q, got %s: %q",
+			kind.Lexeme(),
 			p.next.Kind,
 			p.src[p.next.Start:p.next.End],
 		)
@@ -96,7 +97,7 @@ func (p *Parser) Parse() (ast.Program, error) {
 	prog := ast.Program{}
 	for !p.current.Is(token.EOF) {
 		statement := p.parseStatement()
-		if statement != nil {
+		if statement != nil && len(p.errs) == 0 {
 			prog.Statements = append(prog.Statements, statement)
 		}
 		p.advance()
@@ -131,16 +132,11 @@ func (p *Parser) parseVarDecl() ast.Statement {
 	statement.Ident = ast.IdentExpression{Tok: p.current, Name: p.src[p.current.Start:p.current.End]}
 
 	p.expect(token.Eq)
+	p.advance()
 
-	// TODO(@FollowTheProcess): Parse the expression, currently just skip
-	// until ';' or EOF
-	for !p.current.Is(token.SemiColon) {
-		p.advance()
-		if p.current.Is(token.EOF) {
-			p.syntaxError("unexpected EOF")
-			return nil
-		}
-	}
+	statement.Value = p.parseExpression()
+
+	p.expect(token.SemiColon)
 
 	return statement
 }
@@ -150,16 +146,9 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 	statement := ast.ReturnStatement{Tok: p.current}
 
 	p.advance()
+	statement.Value = p.parseExpression()
 
-	// TODO(@FollowTheProcess): Parse the expression, currently just skip
-	// until ';' or EOF
-	for !p.current.Is(token.SemiColon) {
-		p.advance()
-		if p.current.Is(token.EOF) {
-			p.syntaxError("unexpected EOF")
-			return nil
-		}
-	}
+	p.expect(token.SemiColon)
 
 	return statement
 }
@@ -169,16 +158,9 @@ func (p *Parser) parsePrintStatement() ast.Statement {
 	statement := ast.PrintStatement{Tok: p.current}
 
 	p.advance()
+	statement.Value = p.parseExpression()
 
-	// TODO(@FollowTheProcess): Parse the expression, currently just skip
-	// until ';' or EOF
-	for !p.current.Is(token.SemiColon) {
-		p.advance()
-		if p.current.Is(token.EOF) {
-			p.syntaxError("unexpected EOF")
-			return nil
-		}
-	}
+	p.expect(token.SemiColon)
 
 	return statement
 }
@@ -205,6 +187,8 @@ func (p *Parser) parseExpression() ast.Expression {
 	switch p.current.Kind {
 	case token.Ident:
 		return p.parseIdentifierExpression()
+	case token.Number:
+		return p.parseNumberLiteralExpression()
 	default:
 		p.syntaxError("TODO: handle %s in parseExpression", p.current.Kind)
 		return nil
@@ -214,4 +198,16 @@ func (p *Parser) parseExpression() ast.Expression {
 // parseIdentifierExpression parses a single ident expression.
 func (p *Parser) parseIdentifierExpression() ast.Expression {
 	return ast.IdentExpression{Tok: p.current, Name: p.src[p.current.Start:p.current.End]}
+}
+
+// parseNumberLiteralExpression parses a number literal expression.
+func (p *Parser) parseNumberLiteralExpression() ast.Expression {
+	src := p.src[p.current.Start:p.current.End]
+	n, err := strconv.ParseFloat(src, 64)
+	if err != nil {
+		p.syntaxError("invalid number literal %q: %v", src, err)
+		return nil
+	}
+
+	return ast.NumberLiteral{Value: n, Tok: p.current}
 }
