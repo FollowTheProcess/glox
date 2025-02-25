@@ -51,7 +51,8 @@ func (e ExpressionStatement) Token() token.Token { return e.Tok }
 
 // [Statement] implementations
 
-func (r ReturnStatement) statementNode()     {}
-func (v VarStatement) statementNode()        {}
-func (p PrintStatement) statementNode()      {}
-func (e ExpressionStatement) statementNode() {}
+func (r ReturnStatement) statementNode()      {}
+func (v VarStatement) statementNode()         {}
+func (p PrintStatement) statementNode()       {}
+func (e ExpressionStatement) statementNode()  {} // Expression statement is both a statement and an expression
+func (e ExpressionStatement) expressionNode() {} // Expression statement is both a statement and an expression

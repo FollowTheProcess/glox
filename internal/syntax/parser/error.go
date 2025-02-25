@@ -18,5 +18,5 @@ type SyntaxError struct {
 // Error implements the error interface for a SyntaxError, enabling its use
 // as a standard Go error.
 func (s SyntaxError) Error() string {
-	return fmt.Sprintf("%s:%d:%d: %s", s.File, s.Line, s.Col, s.Msg)
+	return fmt.Sprintf("%s:%d:%d: %s (%s)", s.File, s.Line, s.Col, s.Msg, s.Token)
 }
