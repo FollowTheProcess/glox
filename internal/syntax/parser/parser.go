@@ -112,6 +112,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseVarDecl()
 	case token.Return:
 		return p.parseReturnStatement()
+	case token.Print:
+		return p.parsePrintStatement()
 	default:
 		p.syntaxError("TODO: Handle %s", p.currentToken.Kind)
 		return nil
@@ -147,6 +149,25 @@ func (p *Parser) parseVarDecl() ast.Statement {
 // parseReturnStatement parses a `return <expr>;` statement.
 func (p *Parser) parseReturnStatement() ast.Statement {
 	statement := ast.ReturnStatement{Tok: p.currentToken}
+
+	p.next()
+
+	// TODO(@FollowTheProcess): Parse the expression, currently just skip
+	// until ';' or EOF
+	for !p.currentToken.Is(token.SemiColon) {
+		p.next()
+		if p.currentToken.Is(token.EOF) {
+			p.syntaxError("unexpected EOF")
+			return nil
+		}
+	}
+
+	return statement
+}
+
+// parsePrintStatement parses a `print <expr>;` statement.
+func (p *Parser) parsePrintStatement() ast.Statement {
+	statement := ast.PrintStatement{Tok: p.currentToken}
 
 	p.next()
 
