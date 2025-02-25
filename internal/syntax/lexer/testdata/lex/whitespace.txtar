@@ -5,7 +5,7 @@ space    tabs				newlines
 
 
 end
--- expected.txt --
+-- tokens.txt --
 <Token::Ident start=0, end=5>
 <Token::Ident start=9, end=13>
 <Token::Ident start=17, end=25>

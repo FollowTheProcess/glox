@@ -1,7 +1,7 @@
 -- src.lox --
 ""
 "string"
--- expected.txt --
+-- tokens.txt --
 <Token::String start=0, end=2>
 <Token::String start=3, end=11>
 <Token::EOF start=12, end=12>

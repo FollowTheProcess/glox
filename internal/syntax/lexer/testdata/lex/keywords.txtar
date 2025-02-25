@@ -1,6 +1,6 @@
 -- src.lox --
 and class else false for fun if nil or return super this true var while
--- expected.txt --
+-- tokens.txt --
 <Token::And start=0, end=3>
 <Token::Class start=4, end=9>
 <Token::Else start=10, end=14>

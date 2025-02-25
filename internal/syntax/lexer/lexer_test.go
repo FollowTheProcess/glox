@@ -399,7 +399,7 @@ func TestLexerIntegration(t *testing.T) {
 			src, err := archive.Read("src.lox")
 			test.Ok(t, err)
 
-			expected, err := archive.Read("expected.txt")
+			expected, err := archive.Read("tokens.txt")
 			test.Ok(t, err)
 
 			tokens := collect(src)
@@ -414,7 +414,7 @@ func TestLexerIntegration(t *testing.T) {
 
 			if *update {
 				// Update the expected with what's actually been seen
-				err := archive.Write("expected.txt", got)
+				err := archive.Write("tokens.txt", got)
 				test.Ok(t, err)
 
 				err = txtar.DumpFile(file, archive)

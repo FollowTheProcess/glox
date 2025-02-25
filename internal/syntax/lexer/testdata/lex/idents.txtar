@@ -1,7 +1,7 @@
 -- src.lox --
 andy formless fo _ _123 _abc ab123
 abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_
--- expected.txt --
+-- tokens.txt --
 <Token::Ident start=0, end=4>
 <Token::Ident start=5, end=13>
 <Token::Ident start=14, end=16>
