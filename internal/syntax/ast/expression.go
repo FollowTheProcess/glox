@@ -18,7 +18,10 @@ type (
 	}
 )
 
-// Token implements the [Node] interface for Ident and returns the ident token.
+// [Node] implementations
+
 func (i IdentExpression) Token() token.Token { return i.Tok }
+
+// [Expression] implementations
 
 func (i IdentExpression) expressionNode() {}

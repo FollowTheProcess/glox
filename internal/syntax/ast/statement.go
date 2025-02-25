@@ -23,15 +23,23 @@ type (
 		Value Expression
 		Tok   token.Token // The "return" keyword
 	}
+
+	// A PrintStatement is the AST node representing a print statement
+	// i.e. `print <expression>;`.
+	PrintStatement struct {
+		Value Expression
+		Tok   token.Token // The "print" keyword
+	}
 )
 
-// Token implements the [Node] interface for VarDeclaration and returns the first
-// token associated with the node, in this case the ident token.
-func (v VarStatement) Token() token.Token { return v.Ident.Tok }
+// [Node] implementations
 
-// Token implements [Node] for a ReturnStatement and returns the token
-// corresponding to the "return" keyword.
+func (v VarStatement) Token() token.Token    { return v.Ident.Tok }
 func (r ReturnStatement) Token() token.Token { return r.Tok }
+func (p PrintStatement) Token() token.Token  { return p.Tok }
+
+// [Statement] implementations
 
 func (r ReturnStatement) statementNode() {}
 func (v VarStatement) statementNode()    {}
+func (p PrintStatement) statementNode()  {}
