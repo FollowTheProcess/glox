@@ -279,7 +279,7 @@ func TestParseNumberLiteral(t *testing.T) {
 	}
 }
 
-func TestUnaryExpression(t *testing.T) {
+func TestParseUnaryExpression(t *testing.T) {
 	tests := []parseTest{
 		{
 			name: "minus five",
