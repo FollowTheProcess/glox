@@ -17,12 +17,19 @@ type (
 		Tok  token.Token // The underlying ident token
 	}
 
-	// Number literal is the AST node representing a literal number. Note
+	// A NumberLiteral is the AST node representing a literal number. Note
 	// that numbers in Lox are *all* float64s underneath
 	//
 	// See https://craftinginterpreters.com/the-lox-language.html#data-types
 	NumberLiteral struct {
 		Value float64
+		Tok   token.Token
+	}
+
+	// A UnaryExpression is the AST node representing a unary expression
+	// i.e. `-5` or `!true`.
+	UnaryExpression struct {
+		Value Expression
 		Tok   token.Token
 	}
 )
@@ -31,8 +38,10 @@ type (
 
 func (i IdentExpression) Token() token.Token { return i.Tok }
 func (n NumberLiteral) Token() token.Token   { return n.Tok }
+func (u UnaryExpression) Token() token.Token { return u.Tok }
 
 // [Expression] implementations
 
 func (i IdentExpression) expressionNode() {}
 func (n NumberLiteral) expressionNode()   {}
+func (u UnaryExpression) expressionNode() {}

@@ -279,6 +279,55 @@ func TestParseNumberLiteral(t *testing.T) {
 	}
 }
 
+func TestUnaryExpression(t *testing.T) {
+	tests := []parseTest{
+		{
+			name: "minus five",
+			src:  "-5;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.UnaryExpression{
+							Tok: token.Token{Kind: token.Minus, Start: 0, End: 1},
+							Value: ast.NumberLiteral{
+								Tok:   token.Token{Kind: token.Number, Start: 1, End: 2},
+								Value: 5,
+							},
+						},
+						Tok: token.Token{Kind: token.Minus, Start: 0, End: 1},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := parser.New(t.Name(), tt.src)
+			got, err := p.Parse()
+
+			// Whether or not we wanted an error is encoded in the length of tt.errs:
+			// 	0:	No, any error is unexpected and should fail the test
+			// 	>0:	Yes, we wanted very specific errors and should test for them
+			wantedError := len(tt.errs) != 0
+			test.WantErr(t, err, wantedError)
+
+			if wantedError {
+				// If we wanted an error, the Program should be empty, and our errs list
+				// should contain the right parse errors
+				test.Equal(t, len(got.Statements), 0, test.Context("expected empty program"))
+				test.EqualFunc(t, p.Errors(), tt.errs, slices.Equal, test.Context("syntax errors did not match"))
+				return
+			}
+
+			testParse(t, got, tt.want)
+		})
+	}
+}
+
+// TODO(@FollowTheProcess): Go through these and ensure they are behaving well and clear, I suspect I've got confused
+// and some aren't needed.
+
 // testParse tests two ast.Programs are identical, failing the test if not.
 func testParse(tb testing.TB, got, want ast.Program) {
 	tb.Helper()
@@ -366,6 +415,8 @@ func testExpression(tb testing.TB, expression, expected ast.Expression) {
 	switch expected.(type) {
 	case ast.NumberLiteral:
 		testNumberLiteralExpression(tb, expression, expected)
+	case ast.UnaryExpression:
+		testUnaryExpression(tb, expression, expected)
 	default:
 		tb.Fatalf("unhandled ast Node in testExpression: %T", expected)
 	}
@@ -386,7 +437,9 @@ func testExpressionStatement(tb testing.TB, statement, expected ast.Statement) {
 	case ast.IdentExpression:
 		testIdentExpression(tb, got, want)
 	case ast.NumberLiteral:
-		testNumberLiteralStatement(tb, got, want)
+		testNumberLiteralExpression(tb, got.Value, want.Value)
+	case ast.UnaryExpression:
+		testUnaryExpression(tb, got.Value, want.Value)
 	default:
 		tb.Fatalf("unhandled ast Node in testExpressionStatement: %T", want.Value)
 	}
@@ -425,6 +478,25 @@ func testNumberLiteralStatement(tb testing.TB, statement, expected ast.Expressio
 	test.Equal(tb, got, want, test.Context("NumberLiteral mismatch"))
 }
 
+// testUnaryExpressionStatement tests two [ast.UnaryExpression] nodes for equality, failing the test
+// if they are not identical, used in the context where the unary expression is a standalone statement
+// as in `!true;`.
+func testUnaryExpressionStatement(tb testing.TB, expression, expected ast.Expression) {
+	tb.Helper()
+
+	test.Equal(tb, expression.Token(), expected.Token(), test.Context("Expression token mismatch"))
+
+	got, ok := expression.(ast.UnaryExpression)
+	test.True(tb, ok, test.Context("expected got to be ast.UnaryExpression, got %T: %#v", expression, expression))
+
+	want, ok := expected.(ast.UnaryExpression)
+	test.True(tb, ok, test.Context("expected want to be ast.UnaryExpression, got %T: %#v", expected, expected))
+
+	test.Equal(tb, got, want, test.Context("UnaryExpression mismatch"))
+}
+
+// TODO(@FollowTheProcess): Could we make these generic? with T being the expected type of expression node?
+
 // testNumberLiteralExpression tests two [ast.NumberLiteral] nodes for equality, failing the test
 // if they are not identical, used in the context where the number is an expression, as in
 // `var x = 5;`.
@@ -440,4 +512,20 @@ func testNumberLiteralExpression(tb testing.TB, expression, expected ast.Express
 	test.True(tb, ok, test.Context("expected want to be ast.NumberLiteral, got %T: %[1]#v", expected))
 
 	test.Equal(tb, got, want, test.Context("NumberLiteral mismatch"))
+}
+
+// testUnaryExpression tests two [ast.UnaryExpression] nodes for equality, failing the test
+// if they are not identical.
+func testUnaryExpression(tb testing.TB, expression, expected ast.Expression) {
+	tb.Helper()
+
+	test.Equal(tb, expression.Token(), expected.Token(), test.Context("Expression token mismatch"))
+
+	got, ok := expression.(ast.UnaryExpression)
+	test.True(tb, ok, test.Context("expected got to be ast.UnaryExpression, got %T: %#v", expression, expression))
+
+	want, ok := expected.(ast.UnaryExpression)
+	test.True(tb, ok, test.Context("expected want to be ast.UnaryExpression, got %T: %#v", expected, expected))
+
+	test.Equal(tb, got, want, test.Context("UnaryExpression mismatch"))
 }
