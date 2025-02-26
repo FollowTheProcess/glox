@@ -127,7 +127,7 @@ func TestPrecedence(t *testing.T) {
 	}{
 		{kind: token.Or, want: token.PrecedenceOr},
 		{kind: token.And, want: token.PrecedenceAnd},
-		{kind: token.Eq, want: token.PrecedenceComp},
+		{kind: token.Eq, want: token.PrecedenceMin},
 		{kind: token.BangEq, want: token.PrecedenceComp},
 		{kind: token.LessThan, want: token.PrecedenceComp},
 		{kind: token.LessThanEq, want: token.PrecedenceComp},
@@ -137,7 +137,6 @@ func TestPrecedence(t *testing.T) {
 		{kind: token.Minus, want: token.PrecedenceAddSubtract},
 		{kind: token.Star, want: token.PrecedenceMulDivide},
 		{kind: token.ForwardSlash, want: token.PrecedenceMulDivide},
-		{kind: token.Bang, want: token.PrecedenceMin},
 		{kind: token.Bang, want: token.PrecedenceMin},
 		{kind: token.Number, want: token.PrecedenceMin},
 		{kind: token.Ident, want: token.PrecedenceMin},

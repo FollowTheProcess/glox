@@ -325,6 +325,85 @@ func TestParseUnaryExpression(t *testing.T) {
 	}
 }
 
+// TODO(@FollowTheProcess): Lots more tests, all the ops and op precedence
+// as well as syntax errors and stuff
+
+func TestParseBinaryExpression(t *testing.T) {
+	tests := []parseTest{
+		{
+			name: "add",
+			src:  "x + y;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.BinaryExpression{
+							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Op:    token.Token{Kind: token.Plus, Start: 2, End: 3},
+							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
+						},
+						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
+					},
+				},
+			},
+		},
+		{
+			name: "minus",
+			src:  "x - y;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.BinaryExpression{
+							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Op:    token.Token{Kind: token.Minus, Start: 2, End: 3},
+							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
+						},
+						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
+					},
+				},
+			},
+		},
+		{
+			name: "or",
+			src:  "x or y;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.BinaryExpression{
+							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Op:    token.Token{Kind: token.Or, Start: 2, End: 4},
+							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 5, End: 6}},
+						},
+						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := parser.New(t.Name(), tt.src)
+			got, err := p.Parse()
+
+			// Whether or not we wanted an error is encoded in the length of tt.errs:
+			// 	0:	No, any error is unexpected and should fail the test
+			// 	>0:	Yes, we wanted very specific errors and should test for them
+			wantedError := len(tt.errs) != 0
+			test.WantErr(t, err, wantedError)
+
+			if wantedError {
+				// If we wanted an error, the Program should be empty, and our errs list
+				// should contain the right parse errors
+				test.Equal(t, len(got.Statements), 0, test.Context("expected empty program"))
+				test.EqualFunc(t, p.Errors(), tt.errs, slices.Equal, test.Context("syntax errors did not match"))
+				return
+			}
+
+			testParse(t, got, tt.want)
+		})
+	}
+}
+
 // testParse tests two ast.Programs are identical, failing the test if not.
 func testParse(tb testing.TB, got, want ast.Program) {
 	tb.Helper()
@@ -409,6 +488,8 @@ func testExpression(tb testing.TB, expression, expected ast.Expression) {
 	test.NotEqual(tb, expression, nil, test.Context("testExpression expression was nil"))
 	test.NotEqual(tb, expected, nil, test.Context("testExpression expected was nil"))
 
+	test.Equal(tb, expression.Token(), expected.Token(), test.Context("Expression token mismatch"))
+
 	switch expected.(type) {
 	case ast.NumberLiteral:
 		testNumberLiteralExpression(tb, expression, expected)
@@ -416,6 +497,8 @@ func testExpression(tb testing.TB, expression, expected ast.Expression) {
 		testIdentExpression(tb, expression, expected)
 	case ast.UnaryExpression:
 		testUnaryExpression(tb, expression, expected)
+	case ast.BinaryExpression:
+		testBinaryExpression(tb, expression, expected)
 	default:
 		tb.Fatalf("unhandled ast Expression in testExpression: %T", expected)
 	}
@@ -442,8 +525,6 @@ func testExpressionStatement(tb testing.TB, statement, expected ast.Statement) {
 func testIdentExpression(tb testing.TB, expression, expected ast.Expression) {
 	tb.Helper()
 
-	test.Equal(tb, expression.Token(), expected.Token(), test.Context("Expression token mismatch"))
-
 	got, ok := expression.(ast.IdentExpression)
 	test.True(tb, ok, test.Context("expected got to be ast.IdentExpression, got %T: %#v", expression, expression))
 
@@ -459,8 +540,6 @@ func testIdentExpression(tb testing.TB, expression, expected ast.Expression) {
 func testNumberLiteralExpression(tb testing.TB, expression, expected ast.Expression) {
 	tb.Helper()
 
-	test.Equal(tb, expression.Token(), expected.Token(), test.Context("Expression token mismatch"))
-
 	got, ok := expression.(ast.NumberLiteral)
 	test.True(tb, ok, test.Context("expected got to be ast.NumberLiteral, got %T: %#v", expression, expression))
 
@@ -475,8 +554,6 @@ func testNumberLiteralExpression(tb testing.TB, expression, expected ast.Express
 func testUnaryExpression(tb testing.TB, expression, expected ast.Expression) {
 	tb.Helper()
 
-	test.Equal(tb, expression.Token(), expected.Token(), test.Context("Expression token mismatch"))
-
 	got, ok := expression.(ast.UnaryExpression)
 	test.True(tb, ok, test.Context("expected got to be ast.UnaryExpression, got %T: %#v", expression, expression))
 
@@ -484,4 +561,18 @@ func testUnaryExpression(tb testing.TB, expression, expected ast.Expression) {
 	test.True(tb, ok, test.Context("expected want to be ast.UnaryExpression, got %T: %#v", expected, expected))
 
 	test.Equal(tb, got, want, test.Context("UnaryExpression mismatch"))
+}
+
+// testBinaryExpression tests two [ast.BinaryExpression] nodes for equality, failing the test
+// if they are not identical.
+func testBinaryExpression(tb testing.TB, expression, expected ast.Expression) {
+	tb.Helper()
+
+	got, ok := expression.(ast.BinaryExpression)
+	test.True(tb, ok, test.Context("expected got to be ast.BinaryExpression, got %T: %#v", expression, expression))
+
+	want, ok := expected.(ast.BinaryExpression)
+	test.True(tb, ok, test.Context("expected want to be ast.BinaryExpression, got %T: %#v", expected, expected))
+
+	test.Equal(tb, got, want, test.Context("BinaryExpression mismatch"))
 }

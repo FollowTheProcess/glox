@@ -246,7 +246,7 @@ func (t Token) Precedence() int {
 		return PrecedenceOr
 	case And:
 		return PrecedenceAnd
-	case Eq, BangEq, LessThan, LessThanEq, GreaterThan, GreaterThanEq:
+	case DoubleEq, BangEq, LessThan, LessThanEq, GreaterThan, GreaterThanEq:
 		return PrecedenceComp
 	case Plus, Minus:
 		return PrecedenceAddSubtract

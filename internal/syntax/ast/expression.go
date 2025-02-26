@@ -32,16 +32,26 @@ type (
 		Value Expression  // The expression to be "unary'd"
 		Tok   token.Token // The operator e.g. `-` or `!`
 	}
+
+	// A BinaryExpression is the AST node representing a binary expression
+	// i.e. `x != y` or `5 + 5`.
+	BinaryExpression struct {
+		Left  Expression  // The lhs of the expression
+		Right Expression  // The rhs of the expression
+		Op    token.Token // The operator token
+	}
 )
 
 // [Node] implementations
 
-func (i IdentExpression) Token() token.Token { return i.Tok }
-func (n NumberLiteral) Token() token.Token   { return n.Tok }
-func (u UnaryExpression) Token() token.Token { return u.Tok }
+func (i IdentExpression) Token() token.Token  { return i.Tok }
+func (n NumberLiteral) Token() token.Token    { return n.Tok }
+func (u UnaryExpression) Token() token.Token  { return u.Tok }
+func (b BinaryExpression) Token() token.Token { return b.Left.Token() }
 
 // [Expression] implementations
 
-func (i IdentExpression) expressionNode() {}
-func (n NumberLiteral) expressionNode()   {}
-func (u UnaryExpression) expressionNode() {}
+func (i IdentExpression) expressionNode()  {}
+func (n NumberLiteral) expressionNode()    {}
+func (u UnaryExpression) expressionNode()  {}
+func (b BinaryExpression) expressionNode() {}

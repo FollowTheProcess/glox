@@ -183,18 +183,45 @@ func (p *Parser) parseExpressionStatement() ast.Statement {
 
 // parseExpression is the top level parse function for precedence based
 // expression parsing.
-func (p *Parser) parseExpression(precedence int) ast.Expression { //nolint: unparam // precedence will be used very shortly
+func (p *Parser) parseExpression(precedence int) ast.Expression {
+	var expression ast.Expression
+
 	switch p.current.Kind {
 	case token.Ident:
-		return p.parseIdentifierExpression()
+		expression = p.parseIdentifierExpression()
 	case token.Number:
-		return p.parseNumberLiteralExpression()
+		expression = p.parseNumberLiteralExpression()
 	case token.Bang, token.Minus:
-		return p.parseUnaryExpression()
+		expression = p.parseUnaryExpression()
 	default:
-		p.syntaxError("TODO: handle %s in parseExpression", p.current.Kind)
+		p.syntaxError("Unhandled token in parseExpression (unary switch): %s", p.current.Kind)
 		return nil
 	}
+
+	for !p.next.Is(token.SemiColon) && precedence < p.next.Precedence() {
+		p.advance()
+		switch p.current.Kind {
+		// TODO(@FollowTheProcess): All the other expected binary ops
+		case token.Or,
+			token.And,
+			token.DoubleEq,
+			token.BangEq,
+			token.LessThan,
+			token.LessThanEq,
+			token.GreaterThan,
+			token.GreaterThanEq,
+			token.Plus,
+			token.Minus,
+			token.Star,
+			token.ForwardSlash:
+			expression = p.parseBinaryExpression(expression)
+		default:
+			p.syntaxError("Unhandled token in parseExpression (binary switch): %s", p.current.Kind)
+			return nil
+		}
+	}
+
+	return expression
 }
 
 // parseIdentifierExpression parses a single ident expression.
@@ -222,6 +249,18 @@ func (p *Parser) parseUnaryExpression() ast.Expression {
 	p.advance()
 
 	expression.Value = p.parseExpression(token.PrecedenceUnary)
+
+	return expression
+}
+
+// parseBinaryExpression parses a binary expression
+// i.e. `x != y` or `5 + 5`.
+func (p *Parser) parseBinaryExpression(left ast.Expression) ast.Expression {
+	expression := ast.BinaryExpression{Left: left, Op: p.current}
+
+	precedence := p.current.Precedence()
+	p.advance()
+	expression.Right = p.parseExpression(precedence)
 
 	return expression
 }
