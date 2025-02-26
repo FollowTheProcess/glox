@@ -183,7 +183,7 @@ func (p *Parser) parseExpressionStatement() ast.Statement {
 
 // parseExpression is the top level parse function for precedence based
 // expression parsing.
-func (p *Parser) parseExpression(precedence int) ast.Expression {
+func (p *Parser) parseExpression(precedence int) ast.Expression { //nolint: unparam // precedence will be used very shortly
 	switch p.current.Kind {
 	case token.Ident:
 		return p.parseIdentifierExpression()

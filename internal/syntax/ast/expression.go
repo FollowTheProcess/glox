@@ -22,15 +22,15 @@ type (
 	//
 	// See https://craftinginterpreters.com/the-lox-language.html#data-types
 	NumberLiteral struct {
-		Value float64
-		Tok   token.Token
+		Value float64     // The value of the number
+		Tok   token.Token // Underlying number token
 	}
 
 	// A UnaryExpression is the AST node representing a unary expression
 	// i.e. `-5` or `!true`.
 	UnaryExpression struct {
-		Value Expression
-		Tok   token.Token
+		Value Expression  // The expression to be "unary'd"
+		Tok   token.Token // The operator e.g. `-` or `!`
 	}
 )
 
