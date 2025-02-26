@@ -279,6 +279,52 @@ func TestParseNumberLiteral(t *testing.T) {
 	}
 }
 
+func TestParseUnaryExpression(t *testing.T) {
+	tests := []parseTest{
+		{
+			name: "minus five",
+			src:  "-5;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.UnaryExpression{
+							Tok: token.Token{Kind: token.Minus, Start: 0, End: 1},
+							Value: ast.NumberLiteral{
+								Tok:   token.Token{Kind: token.Number, Start: 1, End: 2},
+								Value: 5,
+							},
+						},
+						Tok: token.Token{Kind: token.Minus, Start: 0, End: 1},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := parser.New(t.Name(), tt.src)
+			got, err := p.Parse()
+
+			// Whether or not we wanted an error is encoded in the length of tt.errs:
+			// 	0:	No, any error is unexpected and should fail the test
+			// 	>0:	Yes, we wanted very specific errors and should test for them
+			wantedError := len(tt.errs) != 0
+			test.WantErr(t, err, wantedError)
+
+			if wantedError {
+				// If we wanted an error, the Program should be empty, and our errs list
+				// should contain the right parse errors
+				test.Equal(t, len(got.Statements), 0, test.Context("expected empty program"))
+				test.EqualFunc(t, p.Errors(), tt.errs, slices.Equal, test.Context("syntax errors did not match"))
+				return
+			}
+
+			testParse(t, got, tt.want)
+		})
+	}
+}
+
 // testParse tests two ast.Programs are identical, failing the test if not.
 func testParse(tb testing.TB, got, want ast.Program) {
 	tb.Helper()
@@ -312,10 +358,10 @@ func testVarStatement(tb testing.TB, statement, expected ast.Statement) {
 	tb.Helper()
 
 	got, ok := statement.(ast.VarStatement)
-	test.True(tb, ok, test.Context("expected got to be ast.VarStatement, got %T: %[1]#v", statement))
+	test.True(tb, ok, test.Context("expected got to be ast.VarStatement, got %T: %#v", statement, statement))
 
 	want, ok := expected.(ast.VarStatement)
-	test.True(tb, ok, test.Context("expected want to be ast.VarStatement, got %T: %[1]#v", expected))
+	test.True(tb, ok, test.Context("expected want to be ast.VarStatement, got %T: %#v", expected, expected))
 
 	test.Equal(tb, got.Ident.Name, want.Ident.Name, test.Context("ident name mismatch"))
 	test.Equal(tb, got.Ident.Token(), want.Ident.Token(), test.Context("ident token mismatch"))
@@ -329,26 +375,26 @@ func testReturnStatement(tb testing.TB, statement, expected ast.Statement) {
 	tb.Helper()
 
 	got, ok := statement.(ast.ReturnStatement)
-	test.True(tb, ok, test.Context("expected got to be ast.ReturnStatement, got %T: %[1]#v", statement))
+	test.True(tb, ok, test.Context("expected got to be ast.ReturnStatement, got %T: %#v", statement, statement))
 
 	want, ok := expected.(ast.ReturnStatement)
-	test.True(tb, ok, test.Context("expected want to be ast.ReturnStatement, got %T: %[1]#v", expected))
+	test.True(tb, ok, test.Context("expected want to be ast.ReturnStatement, got %T: %#v", expected, expected))
 
 	test.Equal(tb, got.Tok, want.Tok, test.Context("ReturnStatement token mismatch"))
 
 	testExpression(tb, got.Value, want.Value)
 }
 
-// testReturnStatement tests two [ast.PrintStatement] nodes for equality, failing the test if they
+// testPrintStatement tests two [ast.PrintStatement] nodes for equality, failing the test if they
 // are not identical.
 func testPrintStatement(tb testing.TB, statement, expected ast.Statement) {
 	tb.Helper()
 
 	got, ok := statement.(ast.PrintStatement)
-	test.True(tb, ok, test.Context("expected got to be ast.PrintStatement, got %T: %[1]#v", statement))
+	test.True(tb, ok, test.Context("expected got to be ast.PrintStatement, got %T: %#v", statement, statement))
 
 	want, ok := expected.(ast.PrintStatement)
-	test.True(tb, ok, test.Context("expected want to be ast.PrintStatement, got %T: %[1]#v", expected))
+	test.True(tb, ok, test.Context("expected want to be ast.PrintStatement, got %T: %#v", expected, expected))
 
 	test.Equal(tb, got.Tok, want.Tok, test.Context("PrintStatement token mismatch"))
 
@@ -366,8 +412,12 @@ func testExpression(tb testing.TB, expression, expected ast.Expression) {
 	switch expected.(type) {
 	case ast.NumberLiteral:
 		testNumberLiteralExpression(tb, expression, expected)
+	case ast.IdentExpression:
+		testIdentExpression(tb, expression, expected)
+	case ast.UnaryExpression:
+		testUnaryExpression(tb, expression, expected)
 	default:
-		tb.Fatalf("unhandled ast Node in testExpression: %T", expected)
+		tb.Fatalf("unhandled ast Expression in testExpression: %T", expected)
 	}
 }
 
@@ -377,52 +427,30 @@ func testExpressionStatement(tb testing.TB, statement, expected ast.Statement) {
 	tb.Helper()
 
 	got, ok := statement.(ast.ExpressionStatement)
-	test.True(tb, ok, test.Context("expected got to be ast.ExpressionStatement, got %T: %[1]#v", statement))
+	test.True(tb, ok, test.Context("expected got to be ast.ExpressionStatement, got %T: %#v", statement, statement))
 
 	want, ok := expected.(ast.ExpressionStatement)
-	test.True(tb, ok, test.Context("expected want to be ast.ExpressionStatement, got %T: %[1]#v", expected))
+	test.True(tb, ok, test.Context("expected want to be ast.ExpressionStatement, got %T: %#v", expected, expected))
 
-	switch want.Value.(type) {
-	case ast.IdentExpression:
-		testIdentExpression(tb, got, want)
-	case ast.NumberLiteral:
-		testNumberLiteralStatement(tb, got, want)
-	default:
-		tb.Fatalf("unhandled ast Node in testExpressionStatement: %T", want.Value)
-	}
+	test.Equal(tb, got.Tok, want.Tok, test.Context("ExpressionStatement.Tok mismatch"))
+
+	testExpression(tb, got.Value, want.Value)
 }
 
 // testIdentExpression tests two [ast.IdentExpression] nodes for equality, failing the test
 // if they are not identical.
-func testIdentExpression(tb testing.TB, statement, expected ast.ExpressionStatement) {
+func testIdentExpression(tb testing.TB, expression, expected ast.Expression) {
 	tb.Helper()
 
-	test.Equal(tb, statement.Tok, expected.Tok, test.Context("ExpressionStatement token mismatch"))
+	test.Equal(tb, expression.Token(), expected.Token(), test.Context("Expression token mismatch"))
 
-	got, ok := statement.Value.(ast.IdentExpression)
-	test.True(tb, ok, test.Context("expected got to be ast.IdentExpression, got %T: %[1]#v", statement.Value))
+	got, ok := expression.(ast.IdentExpression)
+	test.True(tb, ok, test.Context("expected got to be ast.IdentExpression, got %T: %#v", expression, expression))
 
-	want, ok := expected.Value.(ast.IdentExpression)
-	test.True(tb, ok, test.Context("expected want to be ast.IdentExpression, got %T: %[1]#v", expected.Value))
+	want, ok := expected.(ast.IdentExpression)
+	test.True(tb, ok, test.Context("expected want to be ast.IdentExpression, got %T: %#v", expected, expected))
 
 	test.Equal(tb, got, want, test.Context("IdentExpression mismatch"))
-}
-
-// testNumberLiteralStatement tests two [ast.NumberLiteral] nodes for equality, failing the test
-// if they are not identical, used in the context where the number is an expression statement as
-// in `5;`.
-func testNumberLiteralStatement(tb testing.TB, statement, expected ast.ExpressionStatement) {
-	tb.Helper()
-
-	test.Equal(tb, statement.Token(), expected.Token(), test.Context("Expression token mismatch"))
-
-	got, ok := statement.Value.(ast.NumberLiteral)
-	test.True(tb, ok, test.Context("expected got to be ast.NumberLiteral, got %T: %[1]#v", statement.Value))
-
-	want, ok := expected.Value.(ast.NumberLiteral)
-	test.True(tb, ok, test.Context("expected want to be ast.NumberLiteral, got %T: %[1]#v", expected.Value))
-
-	test.Equal(tb, got, want, test.Context("NumberLiteral mismatch"))
 }
 
 // testNumberLiteralExpression tests two [ast.NumberLiteral] nodes for equality, failing the test
@@ -434,10 +462,26 @@ func testNumberLiteralExpression(tb testing.TB, expression, expected ast.Express
 	test.Equal(tb, expression.Token(), expected.Token(), test.Context("Expression token mismatch"))
 
 	got, ok := expression.(ast.NumberLiteral)
-	test.True(tb, ok, test.Context("expected got to be ast.NumberLiteral, got %T: %[1]#v", expression))
+	test.True(tb, ok, test.Context("expected got to be ast.NumberLiteral, got %T: %#v", expression, expression))
 
 	want, ok := expected.(ast.NumberLiteral)
-	test.True(tb, ok, test.Context("expected want to be ast.NumberLiteral, got %T: %[1]#v", expected))
+	test.True(tb, ok, test.Context("expected want to be ast.NumberLiteral, got %T: %#v", expected, expected))
 
 	test.Equal(tb, got, want, test.Context("NumberLiteral mismatch"))
+}
+
+// testUnaryExpression tests two [ast.UnaryExpression] nodes for equality, failing the test
+// if they are not identical.
+func testUnaryExpression(tb testing.TB, expression, expected ast.Expression) {
+	tb.Helper()
+
+	test.Equal(tb, expression.Token(), expected.Token(), test.Context("Expression token mismatch"))
+
+	got, ok := expression.(ast.UnaryExpression)
+	test.True(tb, ok, test.Context("expected got to be ast.UnaryExpression, got %T: %#v", expression, expression))
+
+	want, ok := expected.(ast.UnaryExpression)
+	test.True(tb, ok, test.Context("expected want to be ast.UnaryExpression, got %T: %#v", expected, expected))
+
+	test.Equal(tb, got, want, test.Context("UnaryExpression mismatch"))
 }

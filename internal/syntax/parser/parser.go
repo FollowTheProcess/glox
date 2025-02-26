@@ -134,7 +134,7 @@ func (p *Parser) parseVarDecl() ast.Statement {
 	p.expect(token.Eq)
 	p.advance()
 
-	statement.Value = p.parseExpression()
+	statement.Value = p.parseExpression(token.PrecedenceMin)
 
 	p.expect(token.SemiColon)
 
@@ -146,7 +146,7 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 	statement := ast.ReturnStatement{Tok: p.current}
 
 	p.advance()
-	statement.Value = p.parseExpression()
+	statement.Value = p.parseExpression(token.PrecedenceMin)
 
 	p.expect(token.SemiColon)
 
@@ -158,7 +158,7 @@ func (p *Parser) parsePrintStatement() ast.Statement {
 	statement := ast.PrintStatement{Tok: p.current}
 
 	p.advance()
-	statement.Value = p.parseExpression()
+	statement.Value = p.parseExpression(token.PrecedenceMin)
 
 	p.expect(token.SemiColon)
 
@@ -172,7 +172,7 @@ func (p *Parser) parseExpressionStatement() ast.Statement {
 
 	// TODO(@FollowTheProcess): Precedence
 
-	statement.Value = p.parseExpression()
+	statement.Value = p.parseExpression(token.PrecedenceMin)
 
 	if p.next.Is(token.SemiColon) {
 		p.advance()
@@ -183,12 +183,14 @@ func (p *Parser) parseExpressionStatement() ast.Statement {
 
 // parseExpression is the top level parse function for precedence based
 // expression parsing.
-func (p *Parser) parseExpression() ast.Expression {
+func (p *Parser) parseExpression(precedence int) ast.Expression { //nolint: unparam // precedence will be used very shortly
 	switch p.current.Kind {
 	case token.Ident:
 		return p.parseIdentifierExpression()
 	case token.Number:
 		return p.parseNumberLiteralExpression()
+	case token.Bang, token.Minus:
+		return p.parseUnaryExpression()
 	default:
 		p.syntaxError("TODO: handle %s in parseExpression", p.current.Kind)
 		return nil
@@ -210,4 +212,16 @@ func (p *Parser) parseNumberLiteralExpression() ast.Expression {
 	}
 
 	return ast.NumberLiteral{Value: n, Tok: p.current}
+}
+
+// parseUnaryExpression parses a unary expression
+// i.e. `!true`.
+func (p *Parser) parseUnaryExpression() ast.Expression {
+	expression := ast.UnaryExpression{Tok: p.current}
+
+	p.advance()
+
+	expression.Value = p.parseExpression(token.PrecedenceUnary)
+
+	return expression
 }

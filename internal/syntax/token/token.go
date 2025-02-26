@@ -58,7 +58,8 @@ const (
 	PrecedenceComp        = 3 // Precedence of comparson operators like '==', '!=' etc.
 	PrecedenceAddSubtract = 4 // Precedence of addition '+' and subtraction '-'
 	PrecedenceMulDivide   = 5 // Precedence of multiplication '*' and division '/'
-	PrecedenceMax         = 6 // Things like call, selector etc.
+	PrecedenceUnary       = 6 // Unary expressions like '!true'
+	PrecedenceMax         = 7 // Highest precedence, things like function calls, selectors
 )
 
 var tokenStrings = [...]string{
