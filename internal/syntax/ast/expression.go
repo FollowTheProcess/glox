@@ -1,6 +1,8 @@
 package ast
 
-import "github.com/FollowTheProcess/glox/internal/syntax/token"
+import (
+	"github.com/FollowTheProcess/glox/internal/syntax/token"
+)
 
 // Expression is an AST expression node.
 type Expression interface {

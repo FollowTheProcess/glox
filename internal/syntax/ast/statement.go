@@ -1,6 +1,8 @@
 package ast
 
-import "github.com/FollowTheProcess/glox/internal/syntax/token"
+import (
+	"github.com/FollowTheProcess/glox/internal/syntax/token"
+)
 
 // Statement is an AST statement node.
 type Statement interface {
@@ -51,8 +53,7 @@ func (e ExpressionStatement) Token() token.Token { return e.Tok }
 
 // [Statement] implementations
 
-func (r ReturnStatement) statementNode()      {}
-func (v VarStatement) statementNode()         {}
-func (p PrintStatement) statementNode()       {}
-func (e ExpressionStatement) statementNode()  {} // Expression statement is both a statement and an expression
-func (e ExpressionStatement) expressionNode() {} // Expression statement is both a statement and an expression
+func (r ReturnStatement) statementNode()     {}
+func (v VarStatement) statementNode()        {}
+func (p PrintStatement) statementNode()      {}
+func (e ExpressionStatement) statementNode() {}
