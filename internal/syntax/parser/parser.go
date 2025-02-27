@@ -169,9 +169,6 @@ func (p *Parser) parsePrintStatement() ast.Statement {
 // i.e. `<expr>;`.
 func (p *Parser) parseExpressionStatement() ast.Statement {
 	statement := ast.ExpressionStatement{Tok: p.current}
-
-	// TODO(@FollowTheProcess): Precedence
-
 	statement.Value = p.parseExpression(token.PrecedenceMin)
 
 	if p.next.Is(token.SemiColon) {
@@ -201,7 +198,6 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	for !p.next.Is(token.SemiColon) && precedence < p.next.Precedence() {
 		p.advance()
 		switch p.current.Kind {
-		// TODO(@FollowTheProcess): All the other expected binary ops
 		case token.Or,
 			token.And,
 			token.DoubleEq,
