@@ -19,7 +19,7 @@ type (
 	// i.e. `var <ident> = <expression>;`.
 	VarStatement struct {
 		Value Expression
-		Ident IdentExpression
+		Ident Ident
 	}
 
 	// A ReturnStatement is the AST node representing a return statement
