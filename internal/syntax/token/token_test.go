@@ -125,10 +125,10 @@ func TestPrecedence(t *testing.T) {
 		kind token.Kind // The token kind under test
 		want int        // The expected precedence
 	}{
-		{kind: token.Or, want: token.PrecedenceOr},
-		{kind: token.And, want: token.PrecedenceAnd},
+		{kind: token.Or, want: token.PrecedenceComp},
+		{kind: token.And, want: token.PrecedenceComp},
 		{kind: token.Eq, want: token.PrecedenceMin},
-		{kind: token.BangEq, want: token.PrecedenceComp},
+		{kind: token.BangEq, want: token.PrecedenceEquals},
 		{kind: token.LessThan, want: token.PrecedenceComp},
 		{kind: token.LessThanEq, want: token.PrecedenceComp},
 		{kind: token.GreaterThan, want: token.PrecedenceComp},

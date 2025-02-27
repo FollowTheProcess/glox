@@ -1,6 +1,9 @@
 package ast
 
 import (
+	"fmt"
+	"strconv"
+
 	"github.com/FollowTheProcess/glox/internal/syntax/token"
 )
 
@@ -8,6 +11,10 @@ import (
 type Expression interface {
 	Node             // Marks the Expression as an AST node
 	expressionNode() // Private method enforcing type safety
+
+	// Precedence returns a string clearly showing the precedence hierarchy of the expression.
+	// e.g. for the expression `a + b + b;` something like `((a + b) + c);`.
+	Precedence() string
 }
 
 // Concrete AST Expression node types, all implementing [Node] and [Expression].
@@ -57,3 +64,21 @@ func (i IdentExpression) expressionNode()  {}
 func (n NumberLiteral) expressionNode()    {}
 func (u UnaryExpression) expressionNode()  {}
 func (b BinaryExpression) expressionNode() {}
+
+// Precedence implementations
+
+func (i IdentExpression) Precedence() string {
+	return i.Name // No precedence here, just the thing
+}
+
+func (n NumberLiteral) Precedence() string {
+	return strconv.FormatFloat(n.Value, 'g', -1, 64) // Same
+}
+
+func (u UnaryExpression) Precedence() string {
+	return fmt.Sprintf("(%s%s)", u.Tok.Kind.Lexeme(), u.Value.Precedence())
+}
+
+func (b BinaryExpression) Precedence() string {
+	return fmt.Sprintf("(%s %s %s)", b.Left.Precedence(), b.Op.Kind.Lexeme(), b.Right.Precedence())
+}
