@@ -461,10 +461,7 @@ func TestOperatorPrecedence(t *testing.T) {
 			want: "((5 < 4) != (3 > 4))",
 		},
 		{
-			src:  "3 + 4 * 5 == 3 * 1 + 4 * 5",
-			want: "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
-		},
-		{
+			name: "two complex expressions equal",
 			src:  "3 + 4 * 5 == 3 * 1 + 4 * 5",
 			want: "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
 		},
