@@ -279,6 +279,64 @@ func TestParseNumberLiteral(t *testing.T) {
 	}
 }
 
+func TestParseBoolLiteral(t *testing.T) {
+	tests := []parseTest{
+		{
+			name: "true",
+			src:  "true;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.BoolLiteral{
+							Value: true,
+							Tok:   token.Token{Kind: token.True, Start: 0, End: 4},
+						},
+						Tok: token.Token{Kind: token.True, Start: 0, End: 4},
+					},
+				},
+			},
+		},
+		{
+			name: "false",
+			src:  "false;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.BoolLiteral{
+							Value: false,
+							Tok:   token.Token{Kind: token.False, Start: 0, End: 5},
+						},
+						Tok: token.Token{Kind: token.False, Start: 0, End: 5},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := parser.New(t.Name(), tt.src)
+			got, err := p.Parse()
+
+			// Whether or not we wanted an error is encoded in the length of tt.errs:
+			// 	0:	No, any error is unexpected and should fail the test
+			// 	>0:	Yes, we wanted very specific errors and should test for them
+			wantedError := len(tt.errs) != 0
+			test.WantErr(t, err, wantedError)
+
+			if wantedError {
+				// If we wanted an error, the Program should be empty, and our errs list
+				// should contain the right parse errors
+				test.Equal(t, len(got.Statements), 0, test.Context("expected empty program"))
+				test.EqualFunc(t, p.Errors(), tt.errs, slices.Equal, test.Context("syntax errors did not match"))
+				return
+			}
+
+			testParse(t, got, tt.want)
+		})
+	}
+}
+
 func TestParseUnaryExpression(t *testing.T) {
 	tests := []parseTest{
 		{
@@ -295,6 +353,42 @@ func TestParseUnaryExpression(t *testing.T) {
 							},
 						},
 						Tok: token.Token{Kind: token.Minus, Start: 0, End: 1},
+					},
+				},
+			},
+		},
+		{
+			name: "not true",
+			src:  "!true;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.UnaryExpression{
+							Value: ast.BoolLiteral{
+								Value: true,
+								Tok:   token.Token{Kind: token.True, Start: 1, End: 5},
+							},
+							Tok: token.Token{Kind: token.Bang, Start: 0, End: 1},
+						},
+						Tok: token.Token{Kind: token.Bang, Start: 0, End: 1},
+					},
+				},
+			},
+		},
+		{
+			name: "not false",
+			src:  "!false;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.UnaryExpression{
+							Value: ast.BoolLiteral{
+								Value: false,
+								Tok:   token.Token{Kind: token.False, Start: 1, End: 6},
+							},
+							Tok: token.Token{Kind: token.Bang, Start: 0, End: 1},
+						},
+						Tok: token.Token{Kind: token.Bang, Start: 0, End: 1},
 					},
 				},
 			},
@@ -519,6 +613,54 @@ func TestParseBinaryExpression(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "bool equal true",
+			src:  "true == true;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.BinaryExpression{
+							Left:  ast.BoolLiteral{Value: true, Tok: token.Token{Kind: token.True, Start: 0, End: 4}},
+							Op:    token.Token{Kind: token.DoubleEq, Start: 5, End: 7},
+							Right: ast.BoolLiteral{Value: true, Tok: token.Token{Kind: token.True, Start: 8, End: 12}},
+						},
+						Tok: token.Token{Kind: token.True, Start: 0, End: 4},
+					},
+				},
+			},
+		},
+		{
+			name: "bool not equal",
+			src:  "true != false;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.BinaryExpression{
+							Left:  ast.BoolLiteral{Value: true, Tok: token.Token{Kind: token.True, Start: 0, End: 4}},
+							Op:    token.Token{Kind: token.BangEq, Start: 5, End: 7},
+							Right: ast.BoolLiteral{Value: false, Tok: token.Token{Kind: token.False, Start: 8, End: 13}},
+						},
+						Tok: token.Token{Kind: token.True, Start: 0, End: 4},
+					},
+				},
+			},
+		},
+		{
+			name: "bool equal true",
+			src:  "false == false;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.BinaryExpression{
+							Left:  ast.BoolLiteral{Value: false, Tok: token.Token{Kind: token.False, Start: 0, End: 5}},
+							Op:    token.Token{Kind: token.DoubleEq, Start: 6, End: 8},
+							Right: ast.BoolLiteral{Value: false, Tok: token.Token{Kind: token.False, Start: 9, End: 14}},
+						},
+						Tok: token.Token{Kind: token.False, Start: 0, End: 5},
+					},
+				},
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -606,6 +748,26 @@ func TestOperatorPrecedence(t *testing.T) {
 			src:  "3 + 4 * 5 == 3 * 1 + 4 * 5",
 			want: "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
 		},
+		{
+			name: "bool true",
+			src:  "true",
+			want: "true",
+		},
+		{
+			name: "bool false",
+			src:  "false",
+			want: "false",
+		},
+		{
+			name: "bool comparison false",
+			src:  "3 > 5 == false",
+			want: "((3 > 5) == false)",
+		},
+		{
+			name: "bool comparison true",
+			src:  "3 < 5 == true",
+			want: "((3 < 5) == true)",
+		},
 	}
 
 	for _, tt := range tests {
@@ -625,6 +787,9 @@ func TestOperatorPrecedence(t *testing.T) {
 }
 
 // testParse tests two ast.Programs are identical, failing the test if not.
+//
+// It recursively descends the grammar (much like the actual parser!) asserting the nodes
+// and tokens/positions are identical at every stage.
 func testParse(tb testing.TB, got, want ast.Program) {
 	tb.Helper()
 
@@ -713,6 +878,8 @@ func testExpression(tb testing.TB, expression, expected ast.Expression) {
 	switch expected.(type) {
 	case ast.NumberLiteral:
 		testNumberLiteralExpression(tb, expression, expected)
+	case ast.BoolLiteral:
+		testBoolLiteralExpression(tb, expression, expected)
 	case ast.IdentExpression:
 		testIdentExpression(tb, expression, expected)
 	case ast.UnaryExpression:
@@ -755,8 +922,7 @@ func testIdentExpression(tb testing.TB, expression, expected ast.Expression) {
 }
 
 // testNumberLiteralExpression tests two [ast.NumberLiteral] nodes for equality, failing the test
-// if they are not identical, used in the context where the number is an expression, as in
-// `var x = 5;`.
+// if they are not identical.
 func testNumberLiteralExpression(tb testing.TB, expression, expected ast.Expression) {
 	tb.Helper()
 
@@ -769,7 +935,21 @@ func testNumberLiteralExpression(tb testing.TB, expression, expected ast.Express
 	test.Equal(tb, got, want, test.Context("NumberLiteral mismatch"))
 }
 
-// testUnaryExpression tests two [ast.UnaryExpression] nodes for equality, failing the test
+// testBoolLiteralExpression tests two [ast.BoolLiteral] nodes for equality, failing the test
+// if they are not identical.
+func testBoolLiteralExpression(tb testing.TB, expression, expected ast.Expression) {
+	tb.Helper()
+
+	got, ok := expression.(ast.BoolLiteral)
+	test.True(tb, ok, test.Context("expected got to be ast.BoolLiteral, got %T: %#v", expression, expression))
+
+	want, ok := expected.(ast.BoolLiteral)
+	test.True(tb, ok, test.Context("expected want to be ast.BoolLiteral, got %T: %#v", expected, expected))
+
+	test.Equal(tb, got, want, test.Context("BoolLiteral mismatch"))
+}
+
+// testUnaryExpression tests two [ast.BoolLiteral] nodes for equality, failing the test
 // if they are not identical.
 func testUnaryExpression(tb testing.TB, expression, expected ast.Expression) {
 	tb.Helper()

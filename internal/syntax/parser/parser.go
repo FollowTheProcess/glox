@@ -11,6 +11,14 @@ import (
 	"github.com/FollowTheProcess/glox/internal/syntax/token"
 )
 
+// TODO(@FollowTheProcess): A sort of integration test where there is a single txtar archive file per test case
+// containing 3 files:
+// 	- src.lox: 		Raw Lox source code
+//	- tokens.txt:	The output from tokenising src.lox
+//  - ast.txt:		Some serialised representation of the AST from parsing tokens.txt
+//
+// Would thoroughly test all 3 components without coupling them together too much
+
 // Parser is the glox parser.
 type Parser struct {
 	name      string       // The name of the source file or "stdin" if REPL
@@ -190,6 +198,8 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		expression = p.parseNumberLiteralExpression()
 	case token.Bang, token.Minus:
 		expression = p.parseUnaryExpression()
+	case token.True, token.False:
+		expression = p.parseBoolLiteralExpression()
 	default:
 		p.syntaxError("Unhandled token in parseExpression (unary switch): %s", p.current.Kind)
 		return nil
@@ -220,12 +230,10 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	return expression
 }
 
-// parseIdentifierExpression parses a single ident expression.
 func (p *Parser) parseIdentifierExpression() ast.Expression {
 	return ast.IdentExpression{Tok: p.current, Name: p.src[p.current.Start:p.current.End]}
 }
 
-// parseNumberLiteralExpression parses a number literal expression.
 func (p *Parser) parseNumberLiteralExpression() ast.Expression {
 	src := p.src[p.current.Start:p.current.End]
 	n, err := strconv.ParseFloat(src, 64)
@@ -235,6 +243,16 @@ func (p *Parser) parseNumberLiteralExpression() ast.Expression {
 	}
 
 	return ast.NumberLiteral{Value: n, Tok: p.current}
+}
+
+func (p *Parser) parseBoolLiteralExpression() ast.Expression {
+	src := p.src[p.current.Start:p.current.End]
+	v, err := strconv.ParseBool(src)
+	if err != nil {
+		p.syntaxError("invalid boolean literal %q: %v", src, err)
+	}
+
+	return ast.BoolLiteral{Value: v, Tok: p.current}
 }
 
 // parseUnaryExpression parses a unary expression

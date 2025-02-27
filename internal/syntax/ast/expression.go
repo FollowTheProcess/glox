@@ -7,6 +7,9 @@ import (
 	"github.com/FollowTheProcess/glox/internal/syntax/token"
 )
 
+// TODO(@FollowTheProcess): Rename AST nodes to be a bit less verbose e.g. BoolLiteral
+// could just be Bool.
+
 // Expression is an AST expression node.
 type Expression interface {
 	Node             // Marks the Expression as an AST node
@@ -35,6 +38,12 @@ type (
 		Tok   token.Token // Underlying number token
 	}
 
+	// A BoolLiteral is the AST node representing a literal true|false.
+	BoolLiteral struct {
+		Value bool        // The value of the boolean
+		Tok   token.Token // Underlying token.True|token.False
+	}
+
 	// A UnaryExpression is the AST node representing a unary expression
 	// i.e. `-5` or `!true`.
 	UnaryExpression struct {
@@ -55,6 +64,7 @@ type (
 
 func (i IdentExpression) Token() token.Token  { return i.Tok }
 func (n NumberLiteral) Token() token.Token    { return n.Tok }
+func (b BoolLiteral) Token() token.Token      { return b.Tok }
 func (u UnaryExpression) Token() token.Token  { return u.Tok }
 func (b BinaryExpression) Token() token.Token { return b.Left.Token() }
 
@@ -62,6 +72,7 @@ func (b BinaryExpression) Token() token.Token { return b.Left.Token() }
 
 func (i IdentExpression) expressionNode()  {}
 func (n NumberLiteral) expressionNode()    {}
+func (b BoolLiteral) expressionNode()      {}
 func (u UnaryExpression) expressionNode()  {}
 func (b BinaryExpression) expressionNode() {}
 
@@ -73,6 +84,10 @@ func (i IdentExpression) Precedence() string {
 
 func (n NumberLiteral) Precedence() string {
 	return strconv.FormatFloat(n.Value, 'g', -1, 64) // Same
+}
+
+func (b BoolLiteral) Precedence() string {
+	return strconv.FormatBool(b.Value)
 }
 
 func (u UnaryExpression) Precedence() string {
