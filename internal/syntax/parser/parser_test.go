@@ -325,9 +325,6 @@ func TestParseUnaryExpression(t *testing.T) {
 	}
 }
 
-// TODO(@FollowTheProcess): Lots more tests, all the ops and op precedence
-// as well as syntax errors and stuff
-
 func TestParseBinaryExpression(t *testing.T) {
 	tests := []parseTest{
 		{
@@ -363,6 +360,38 @@ func TestParseBinaryExpression(t *testing.T) {
 			},
 		},
 		{
+			name: "multiply",
+			src:  "x * y;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.BinaryExpression{
+							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Op:    token.Token{Kind: token.Star, Start: 2, End: 3},
+							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
+						},
+						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
+					},
+				},
+			},
+		},
+		{
+			name: "divide",
+			src:  "x / y;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.BinaryExpression{
+							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Op:    token.Token{Kind: token.ForwardSlash, Start: 2, End: 3},
+							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
+						},
+						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
+					},
+				},
+			},
+		},
+		{
 			name: "or",
 			src:  "x or y;",
 			want: ast.Program{
@@ -371,6 +400,118 @@ func TestParseBinaryExpression(t *testing.T) {
 						Value: ast.BinaryExpression{
 							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
 							Op:    token.Token{Kind: token.Or, Start: 2, End: 4},
+							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 5, End: 6}},
+						},
+						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
+					},
+				},
+			},
+		},
+		{
+			name: "and",
+			src:  "x and y;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.BinaryExpression{
+							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Op:    token.Token{Kind: token.And, Start: 2, End: 5},
+							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 6, End: 7}},
+						},
+						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
+					},
+				},
+			},
+		},
+		{
+			name: "greater",
+			src:  "x > y;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.BinaryExpression{
+							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Op:    token.Token{Kind: token.GreaterThan, Start: 2, End: 3},
+							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
+						},
+						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
+					},
+				},
+			},
+		},
+		{
+			name: "less",
+			src:  "x < y;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.BinaryExpression{
+							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Op:    token.Token{Kind: token.LessThan, Start: 2, End: 3},
+							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
+						},
+						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
+					},
+				},
+			},
+		},
+		{
+			name: "greater or equal",
+			src:  "x >= y;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.BinaryExpression{
+							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Op:    token.Token{Kind: token.GreaterThanEq, Start: 2, End: 4},
+							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 5, End: 6}},
+						},
+						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
+					},
+				},
+			},
+		},
+		{
+			name: "less or equal",
+			src:  "x <= y;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.BinaryExpression{
+							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Op:    token.Token{Kind: token.LessThanEq, Start: 2, End: 4},
+							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 5, End: 6}},
+						},
+						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
+					},
+				},
+			},
+		},
+		{
+			name: "equal",
+			src:  "x == y;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.BinaryExpression{
+							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Op:    token.Token{Kind: token.DoubleEq, Start: 2, End: 4},
+							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 5, End: 6}},
+						},
+						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
+					},
+				},
+			},
+		},
+		{
+			name: "not equal",
+			src:  "x != y;",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.BinaryExpression{
+							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Op:    token.Token{Kind: token.BangEq, Start: 2, End: 4},
 							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 5, End: 6}},
 						},
 						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
@@ -405,219 +546,80 @@ func TestParseBinaryExpression(t *testing.T) {
 }
 
 func TestOperatorPrecedence(t *testing.T) {
-	tests := []parseTest{
+	tests := []struct {
+		name string // Name of the test case
+		src  string // Source code
+		want string // Expected precedence string
+	}{
 		{
-			name: "unary beats multiplication",
-			src:  "-a * b", // ((-a) * b)
-			want: ast.Program{
-				Statements: []ast.Statement{
-					ast.ExpressionStatement{
-						Value: ast.BinaryExpression{
-							Left: ast.UnaryExpression{
-								Value: ast.IdentExpression{Name: "a", Tok: token.Token{Kind: token.Ident, Start: 1, End: 2}},
-								Tok:   token.Token{Kind: token.Minus, Start: 0, End: 1},
-							},
-							Right: ast.IdentExpression{Name: "b", Tok: token.Token{Kind: token.Ident, Start: 5, End: 6}},
-							Op:    token.Token{Kind: token.Star, Start: 3, End: 4},
-						},
-						Tok: token.Token{Kind: token.Minus, Start: 0, End: 1},
-					},
-				},
-			},
+			name: "unary beats multiply",
+			src:  "-a * b",
+			want: "((-a) * b)",
+		},
+		{
+			name: "unary beats negation",
+			src:  "!-a",
+			want: "(!(-a))",
 		},
 		{
 			name: "three adds",
-			src:  "a + b + c", // ((a + b) + c)
-			want: ast.Program{
-				Statements: []ast.Statement{
-					ast.ExpressionStatement{
-						Value: ast.BinaryExpression{
-							Left: ast.BinaryExpression{
-								Left:  ast.IdentExpression{Name: "a", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
-								Right: ast.IdentExpression{Name: "b", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
-								Op:    token.Token{Kind: token.Plus, Start: 2, End: 3},
-							},
-							Right: ast.IdentExpression{Name: "c", Tok: token.Token{Kind: token.Ident, Start: 8, End: 9}},
-							Op:    token.Token{Kind: token.Plus, Start: 6, End: 7},
-						},
-						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
-					},
-				},
-			},
+			src:  "a + b + c",
+			want: "((a + b) + c)",
 		},
 		{
-			name: "two adds and subtract",
-			src:  "a + b - c", // ((a + b) - c)
-			want: ast.Program{
-				Statements: []ast.Statement{
-					ast.ExpressionStatement{
-						Value: ast.BinaryExpression{
-							Left: ast.BinaryExpression{
-								Left:  ast.IdentExpression{Name: "a", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
-								Right: ast.IdentExpression{Name: "b", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
-								Op:    token.Token{Kind: token.Plus, Start: 2, End: 3},
-							},
-							Right: ast.IdentExpression{Name: "c", Tok: token.Token{Kind: token.Ident, Start: 8, End: 9}},
-							Op:    token.Token{Kind: token.Minus, Start: 6, End: 7},
-						},
-						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
-					},
-				},
-			},
+			name: "add then subtract",
+			src:  "a + b - c",
+			want: "((a + b) - c)",
 		},
 		{
 			name: "three multiplies",
-			src:  "a * b * c", // ((a * b) * c)
-			want: ast.Program{
-				Statements: []ast.Statement{
-					ast.ExpressionStatement{
-						Value: ast.BinaryExpression{
-							Left: ast.BinaryExpression{
-								Left:  ast.IdentExpression{Name: "a", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
-								Right: ast.IdentExpression{Name: "b", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
-								Op:    token.Token{Kind: token.Star, Start: 2, End: 3},
-							},
-							Right: ast.IdentExpression{Name: "c", Tok: token.Token{Kind: token.Ident, Start: 8, End: 9}},
-							Op:    token.Token{Kind: token.Star, Start: 6, End: 7},
-						},
-						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
-					},
-				},
-			},
+			src:  "a * b * c",
+			want: "((a * b) * c)",
 		},
 		{
-			name: "multiply then divide",
-			src:  "a * b / c", // ((a * b) / c)
-			want: ast.Program{
-				Statements: []ast.Statement{
-					ast.ExpressionStatement{
-						Value: ast.BinaryExpression{
-							Left: ast.BinaryExpression{
-								Left:  ast.IdentExpression{Name: "a", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
-								Right: ast.IdentExpression{Name: "b", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
-								Op:    token.Token{Kind: token.Star, Start: 2, End: 3},
-							},
-							Right: ast.IdentExpression{Name: "c", Tok: token.Token{Kind: token.Ident, Start: 8, End: 9}},
-							Op:    token.Token{Kind: token.ForwardSlash, Start: 6, End: 7},
-						},
-						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
-					},
-				},
-			},
+			name: "multiply beats divide",
+			src:  "a * b / c",
+			want: "((a * b) / c)",
 		},
 		{
-			name: "divide beats plus",
-			src:  "a + b / c", // (a + (b / c))
-			want: ast.Program{
-				Statements: []ast.Statement{
-					ast.ExpressionStatement{
-						Value: ast.BinaryExpression{
-							Left: ast.IdentExpression{Name: "a", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
-							Right: ast.BinaryExpression{
-								Left:  ast.IdentExpression{Name: "b", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
-								Right: ast.IdentExpression{Name: "c", Tok: token.Token{Kind: token.Ident, Start: 8, End: 9}},
-								Op:    token.Token{Kind: token.ForwardSlash, Start: 6, End: 7},
-							},
-							Op: token.Token{Kind: token.Plus, Start: 2, End: 3},
-						},
-						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
-					},
-				},
-			},
+			name: "divide beats add",
+			src:  "a + b / c",
+			want: "(a + (b / c))",
 		},
 		{
-			name: "lots of things",
-			src:  "a + b * c + d / e - f", // (((a + (b * c)) + (d / e)) - f)
-			want: ast.Program{
-				Statements: []ast.Statement{
-					ast.ExpressionStatement{
-						Value: ast.BinaryExpression{
-							Left: ast.BinaryExpression{
-								Left: ast.BinaryExpression{
-									Left: ast.IdentExpression{Name: "a", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
-									Right: ast.BinaryExpression{
-										Left: ast.IdentExpression{
-											Name: "b",
-											Tok:  token.Token{Kind: token.Ident, Start: 4, End: 5},
-										},
-										Right: ast.IdentExpression{
-											Name: "c",
-											Tok:  token.Token{Kind: token.Ident, Start: 8, End: 9},
-										},
-										Op: token.Token{Kind: token.Star, Start: 6, End: 7},
-									},
-									Op: token.Token{Kind: token.Plus, Start: 2, End: 3},
-								},
-								Right: ast.BinaryExpression{
-									Left: ast.IdentExpression{
-										Name: "d",
-										Tok:  token.Token{Kind: token.Ident, Start: 12, End: 13},
-									},
-									Right: ast.IdentExpression{
-										Name: "e",
-										Tok:  token.Token{Kind: token.Ident, Start: 16, End: 17},
-									},
-									Op: token.Token{Kind: token.ForwardSlash, Start: 14, End: 15},
-								},
-								Op: token.Token{Kind: token.Plus, Start: 10, End: 11},
-							},
-							Right: ast.IdentExpression{Name: "f", Tok: token.Token{Kind: token.Ident, Start: 20, End: 21}},
-							Op:    token.Token{Kind: token.Minus, Start: 18, End: 19},
-						},
-						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
-					},
-				},
-			},
+			name: "lots of stuff",
+			src:  "a + b * c + d / e - f",
+			want: "(((a + (b * c)) + (d / e)) - f)",
 		},
 		{
-			name: "two statements",
-			src:  "3 + 4; -5 * 5", // (3 + 4)((-5) * 5)
-			want: ast.Program{
-				Statements: []ast.Statement{
-					ast.ExpressionStatement{
-						Value: ast.BinaryExpression{
-							Left:  ast.NumberLiteral{Value: 3, Tok: token.Token{Kind: token.Number, Start: 0, End: 1}},
-							Op:    token.Token{Kind: token.Plus, Start: 2, End: 3},
-							Right: ast.NumberLiteral{Value: 4, Tok: token.Token{Kind: token.Number, Start: 4, End: 5}},
-						},
-						Tok: token.Token{Kind: token.Number, Start: 0, End: 1},
-					},
-					ast.ExpressionStatement{
-						Value: ast.BinaryExpression{
-							Left: ast.UnaryExpression{
-								Value: ast.NumberLiteral{Value: 5, Tok: token.Token{Kind: token.Number, Start: 8, End: 9}},
-								Tok:   token.Token{Kind: token.Minus, Start: 7, End: 8},
-							},
-							Op:    token.Token{Kind: token.Star, Start: 10, End: 11},
-							Right: ast.NumberLiteral{Value: 5, Tok: token.Token{Kind: token.Number, Start: 12, End: 13}},
-						},
-						Tok: token.Token{Kind: token.Minus, Start: 7, End: 8},
-					},
-				},
-			},
+			name: "binary comparison",
+			src:  "5 > 4 == 3 < 4",
+			want: "((5 > 4) == (3 < 4))",
+		},
+		{
+			name: "binary comparison 2",
+			src:  "5 < 4 != 3 > 4",
+			want: "((5 < 4) != (3 > 4))",
+		},
+		{
+			name: "two complex expressions equal",
+			src:  "3 + 4 * 5 == 3 * 1 + 4 * 5",
+			want: "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := parser.New(t.Name(), tt.src)
-			got, err := p.Parse()
+			prog, err := p.Parse()
+			test.Ok(t, err, test.Context("unexpected parse error"))
 
-			// Whether or not we wanted an error is encoded in the length of tt.errs:
-			// 	0:	No, any error is unexpected and should fail the test
-			// 	>0:	Yes, we wanted very specific errors and should test for them
-			wantedError := len(tt.errs) != 0
-			test.WantErr(t, err, wantedError)
+			for _, statement := range prog.Statements {
+				expressionStatement, ok := statement.(ast.ExpressionStatement)
+				test.True(t, ok, test.Context("non ExpressionStatement node found: %T", statement))
 
-			if wantedError {
-				// If we wanted an error, the Program should be empty, and our errs list
-				// should contain the right parse errors
-				test.Equal(t, len(got.Statements), 0, test.Context("expected empty program"))
-				test.EqualFunc(t, p.Errors(), tt.errs, slices.Equal, test.Context("syntax errors did not match"))
-				return
+				test.Equal(t, expressionStatement.Value.Precedence(), tt.want)
 			}
-
-			testParse(t, got, tt.want)
 		})
 	}
 }

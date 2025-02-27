@@ -125,10 +125,10 @@ func TestPrecedence(t *testing.T) {
 		kind token.Kind // The token kind under test
 		want int        // The expected precedence
 	}{
-		{kind: token.Or, want: token.PrecedenceOr},
-		{kind: token.And, want: token.PrecedenceAnd},
+		{kind: token.Or, want: token.PrecedenceComp},
+		{kind: token.And, want: token.PrecedenceComp},
 		{kind: token.Eq, want: token.PrecedenceMin},
-		{kind: token.BangEq, want: token.PrecedenceComp},
+		{kind: token.BangEq, want: token.PrecedenceEquals},
 		{kind: token.LessThan, want: token.PrecedenceComp},
 		{kind: token.LessThanEq, want: token.PrecedenceComp},
 		{kind: token.GreaterThan, want: token.PrecedenceComp},
@@ -149,4 +149,24 @@ func TestPrecedence(t *testing.T) {
 			test.Equal(t, tok.Precedence(), tt.want)
 		})
 	}
+}
+
+func TestBadToken(t *testing.T) {
+	tok := token.Token{Kind: 9999}
+	test.Equal(t, tok.Kind.Lexeme(), "<BadToken>")
+	test.Equal(t, tok.Kind.String(), "<BadToken>")
+}
+
+func TestIs(t *testing.T) {
+	one := token.Token{Kind: token.Number}
+	two := token.Token{Kind: token.Number}
+	three := token.Token{Kind: token.Comma}
+
+	test.True(t, one.Is(token.Number))
+	test.False(t, one.Is(token.Nil))
+
+	test.True(t, two.Is(token.Number))
+	test.False(t, two.Is(token.And))
+
+	test.False(t, three.Is(token.Number))
 }

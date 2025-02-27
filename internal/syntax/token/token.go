@@ -52,14 +52,13 @@ const (
 )
 
 const (
-	PrecedenceMin         = 0 // Lowest operator precedence
-	PrecedenceOr          = 1 // Precedence of the 'or' binary operator
-	PrecedenceAnd         = 2 // Precedence of the 'and' binary operator
-	PrecedenceComp        = 3 // Precedence of comparson operators like '==', '!=' etc.
-	PrecedenceAddSubtract = 4 // Precedence of addition '+' and subtraction '-'
-	PrecedenceMulDivide   = 5 // Precedence of multiplication '*' and division '/'
-	PrecedenceUnary       = 6 // Unary expressions like '!true'
-	PrecedenceMax         = 7 // Highest precedence, things like function calls, selectors
+	PrecedenceMin         = iota // Lowest operator precedence
+	PrecedenceEquals             // Precedence of comparson operators like '==', '!=' etc.
+	PrecedenceComp               // Less than, greater than, and, or etc.
+	PrecedenceAddSubtract        // Precedence of addition '+' and subtraction '-'
+	PrecedenceMulDivide          // Precedence of multiplication '*' and division '/'
+	PrecedenceUnary              // Unary expressions like '!true'
+	PrecedenceMax                // Highest precedence, things like function calls, selectors
 )
 
 var tokenStrings = [...]string{
@@ -238,15 +237,10 @@ func Keyword(ident string) (kind Kind, ok bool) {
 //
 // If the token is not a binary operator, the lowest precedence is returned.
 func (t Token) Precedence() int {
-	// TODO(@FollowTheProcess): What about a binding power thing like
-	// https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html
-	// we could return left and right binding power?
 	switch t.Kind {
-	case Or:
-		return PrecedenceOr
-	case And:
-		return PrecedenceAnd
-	case DoubleEq, BangEq, LessThan, LessThanEq, GreaterThan, GreaterThanEq:
+	case DoubleEq, BangEq:
+		return PrecedenceEquals
+	case LessThan, LessThanEq, GreaterThan, GreaterThanEq, Or, And:
 		return PrecedenceComp
 	case Plus, Minus:
 		return PrecedenceAddSubtract
