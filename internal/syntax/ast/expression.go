@@ -7,9 +7,6 @@ import (
 	"github.com/FollowTheProcess/glox/internal/syntax/token"
 )
 
-// TODO(@FollowTheProcess): Rename AST nodes to be a bit less verbose e.g. BoolLiteral
-// could just be Bool.
-
 // Expression is an AST expression node.
 type Expression interface {
 	Node             // Marks the Expression as an AST node
@@ -22,24 +19,24 @@ type Expression interface {
 
 // Concrete AST Expression node types, all implementing [Node] and [Expression].
 type (
-	// An IdentExpression is the AST node representing an identifier, both
+	// An Ident is the AST node representing an identifier, both
 	// keyword and not.
-	IdentExpression struct {
+	Ident struct {
 		Name string      // The name of the ident
 		Tok  token.Token // The underlying ident token
 	}
 
-	// A NumberLiteral is the AST node representing a literal number. Note
+	// A Number is the AST node representing a literal number. Note
 	// that numbers in Lox are *all* float64s underneath
 	//
 	// See https://craftinginterpreters.com/the-lox-language.html#data-types
-	NumberLiteral struct {
+	Number struct {
 		Value float64     // The value of the number
 		Tok   token.Token // Underlying number token
 	}
 
-	// A BoolLiteral is the AST node representing a literal true|false.
-	BoolLiteral struct {
+	// A Bool is the AST node representing a literal true|false.
+	Bool struct {
 		Value bool        // The value of the boolean
 		Tok   token.Token // Underlying token.True|token.False
 	}
@@ -62,31 +59,31 @@ type (
 
 // [Node] implementations
 
-func (i IdentExpression) Token() token.Token  { return i.Tok }
-func (n NumberLiteral) Token() token.Token    { return n.Tok }
-func (b BoolLiteral) Token() token.Token      { return b.Tok }
+func (i Ident) Token() token.Token            { return i.Tok }
+func (n Number) Token() token.Token           { return n.Tok }
+func (b Bool) Token() token.Token             { return b.Tok }
 func (u UnaryExpression) Token() token.Token  { return u.Tok }
 func (b BinaryExpression) Token() token.Token { return b.Left.Token() }
 
 // [Expression] implementations
 
-func (i IdentExpression) expressionNode()  {}
-func (n NumberLiteral) expressionNode()    {}
-func (b BoolLiteral) expressionNode()      {}
+func (i Ident) expressionNode()            {}
+func (n Number) expressionNode()           {}
+func (b Bool) expressionNode()             {}
 func (u UnaryExpression) expressionNode()  {}
 func (b BinaryExpression) expressionNode() {}
 
 // Precedence implementations
 
-func (i IdentExpression) Precedence() string {
+func (i Ident) Precedence() string {
 	return i.Name // No precedence here, just the thing
 }
 
-func (n NumberLiteral) Precedence() string {
+func (n Number) Precedence() string {
 	return strconv.FormatFloat(n.Value, 'g', -1, 64) // Same
 }
 
-func (b BoolLiteral) Precedence() string {
+func (b Bool) Precedence() string {
 	return strconv.FormatBool(b.Value)
 }
 

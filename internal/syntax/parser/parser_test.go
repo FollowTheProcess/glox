@@ -27,11 +27,11 @@ func TestParseVarStatement(t *testing.T) {
 			want: ast.Program{
 				Statements: []ast.Statement{
 					ast.VarStatement{
-						Ident: ast.IdentExpression{
+						Ident: ast.Ident{
 							Name: "something",
 							Tok:  token.Token{Kind: token.Ident, Start: 4, End: 13},
 						},
-						Value: ast.NumberLiteral{
+						Value: ast.Number{
 							Value: 2,
 							Tok:   token.Token{Kind: token.Number, Start: 16, End: 17},
 						},
@@ -86,7 +86,7 @@ func TestParseReturnStatement(t *testing.T) {
 				Statements: []ast.Statement{
 					ast.ReturnStatement{
 						Tok: token.Token{Kind: token.Return, Start: 0, End: 6},
-						Value: ast.NumberLiteral{
+						Value: ast.Number{
 							Value: 3,
 							Tok:   token.Token{Kind: token.Number, Start: 7, End: 8},
 						},
@@ -129,7 +129,7 @@ func TestParsePrintStatement(t *testing.T) {
 				Statements: []ast.Statement{
 					ast.PrintStatement{
 						Tok: token.Token{Kind: token.Print, Start: 0, End: 5},
-						Value: ast.NumberLiteral{
+						Value: ast.Number{
 							Value: 3.14159,
 							Tok:   token.Token{Kind: token.Number, Start: 6, End: 13},
 						},
@@ -163,7 +163,7 @@ func TestParsePrintStatement(t *testing.T) {
 	}
 }
 
-func TestParseIdentifierExpression(t *testing.T) {
+func TestParseIdent(t *testing.T) {
 	tests := []parseTest{
 		{
 			name: "valid",
@@ -171,7 +171,7 @@ func TestParseIdentifierExpression(t *testing.T) {
 			want: ast.Program{
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
-						Value: ast.IdentExpression{
+						Value: ast.Ident{
 							Name: "foo",
 							Tok:  token.Token{Kind: token.Ident, Start: 0, End: 3},
 						},
@@ -206,7 +206,7 @@ func TestParseIdentifierExpression(t *testing.T) {
 	}
 }
 
-func TestParseNumberLiteral(t *testing.T) {
+func TestParseNumber(t *testing.T) {
 	tests := []parseTest{
 		{
 			name: "integer",
@@ -214,7 +214,7 @@ func TestParseNumberLiteral(t *testing.T) {
 			want: ast.Program{
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
-						Value: ast.NumberLiteral{
+						Value: ast.Number{
 							Value: 5,
 							Tok:   token.Token{Kind: token.Number, Start: 0, End: 1},
 						},
@@ -229,7 +229,7 @@ func TestParseNumberLiteral(t *testing.T) {
 			want: ast.Program{
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
-						Value: ast.NumberLiteral{
+						Value: ast.Number{
 							Value: 9463,
 							Tok:   token.Token{Kind: token.Number, Start: 0, End: 4},
 						},
@@ -244,7 +244,7 @@ func TestParseNumberLiteral(t *testing.T) {
 			want: ast.Program{
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
-						Value: ast.NumberLiteral{
+						Value: ast.Number{
 							Value: 3.14159,
 							Tok:   token.Token{Kind: token.Number, Start: 0, End: 7},
 						},
@@ -279,7 +279,7 @@ func TestParseNumberLiteral(t *testing.T) {
 	}
 }
 
-func TestParseBoolLiteral(t *testing.T) {
+func TestParseBool(t *testing.T) {
 	tests := []parseTest{
 		{
 			name: "true",
@@ -287,7 +287,7 @@ func TestParseBoolLiteral(t *testing.T) {
 			want: ast.Program{
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
-						Value: ast.BoolLiteral{
+						Value: ast.Bool{
 							Value: true,
 							Tok:   token.Token{Kind: token.True, Start: 0, End: 4},
 						},
@@ -302,7 +302,7 @@ func TestParseBoolLiteral(t *testing.T) {
 			want: ast.Program{
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
-						Value: ast.BoolLiteral{
+						Value: ast.Bool{
 							Value: false,
 							Tok:   token.Token{Kind: token.False, Start: 0, End: 5},
 						},
@@ -347,7 +347,7 @@ func TestParseUnaryExpression(t *testing.T) {
 					ast.ExpressionStatement{
 						Value: ast.UnaryExpression{
 							Tok: token.Token{Kind: token.Minus, Start: 0, End: 1},
-							Value: ast.NumberLiteral{
+							Value: ast.Number{
 								Tok:   token.Token{Kind: token.Number, Start: 1, End: 2},
 								Value: 5,
 							},
@@ -364,7 +364,7 @@ func TestParseUnaryExpression(t *testing.T) {
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
 						Value: ast.UnaryExpression{
-							Value: ast.BoolLiteral{
+							Value: ast.Bool{
 								Value: true,
 								Tok:   token.Token{Kind: token.True, Start: 1, End: 5},
 							},
@@ -382,7 +382,7 @@ func TestParseUnaryExpression(t *testing.T) {
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
 						Value: ast.UnaryExpression{
-							Value: ast.BoolLiteral{
+							Value: ast.Bool{
 								Value: false,
 								Tok:   token.Token{Kind: token.False, Start: 1, End: 6},
 							},
@@ -428,9 +428,9 @@ func TestParseBinaryExpression(t *testing.T) {
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
 						Value: ast.BinaryExpression{
-							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Left:  ast.Ident{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
 							Op:    token.Token{Kind: token.Plus, Start: 2, End: 3},
-							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
+							Right: ast.Ident{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
 						},
 						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
 					},
@@ -444,9 +444,9 @@ func TestParseBinaryExpression(t *testing.T) {
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
 						Value: ast.BinaryExpression{
-							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Left:  ast.Ident{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
 							Op:    token.Token{Kind: token.Minus, Start: 2, End: 3},
-							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
+							Right: ast.Ident{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
 						},
 						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
 					},
@@ -460,9 +460,9 @@ func TestParseBinaryExpression(t *testing.T) {
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
 						Value: ast.BinaryExpression{
-							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Left:  ast.Ident{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
 							Op:    token.Token{Kind: token.Star, Start: 2, End: 3},
-							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
+							Right: ast.Ident{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
 						},
 						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
 					},
@@ -476,9 +476,9 @@ func TestParseBinaryExpression(t *testing.T) {
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
 						Value: ast.BinaryExpression{
-							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Left:  ast.Ident{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
 							Op:    token.Token{Kind: token.ForwardSlash, Start: 2, End: 3},
-							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
+							Right: ast.Ident{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
 						},
 						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
 					},
@@ -492,9 +492,9 @@ func TestParseBinaryExpression(t *testing.T) {
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
 						Value: ast.BinaryExpression{
-							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Left:  ast.Ident{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
 							Op:    token.Token{Kind: token.Or, Start: 2, End: 4},
-							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 5, End: 6}},
+							Right: ast.Ident{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 5, End: 6}},
 						},
 						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
 					},
@@ -508,9 +508,9 @@ func TestParseBinaryExpression(t *testing.T) {
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
 						Value: ast.BinaryExpression{
-							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Left:  ast.Ident{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
 							Op:    token.Token{Kind: token.And, Start: 2, End: 5},
-							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 6, End: 7}},
+							Right: ast.Ident{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 6, End: 7}},
 						},
 						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
 					},
@@ -524,9 +524,9 @@ func TestParseBinaryExpression(t *testing.T) {
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
 						Value: ast.BinaryExpression{
-							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Left:  ast.Ident{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
 							Op:    token.Token{Kind: token.GreaterThan, Start: 2, End: 3},
-							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
+							Right: ast.Ident{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
 						},
 						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
 					},
@@ -540,9 +540,9 @@ func TestParseBinaryExpression(t *testing.T) {
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
 						Value: ast.BinaryExpression{
-							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Left:  ast.Ident{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
 							Op:    token.Token{Kind: token.LessThan, Start: 2, End: 3},
-							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
+							Right: ast.Ident{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 4, End: 5}},
 						},
 						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
 					},
@@ -556,9 +556,9 @@ func TestParseBinaryExpression(t *testing.T) {
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
 						Value: ast.BinaryExpression{
-							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Left:  ast.Ident{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
 							Op:    token.Token{Kind: token.GreaterThanEq, Start: 2, End: 4},
-							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 5, End: 6}},
+							Right: ast.Ident{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 5, End: 6}},
 						},
 						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
 					},
@@ -572,9 +572,9 @@ func TestParseBinaryExpression(t *testing.T) {
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
 						Value: ast.BinaryExpression{
-							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Left:  ast.Ident{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
 							Op:    token.Token{Kind: token.LessThanEq, Start: 2, End: 4},
-							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 5, End: 6}},
+							Right: ast.Ident{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 5, End: 6}},
 						},
 						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
 					},
@@ -588,9 +588,9 @@ func TestParseBinaryExpression(t *testing.T) {
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
 						Value: ast.BinaryExpression{
-							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Left:  ast.Ident{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
 							Op:    token.Token{Kind: token.DoubleEq, Start: 2, End: 4},
-							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 5, End: 6}},
+							Right: ast.Ident{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 5, End: 6}},
 						},
 						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
 					},
@@ -604,9 +604,9 @@ func TestParseBinaryExpression(t *testing.T) {
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
 						Value: ast.BinaryExpression{
-							Left:  ast.IdentExpression{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
+							Left:  ast.Ident{Name: "x", Tok: token.Token{Kind: token.Ident, Start: 0, End: 1}},
 							Op:    token.Token{Kind: token.BangEq, Start: 2, End: 4},
-							Right: ast.IdentExpression{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 5, End: 6}},
+							Right: ast.Ident{Name: "y", Tok: token.Token{Kind: token.Ident, Start: 5, End: 6}},
 						},
 						Tok: token.Token{Kind: token.Ident, Start: 0, End: 1},
 					},
@@ -620,9 +620,9 @@ func TestParseBinaryExpression(t *testing.T) {
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
 						Value: ast.BinaryExpression{
-							Left:  ast.BoolLiteral{Value: true, Tok: token.Token{Kind: token.True, Start: 0, End: 4}},
+							Left:  ast.Bool{Value: true, Tok: token.Token{Kind: token.True, Start: 0, End: 4}},
 							Op:    token.Token{Kind: token.DoubleEq, Start: 5, End: 7},
-							Right: ast.BoolLiteral{Value: true, Tok: token.Token{Kind: token.True, Start: 8, End: 12}},
+							Right: ast.Bool{Value: true, Tok: token.Token{Kind: token.True, Start: 8, End: 12}},
 						},
 						Tok: token.Token{Kind: token.True, Start: 0, End: 4},
 					},
@@ -636,9 +636,9 @@ func TestParseBinaryExpression(t *testing.T) {
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
 						Value: ast.BinaryExpression{
-							Left:  ast.BoolLiteral{Value: true, Tok: token.Token{Kind: token.True, Start: 0, End: 4}},
+							Left:  ast.Bool{Value: true, Tok: token.Token{Kind: token.True, Start: 0, End: 4}},
 							Op:    token.Token{Kind: token.BangEq, Start: 5, End: 7},
-							Right: ast.BoolLiteral{Value: false, Tok: token.Token{Kind: token.False, Start: 8, End: 13}},
+							Right: ast.Bool{Value: false, Tok: token.Token{Kind: token.False, Start: 8, End: 13}},
 						},
 						Tok: token.Token{Kind: token.True, Start: 0, End: 4},
 					},
@@ -652,9 +652,9 @@ func TestParseBinaryExpression(t *testing.T) {
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
 						Value: ast.BinaryExpression{
-							Left:  ast.BoolLiteral{Value: false, Tok: token.Token{Kind: token.False, Start: 0, End: 5}},
+							Left:  ast.Bool{Value: false, Tok: token.Token{Kind: token.False, Start: 0, End: 5}},
 							Op:    token.Token{Kind: token.DoubleEq, Start: 6, End: 8},
-							Right: ast.BoolLiteral{Value: false, Tok: token.Token{Kind: token.False, Start: 9, End: 14}},
+							Right: ast.Bool{Value: false, Tok: token.Token{Kind: token.False, Start: 9, End: 14}},
 						},
 						Tok: token.Token{Kind: token.False, Start: 0, End: 5},
 					},
@@ -876,12 +876,12 @@ func testExpression(tb testing.TB, expression, expected ast.Expression) {
 	test.Equal(tb, expression.Token(), expected.Token(), test.Context("Expression token mismatch"))
 
 	switch expected.(type) {
-	case ast.NumberLiteral:
-		testNumberLiteralExpression(tb, expression, expected)
-	case ast.BoolLiteral:
-		testBoolLiteralExpression(tb, expression, expected)
-	case ast.IdentExpression:
-		testIdentExpression(tb, expression, expected)
+	case ast.Number:
+		testNumber(tb, expression, expected)
+	case ast.Bool:
+		testBool(tb, expression, expected)
+	case ast.Ident:
+		testIdent(tb, expression, expected)
 	case ast.UnaryExpression:
 		testUnaryExpression(tb, expression, expected)
 	case ast.BinaryExpression:
@@ -907,49 +907,49 @@ func testExpressionStatement(tb testing.TB, statement, expected ast.Statement) {
 	testExpression(tb, got.Value, want.Value)
 }
 
-// testIdentExpression tests two [ast.IdentExpression] nodes for equality, failing the test
+// testIdent tests two [ast.Ident] nodes for equality, failing the test
 // if they are not identical.
-func testIdentExpression(tb testing.TB, expression, expected ast.Expression) {
+func testIdent(tb testing.TB, expression, expected ast.Expression) {
 	tb.Helper()
 
-	got, ok := expression.(ast.IdentExpression)
-	test.True(tb, ok, test.Context("expected got to be ast.IdentExpression, got %T: %#v", expression, expression))
+	got, ok := expression.(ast.Ident)
+	test.True(tb, ok, test.Context("expected got to be ast.Ident, got %T: %#v", expression, expression))
 
-	want, ok := expected.(ast.IdentExpression)
-	test.True(tb, ok, test.Context("expected want to be ast.IdentExpression, got %T: %#v", expected, expected))
+	want, ok := expected.(ast.Ident)
+	test.True(tb, ok, test.Context("expected want to be ast.Ident, got %T: %#v", expected, expected))
 
-	test.Equal(tb, got, want, test.Context("IdentExpression mismatch"))
+	test.Equal(tb, got, want, test.Context("Ident mismatch"))
 }
 
-// testNumberLiteralExpression tests two [ast.NumberLiteral] nodes for equality, failing the test
+// testNumber tests two [ast.Number] nodes for equality, failing the test
 // if they are not identical.
-func testNumberLiteralExpression(tb testing.TB, expression, expected ast.Expression) {
+func testNumber(tb testing.TB, expression, expected ast.Expression) {
 	tb.Helper()
 
-	got, ok := expression.(ast.NumberLiteral)
-	test.True(tb, ok, test.Context("expected got to be ast.NumberLiteral, got %T: %#v", expression, expression))
+	got, ok := expression.(ast.Number)
+	test.True(tb, ok, test.Context("expected got to be ast.Number, got %T: %#v", expression, expression))
 
-	want, ok := expected.(ast.NumberLiteral)
-	test.True(tb, ok, test.Context("expected want to be ast.NumberLiteral, got %T: %#v", expected, expected))
+	want, ok := expected.(ast.Number)
+	test.True(tb, ok, test.Context("expected want to be ast.Number, got %T: %#v", expected, expected))
 
-	test.Equal(tb, got, want, test.Context("NumberLiteral mismatch"))
+	test.Equal(tb, got, want, test.Context("Number mismatch"))
 }
 
-// testBoolLiteralExpression tests two [ast.BoolLiteral] nodes for equality, failing the test
+// testBool tests two [ast.Bool] nodes for equality, failing the test
 // if they are not identical.
-func testBoolLiteralExpression(tb testing.TB, expression, expected ast.Expression) {
+func testBool(tb testing.TB, expression, expected ast.Expression) {
 	tb.Helper()
 
-	got, ok := expression.(ast.BoolLiteral)
-	test.True(tb, ok, test.Context("expected got to be ast.BoolLiteral, got %T: %#v", expression, expression))
+	got, ok := expression.(ast.Bool)
+	test.True(tb, ok, test.Context("expected got to be ast.Bool, got %T: %#v", expression, expression))
 
-	want, ok := expected.(ast.BoolLiteral)
-	test.True(tb, ok, test.Context("expected want to be ast.BoolLiteral, got %T: %#v", expected, expected))
+	want, ok := expected.(ast.Bool)
+	test.True(tb, ok, test.Context("expected want to be ast.Bool, got %T: %#v", expected, expected))
 
-	test.Equal(tb, got, want, test.Context("BoolLiteral mismatch"))
+	test.Equal(tb, got, want, test.Context("Bool mismatch"))
 }
 
-// testUnaryExpression tests two [ast.BoolLiteral] nodes for equality, failing the test
+// testUnaryExpression tests two [ast.Bool] nodes for equality, failing the test
 // if they are not identical.
 func testUnaryExpression(tb testing.TB, expression, expected ast.Expression) {
 	tb.Helper()

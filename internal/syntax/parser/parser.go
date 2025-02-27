@@ -137,7 +137,7 @@ func (p *Parser) Errors() []error {
 func (p *Parser) parseVarDecl() ast.Statement {
 	var statement ast.VarStatement
 	p.expect(token.Ident)
-	statement.Ident = ast.IdentExpression{Tok: p.current, Name: p.src[p.current.Start:p.current.End]}
+	statement.Ident = ast.Ident{Tok: p.current, Name: p.src[p.current.Start:p.current.End]}
 
 	p.expect(token.Eq)
 	p.advance()
@@ -231,7 +231,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 }
 
 func (p *Parser) parseIdentifierExpression() ast.Expression {
-	return ast.IdentExpression{Tok: p.current, Name: p.src[p.current.Start:p.current.End]}
+	return ast.Ident{Tok: p.current, Name: p.src[p.current.Start:p.current.End]}
 }
 
 func (p *Parser) parseNumberLiteralExpression() ast.Expression {
@@ -242,7 +242,7 @@ func (p *Parser) parseNumberLiteralExpression() ast.Expression {
 		return nil
 	}
 
-	return ast.NumberLiteral{Value: n, Tok: p.current}
+	return ast.Number{Value: n, Tok: p.current}
 }
 
 func (p *Parser) parseBoolLiteralExpression() ast.Expression {
@@ -252,7 +252,7 @@ func (p *Parser) parseBoolLiteralExpression() ast.Expression {
 		p.syntaxError("invalid boolean literal %q: %v", src, err)
 	}
 
-	return ast.BoolLiteral{Value: v, Tok: p.current}
+	return ast.Bool{Value: v, Tok: p.current}
 }
 
 // parseUnaryExpression parses a unary expression
