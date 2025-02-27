@@ -150,3 +150,23 @@ func TestPrecedence(t *testing.T) {
 		})
 	}
 }
+
+func TestBadToken(t *testing.T) {
+	tok := token.Token{Kind: 9999}
+	test.Equal(t, tok.Kind.Lexeme(), "<BadToken>")
+	test.Equal(t, tok.Kind.String(), "<BadToken>")
+}
+
+func TestIs(t *testing.T) {
+	one := token.Token{Kind: token.Number}
+	two := token.Token{Kind: token.Number}
+	three := token.Token{Kind: token.Comma}
+
+	test.True(t, one.Is(token.Number))
+	test.False(t, one.Is(token.Nil))
+
+	test.True(t, two.Is(token.Number))
+	test.False(t, two.Is(token.And))
+
+	test.False(t, three.Is(token.Number))
+}

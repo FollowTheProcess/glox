@@ -189,15 +189,6 @@ func (t Token) Is(kind Kind) bool {
 	return t.Kind == kind
 }
 
-// Lexeme returns the lexeme associated with the token's kind.
-//
-// For the kinds that are known ahead of time e.g. SemiColon (";"), OpenParen ("(") etc. this
-// returns the underlying character, for the likes of Ident, String etc. this returns their name
-// like [Kind.String] does.
-func (t Token) Lexeme() string {
-	return t.Kind.Lexeme()
-}
-
 // Keyword looks up an identifier in the set of Lox keywords, returning it's
 // [Kind] if it was a keyword.
 //
