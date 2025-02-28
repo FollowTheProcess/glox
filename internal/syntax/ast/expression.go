@@ -55,23 +55,33 @@ type (
 		Right Expression  // The rhs of the expression
 		Op    token.Token // The operator token
 	}
+
+	// GroupedExpression is the AST node representing a grouped (parenthesised)
+	// expression i.e. `(x + y);`.
+	GroupedExpression struct {
+		Value  Expression  // The inner expression
+		LParen token.Token // Opening '(' token
+		RParen token.Token // Closing ')' token
+	}
 )
 
 // [Node] implementations
 
-func (i Ident) Token() token.Token            { return i.Tok }
-func (n Number) Token() token.Token           { return n.Tok }
-func (b Bool) Token() token.Token             { return b.Tok }
-func (u UnaryExpression) Token() token.Token  { return u.Tok }
-func (b BinaryExpression) Token() token.Token { return b.Left.Token() }
+func (i Ident) Token() token.Token             { return i.Tok }
+func (n Number) Token() token.Token            { return n.Tok }
+func (b Bool) Token() token.Token              { return b.Tok }
+func (u UnaryExpression) Token() token.Token   { return u.Tok }
+func (b BinaryExpression) Token() token.Token  { return b.Left.Token() }
+func (g GroupedExpression) Token() token.Token { return g.LParen }
 
 // [Expression] implementations
 
-func (i Ident) expressionNode()            {}
-func (n Number) expressionNode()           {}
-func (b Bool) expressionNode()             {}
-func (u UnaryExpression) expressionNode()  {}
-func (b BinaryExpression) expressionNode() {}
+func (i Ident) expressionNode()             {}
+func (n Number) expressionNode()            {}
+func (b Bool) expressionNode()              {}
+func (u UnaryExpression) expressionNode()   {}
+func (b BinaryExpression) expressionNode()  {}
+func (g GroupedExpression) expressionNode() {}
 
 // Precedence implementations
 
@@ -93,4 +103,8 @@ func (u UnaryExpression) Precedence() string {
 
 func (b BinaryExpression) Precedence() string {
 	return fmt.Sprintf("(%s %s %s)", b.Left.Precedence(), b.Op.Kind.Lexeme(), b.Right.Precedence())
+}
+
+func (g GroupedExpression) Precedence() string {
+	return g.Value.Precedence()
 }

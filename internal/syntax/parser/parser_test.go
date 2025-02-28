@@ -687,6 +687,56 @@ func TestParseBinaryExpression(t *testing.T) {
 	}
 }
 
+func TestParseGroupedExpression(t *testing.T) {
+	tests := []parseTest{
+		{
+			name: "unary",
+			src:  "(-5);",
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.GroupedExpression{
+							LParen: token.Token{Kind: token.OpenParen, Start: 0, End: 1},
+							RParen: token.Token{Kind: token.CloseParen, Start: 3, End: 4},
+							Value: ast.UnaryExpression{
+								Value: ast.Number{
+									Value: 5,
+									Tok:   token.Token{Kind: token.Number, Start: 2, End: 3},
+								},
+								Tok: token.Token{Kind: token.Minus, Start: 1, End: 2},
+							},
+						},
+						Tok: token.Token{Kind: token.OpenParen, Start: 0, End: 1},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := parser.New(t.Name(), tt.src)
+			got, err := p.Parse()
+
+			// Whether or not we wanted an error is encoded in the length of tt.errs:
+			// 	0:	No, any error is unexpected and should fail the test
+			// 	>0:	Yes, we wanted very specific errors and should test for them
+			wantedError := len(tt.errs) != 0
+			test.WantErr(t, err, wantedError)
+
+			if wantedError {
+				// If we wanted an error, the Program should be empty, and our errs list
+				// should contain the right parse errors
+				test.Equal(t, len(got.Statements), 0, test.Context("expected empty program"))
+				test.EqualFunc(t, p.Errors(), tt.errs, slices.Equal, test.Context("syntax errors did not match"))
+				return
+			}
+
+			testParse(t, got, tt.want)
+		})
+	}
+}
+
 func TestOperatorPrecedence(t *testing.T) {
 	tests := []struct {
 		name string // Name of the test case
@@ -767,6 +817,31 @@ func TestOperatorPrecedence(t *testing.T) {
 			name: "bool comparison true",
 			src:  "3 < 5 == true",
 			want: "((3 < 5) == true)",
+		},
+		{
+			name: "grouped add",
+			src:  "1 + (2 + 3) + 4",
+			want: "((1 + (2 + 3)) + 4)",
+		},
+		{
+			name: "grouped add beats multiply",
+			src:  "(5 + 5) * 2",
+			want: "((5 + 5) * 2)",
+		},
+		{
+			name: "grouped add beats divide",
+			src:  "2 / (5 + 5)",
+			want: "(2 / (5 + 5))",
+		},
+		{
+			name: "group beats unary negate",
+			src:  "-(5 + 5)",
+			want: "(-(5 + 5))",
+		},
+		{
+			name: "group beats unary not",
+			src:  "!(true == true)",
+			want: "(!(true == true))",
 		},
 	}
 
@@ -865,6 +940,22 @@ func testPrintStatement(tb testing.TB, statement, expected ast.Statement) {
 	testExpression(tb, got.Value, want.Value)
 }
 
+// testExpressionStatement tests two [ast.ExpressionStatement] nodes for equality, failing the test
+// if they are not identical.
+func testExpressionStatement(tb testing.TB, statement, expected ast.Statement) {
+	tb.Helper()
+
+	got, ok := statement.(ast.ExpressionStatement)
+	test.True(tb, ok, test.Context("expected got to be ast.ExpressionStatement, got %T: %#v", statement, statement))
+
+	want, ok := expected.(ast.ExpressionStatement)
+	test.True(tb, ok, test.Context("expected want to be ast.ExpressionStatement, got %T: %#v", expected, expected))
+
+	test.Equal(tb, got.Tok, want.Tok, test.Context("ExpressionStatement.Tok mismatch"))
+
+	testExpression(tb, got.Value, want.Value)
+}
+
 // testExpression tests two [ast.Expression] nodes for equality, failing the test
 // if they are not identical.
 func testExpression(tb testing.TB, expression, expected ast.Expression) {
@@ -886,25 +977,11 @@ func testExpression(tb testing.TB, expression, expected ast.Expression) {
 		testUnaryExpression(tb, expression, expected)
 	case ast.BinaryExpression:
 		testBinaryExpression(tb, expression, expected)
+	case ast.GroupedExpression:
+		testGroupedExpression(tb, expression, expected)
 	default:
 		tb.Fatalf("unhandled ast Expression in testExpression: %T", expected)
 	}
-}
-
-// testExpressionStatement tests two [ast.ExpressionStatement] nodes for equality, failing the test
-// if they are not identical.
-func testExpressionStatement(tb testing.TB, statement, expected ast.Statement) {
-	tb.Helper()
-
-	got, ok := statement.(ast.ExpressionStatement)
-	test.True(tb, ok, test.Context("expected got to be ast.ExpressionStatement, got %T: %#v", statement, statement))
-
-	want, ok := expected.(ast.ExpressionStatement)
-	test.True(tb, ok, test.Context("expected want to be ast.ExpressionStatement, got %T: %#v", expected, expected))
-
-	test.Equal(tb, got.Tok, want.Tok, test.Context("ExpressionStatement.Tok mismatch"))
-
-	testExpression(tb, got.Value, want.Value)
 }
 
 // testIdent tests two [ast.Ident] nodes for equality, failing the test
@@ -974,5 +1051,22 @@ func testBinaryExpression(tb testing.TB, expression, expected ast.Expression) {
 	want, ok := expected.(ast.BinaryExpression)
 	test.True(tb, ok, test.Context("expected want to be ast.BinaryExpression, got %T: %#v", expected, expected))
 
+	// TODO(@FollowTheProcess): Does test.Equal really test the expressions, or should be run each through
+	// testExpression?
+
 	test.Equal(tb, got, want, test.Context("BinaryExpression mismatch"))
+}
+
+// testGroupedExpression tests two [ast.GroupedExpression] nodes for equality, failing the test
+// if they are not identical.
+func testGroupedExpression(tb testing.TB, expression, expected ast.Expression) {
+	tb.Helper()
+
+	got, ok := expression.(ast.GroupedExpression)
+	test.True(tb, ok, test.Context("expected got to be ast.GroupedExpression, got %T: %#v", expression, expression))
+
+	want, ok := expected.(ast.GroupedExpression)
+	test.True(tb, ok, test.Context("expected want to be ast.GroupedExpression, got %T: %#v", expected, expected))
+
+	test.Equal(tb, got, want, test.Context("GroupedExpression mismatch"))
 }

@@ -50,9 +50,11 @@ func (p *Parser) advance() {
 	p.next = p.tokeniser.NextToken()
 }
 
-// expect advances the parser by a single token, and asserts that the token
-// is of a particular kind. If not, a parsing error will be produced and
-// appended to the error list.
+// expect asserts that the next token is of a particular kind, appending a syntax
+// error to the parser if it's not.
+//
+// If the next token is as expected, expect advances the parser onto that token so
+// that it is now p.current.
 func (p *Parser) expect(kind token.Kind) {
 	if !p.next.Is(kind) {
 		p.syntaxError(
@@ -200,6 +202,8 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		expression = p.parseUnaryExpression()
 	case token.True, token.False:
 		expression = p.parseBoolLiteralExpression()
+	case token.OpenParen:
+		expression = p.parseGroupedExpression()
 	default:
 		p.syntaxError("Unhandled token in parseExpression (unary switch): %s", p.current.Kind)
 		return nil
@@ -275,6 +279,21 @@ func (p *Parser) parseBinaryExpression(left ast.Expression) ast.Expression {
 	precedence := p.current.Precedence()
 	p.advance()
 	expression.Right = p.parseExpression(precedence)
+
+	return expression
+}
+
+// parseGroupedExpression parses a parenthesised expression
+// i.e. `(x + y)`.
+func (p *Parser) parseGroupedExpression() ast.Expression {
+	expression := ast.GroupedExpression{LParen: p.current}
+	p.advance()
+	inner := p.parseExpression(token.PrecedenceMin)
+
+	p.expect(token.CloseParen)
+
+	expression.Value = inner
+	expression.RParen = p.current
 
 	return expression
 }
