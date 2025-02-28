@@ -3,4 +3,7 @@ byt = "byt"           # Useful name as byte is a keyword in go
 decorder = "decorder" # Name of a Go linter
 
 [files]
-extend-exclude = [ "**/testdata/**/*" ]
+extend-exclude = [
+  "**/testdata/**/*",
+  "go.sum",
+]
