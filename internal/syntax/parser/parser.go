@@ -17,7 +17,11 @@ import (
 //	- tokens.txt:	The output from tokenising src.lox
 //  - ast.txt:		Some serialised representation of the AST from parsing tokens.txt
 //
-// Would thoroughly test all 3 components without coupling them together too much
+// Would thoroughly test all 3 components without coupling them together too much.
+//
+// The blocker is really the 3rd point, how do we nicely serialise the AST, keep all of
+// the detail and nesting, and make it easily readable. I'm thinking like a formatted dump
+// of the %#v format basically?
 
 // Parser is the glox parser.
 type Parser struct {
@@ -56,17 +60,27 @@ func (p *Parser) advance() {
 // If the next token is as expected, expect advances the parser onto that token so
 // that it is now p.current.
 func (p *Parser) expect(kind token.Kind) {
-	if !p.next.Is(kind) {
-		p.syntaxError(
-			"expected %q, got %s: %q",
-			kind.Lexeme(),
-			p.next.Kind,
-			p.src[p.next.Start:p.next.End],
-		)
+	if p.next.Is(kind) {
+		p.advance() // It matches, advance over it so it's now p.current
+		return
 	}
 
-	// Make progress, so that p.next above is now p.current
-	p.advance()
+	if p.next.Is(token.EOF) {
+		// If it's EOF, don't show the empty string
+		p.syntaxError(
+			"expected %q, got %s",
+			kind.Lexeme(),
+			p.next.Kind,
+		)
+		return
+	}
+
+	p.syntaxError(
+		"expected %q, got %s: %q",
+		kind.Lexeme(),
+		p.next.Kind,
+		p.src[p.next.Start:p.next.End],
+	)
 }
 
 // syntaxError emits a [SyntaxError], populating it with line/col info using
