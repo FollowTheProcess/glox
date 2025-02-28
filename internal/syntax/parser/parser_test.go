@@ -45,7 +45,7 @@ func TestParseVarStatement(t *testing.T) {
 			want: ast.Program{},
 			errs: []error{parser.SyntaxError{
 				File:  "TestParseVarStatement/missing_semicolon",
-				Msg:   `expected ";", got EOF: ""`, // TODO(@FollowTheProcess): If it's EOF, don't show the (empty) value
+				Msg:   `expected ";", got EOF`,
 				Token: token.Token{Kind: token.Number, Start: 16, End: 17},
 				Line:  1,
 				Col:   16,

@@ -57,12 +57,21 @@ func (p *Parser) advance() {
 // that it is now p.current.
 func (p *Parser) expect(kind token.Kind) {
 	if !p.next.Is(kind) {
-		p.syntaxError(
-			"expected %q, got %s: %q",
-			kind.Lexeme(),
-			p.next.Kind,
-			p.src[p.next.Start:p.next.End],
-		)
+		if p.next.Is(token.EOF) {
+			// If it's EOF, don't show the empty string
+			p.syntaxError(
+				"expected %q, got %s",
+				kind.Lexeme(),
+				p.next.Kind,
+			)
+		} else {
+			p.syntaxError(
+				"expected %q, got %s: %q",
+				kind.Lexeme(),
+				p.next.Kind,
+				p.src[p.next.Start:p.next.End],
+			)
+		}
 	}
 
 	// Make progress, so that p.next above is now p.current
