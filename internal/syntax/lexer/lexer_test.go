@@ -465,17 +465,21 @@ func FuzzLexer(f *testing.F) {
 		f.Add(string(contents))
 	}
 
+	// Implicit property: The lexer never panics, even when being thrown
+	// random garbage as source code
 	f.Fuzz(func(t *testing.T, src string) {
 		lexer := lexer.New(src)
 
 		for {
 			tok := lexer.NextToken()
-			if tok.Is(token.EOF) || tok.Is(token.Error) {
-				break
-			}
 
 			// Property: The End token must always be greater or equal to Start
 			test.True(t, tok.End >= tok.Start)
+
+			// End the loop on EOF or error
+			if tok.Is(token.EOF) || tok.Is(token.Error) {
+				break
+			}
 		}
 	})
 }
