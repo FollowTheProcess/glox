@@ -374,6 +374,16 @@ func TestLexer(t *testing.T) {
 				{Kind: token.EOF, Start: 6, End: 6},
 			},
 		},
+		{
+			name: "bad float char",
+			src:  "0.\U000635f4",
+			want: []token.Token{
+				{Kind: token.Number, Start: 0, End: 1},
+				{Kind: token.Dot, Start: 1, End: 2},
+				{Kind: token.Error, Start: 2, End: 6},
+				{Kind: token.EOF, Start: 6, End: 6},
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -427,6 +437,53 @@ func TestLexerIntegration(t *testing.T) {
 	}
 }
 
+func FuzzLexer(f *testing.F) {
+	// Find all Lox source as examples for the corpus
+	lexBase := filepath.Join("testdata", "lex")
+	lexPattern := filepath.Join(lexBase, "*.txtar")
+	txtarFiles, err := filepath.Glob(lexPattern)
+	test.Ok(f, err)
+
+	benchBase := filepath.Join("testdata", "bench")
+	benchPattern := filepath.Join(benchBase, "*.txtar")
+	loxFiles, err := filepath.Glob(benchPattern)
+	test.Ok(f, err)
+
+	for _, file := range txtarFiles {
+		archive, err := txtar.ParseFile(file)
+		test.Ok(f, err)
+
+		src, err := archive.Read("src.lox")
+		test.Ok(f, err)
+
+		f.Add(src)
+	}
+
+	for _, file := range loxFiles {
+		contents, err := os.ReadFile(file)
+		test.Ok(f, err)
+		f.Add(string(contents))
+	}
+
+	// Implicit property: The lexer never panics, even when being thrown
+	// random garbage as source code
+	f.Fuzz(func(t *testing.T, src string) {
+		lexer := lexer.New(src)
+
+		for {
+			tok := lexer.NextToken()
+
+			// Property: The End token must always be greater or equal to Start
+			test.True(t, tok.End >= tok.Start)
+
+			// End the loop on EOF or error
+			if tok.Is(token.EOF) || tok.Is(token.Error) {
+				break
+			}
+		}
+	})
+}
+
 func BenchmarkLexer(b *testing.B) {
 	file := filepath.Join("testdata", "bench", "binary_trees.lox")
 
@@ -455,7 +512,7 @@ func collect(src string) []token.Token {
 	for {
 		tok := l.NextToken()
 		tokens = append(tokens, tok)
-		if tok.Kind == token.EOF {
+		if tok.Is(token.EOF) {
 			break
 		}
 	}

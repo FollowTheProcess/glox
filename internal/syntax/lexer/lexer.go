@@ -60,8 +60,7 @@ func (l *Lexer) next() rune {
 
 // peek returns, but does not consume, the next rune in the input.
 func (l *Lexer) peek() rune {
-	r := l.next()
-	l.backup()
+	r, _ := utf8.DecodeRuneInString(l.rest())
 	return r
 }
 
@@ -83,7 +82,7 @@ func (l *Lexer) rest() string {
 
 // atEOF returns whether or not the lexer is currently at the end of a file.
 func (l *Lexer) atEOF() bool {
-	return l.pos >= len(l.src)
+	return 0 > l.pos || l.pos >= len(l.src)
 }
 
 // backup steps back one rune. Can only be called once per call of next.
