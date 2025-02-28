@@ -1037,7 +1037,8 @@ func testUnaryExpression(tb testing.TB, expression, expected ast.Expression) {
 	want, ok := expected.(ast.UnaryExpression)
 	test.True(tb, ok, test.Context("expected want to be ast.UnaryExpression, got %T: %#v", expected, expected))
 
-	test.Equal(tb, got, want, test.Context("UnaryExpression mismatch"))
+	test.Equal(tb, got.Tok, want.Tok, test.Context("UnaryExpression operator mismatch"))
+	testExpression(tb, got.Value, want.Value)
 }
 
 // testBinaryExpression tests two [ast.BinaryExpression] nodes for equality, failing the test
@@ -1051,10 +1052,9 @@ func testBinaryExpression(tb testing.TB, expression, expected ast.Expression) {
 	want, ok := expected.(ast.BinaryExpression)
 	test.True(tb, ok, test.Context("expected want to be ast.BinaryExpression, got %T: %#v", expected, expected))
 
-	// TODO(@FollowTheProcess): Does test.Equal really test the expressions, or should be run each through
-	// testExpression?
-
-	test.Equal(tb, got, want, test.Context("BinaryExpression mismatch"))
+	testExpression(tb, got.Left, want.Left)
+	test.Equal(tb, got.Op, want.Op, test.Context("BinaryExpression operator mismatch"))
+	testExpression(tb, got.Right, want.Right)
 }
 
 // testGroupedExpression tests two [ast.GroupedExpression] nodes for equality, failing the test
@@ -1068,5 +1068,7 @@ func testGroupedExpression(tb testing.TB, expression, expected ast.Expression) {
 	want, ok := expected.(ast.GroupedExpression)
 	test.True(tb, ok, test.Context("expected want to be ast.GroupedExpression, got %T: %#v", expected, expected))
 
-	test.Equal(tb, got, want, test.Context("GroupedExpression mismatch"))
+	test.Equal(tb, got.LParen, want.LParen, test.Context("GroupedExpression LParen mismatch"))
+	testExpression(tb, got.Value, want.Value)
+	test.Equal(tb, got.RParen, want.RParen, test.Context("GroupedExpression RParen mismatch"))
 }
