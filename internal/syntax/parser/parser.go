@@ -17,7 +17,11 @@ import (
 //	- tokens.txt:	The output from tokenising src.lox
 //  - ast.txt:		Some serialised representation of the AST from parsing tokens.txt
 //
-// Would thoroughly test all 3 components without coupling them together too much
+// Would thoroughly test all 3 components without coupling them together too much.
+//
+// The blocker is really the 3rd point, how do we nicely serialise the AST, keep all of
+// the detail and nesting, and make it easily readable. I'm thinking like a formatted dump
+// of the %#v format basically?
 
 // Parser is the glox parser.
 type Parser struct {
