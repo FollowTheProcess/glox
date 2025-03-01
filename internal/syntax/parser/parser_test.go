@@ -1,6 +1,8 @@
 package parser_test
 
 import (
+	"flag"
+	"os"
 	"slices"
 	"testing"
 
@@ -9,6 +11,8 @@ import (
 	"github.com/FollowTheProcess/glox/internal/syntax/token"
 	"github.com/FollowTheProcess/test"
 )
+
+var debug = flag.Bool("debug", false, "Emit parse traces to stderr during tests")
 
 // parseTest is a table driven test where we parse a full program and make assertions
 // about the AST that gets produced.
@@ -55,7 +59,7 @@ func TestParseVarStatement(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := parser.New(t.Name(), tt.src)
+			p := parser.New(t.Name(), tt.src, *debug, os.Stderr)
 			got, err := p.Parse()
 
 			// Whether or not we wanted an error is encoded in the length of tt.errs:
@@ -98,7 +102,7 @@ func TestParseReturnStatement(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := parser.New(t.Name(), tt.src)
+			p := parser.New(t.Name(), tt.src, *debug, os.Stderr)
 			got, err := p.Parse()
 
 			// Whether or not we wanted an error is encoded in the length of tt.errs:
@@ -141,7 +145,7 @@ func TestParsePrintStatement(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := parser.New(t.Name(), tt.src)
+			p := parser.New(t.Name(), tt.src, *debug, os.Stderr)
 			got, err := p.Parse()
 
 			// Whether or not we wanted an error is encoded in the length of tt.errs:
@@ -184,7 +188,7 @@ func TestParseIdent(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := parser.New(t.Name(), tt.src)
+			p := parser.New(t.Name(), tt.src, *debug, os.Stderr)
 			got, err := p.Parse()
 
 			// Whether or not we wanted an error is encoded in the length of tt.errs:
@@ -257,7 +261,7 @@ func TestParseNumber(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := parser.New(t.Name(), tt.src)
+			p := parser.New(t.Name(), tt.src, *debug, os.Stderr)
 			got, err := p.Parse()
 
 			// Whether or not we wanted an error is encoded in the length of tt.errs:
@@ -315,7 +319,7 @@ func TestParseBool(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := parser.New(t.Name(), tt.src)
+			p := parser.New(t.Name(), tt.src, *debug, os.Stderr)
 			got, err := p.Parse()
 
 			// Whether or not we wanted an error is encoded in the length of tt.errs:
@@ -397,7 +401,7 @@ func TestParseUnaryExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := parser.New(t.Name(), tt.src)
+			p := parser.New(t.Name(), tt.src, *debug, os.Stderr)
 			got, err := p.Parse()
 
 			// Whether or not we wanted an error is encoded in the length of tt.errs:
@@ -665,7 +669,7 @@ func TestParseBinaryExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := parser.New(t.Name(), tt.src)
+			p := parser.New(t.Name(), tt.src, *debug, os.Stderr)
 			got, err := p.Parse()
 
 			// Whether or not we wanted an error is encoded in the length of tt.errs:
@@ -715,7 +719,7 @@ func TestParseGroupedExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := parser.New(t.Name(), tt.src)
+			p := parser.New(t.Name(), tt.src, *debug, os.Stderr)
 			got, err := p.Parse()
 
 			// Whether or not we wanted an error is encoded in the length of tt.errs:
@@ -847,7 +851,7 @@ func TestOperatorPrecedence(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := parser.New(t.Name(), tt.src)
+			p := parser.New(t.Name(), tt.src, *debug, os.Stderr)
 			prog, err := p.Parse()
 			test.Ok(t, err, test.Context("unexpected parse error"))
 

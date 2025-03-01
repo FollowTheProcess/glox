@@ -59,14 +59,20 @@ func runCommand() (*cli.Command, error) {
 	)
 }
 
+type replOptions struct {
+	debug bool // Emit debug information
+}
+
 // replCommand returns the repl subcommand.
 func replCommand() (*cli.Command, error) {
+	var options replOptions
 	return cli.New(
 		"repl",
 		cli.Short("Start an interactive REPL for Lox"),
 		cli.Allow(cli.NoArgs()),
+		cli.Flag(&options.debug, "debug", cli.NoShortHand, false, "Emit debug information"),
 		cli.Run(func(cmd *cli.Command, args []string) error {
-			return repl.Start(os.Stdin, os.Stdout)
+			return repl.Start(os.Stdin, os.Stdout, options.debug)
 		}),
 	)
 }
@@ -99,7 +105,7 @@ func doRun(options *runOptions) func(cmd *cli.Command, args []string) error {
 			return stdoutWriter.Flush()
 		}
 
-		parser := parser.New(src, string(contents))
+		parser := parser.New(src, string(contents), options.debug, os.Stderr)
 		program, err := parser.Parse()
 		if err != nil {
 			return err

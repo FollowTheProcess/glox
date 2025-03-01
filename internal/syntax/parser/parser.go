@@ -4,7 +4,9 @@ package parser
 import (
 	"errors"
 	"fmt"
+	"io"
 	"strconv"
+	"strings"
 
 	"github.com/FollowTheProcess/glox/internal/syntax/ast"
 	"github.com/FollowTheProcess/glox/internal/syntax/lexer"
@@ -25,20 +27,25 @@ import (
 
 // Parser is the glox parser.
 type Parser struct {
-	name      string       // The name of the source file or "stdin" if REPL
-	tokeniser *lexer.Lexer // The lexer
-	src       string       // The raw source code
-	errs      []error      // List of [SyntaxError], collected while parsing
-	current   token.Token  // The current token the parser is sat on
-	next      token.Token  // The next token in the stream
+	traceWriter io.Writer
+	tokeniser   *lexer.Lexer
+	name        string
+	src         string
+	errs        []error
+	current     token.Token
+	next        token.Token
+	indent      int
+	trace       bool
 }
 
 // New returns a new Parser.
-func New(name, src string) *Parser {
+func New(name, src string, trace bool, traceWriter io.Writer) *Parser {
 	parser := &Parser{
-		name:      name,
-		src:       src,
-		tokeniser: lexer.New(src),
+		name:        name,
+		src:         src,
+		tokeniser:   lexer.New(src),
+		trace:       trace,
+		traceWriter: traceWriter,
 	}
 
 	// Read 2 tokens so current and next are set
@@ -48,10 +55,29 @@ func New(name, src string) *Parser {
 	return parser
 }
 
+// Parse is the top level parsing method, and will parse an entire Lox
+// source file to completion.
+func (p *Parser) Parse() (ast.Program, error) {
+	prog := ast.Program{}
+	for !p.current.Is(token.EOF) {
+		statement := p.parseStatement()
+		if statement != nil && len(p.errs) == 0 {
+			prog.Statements = append(prog.Statements, statement)
+		}
+		p.advance()
+	}
+
+	return prog, errors.Join(p.errs...)
+}
+
 // advance advances the parser by a single token.
 func (p *Parser) advance() {
 	p.current = p.next
 	p.next = p.tokeniser.NextToken()
+
+	if p.trace {
+		p.printTrace("current: " + p.current.String())
+	}
 }
 
 // expect asserts that the next token is of a particular kind, appending a syntax
@@ -83,11 +109,10 @@ func (p *Parser) expect(kind token.Kind) {
 	)
 }
 
-// syntaxError emits a [SyntaxError], populating it with line/col info using
-// the parser's current state.
-func (p *Parser) syntaxError(format string, args ...any) {
-	// Calculate line and col based on the offending token's offset
-	line := 1              // Line counter
+// position calculates the parser's current position based on the offset of the
+// p.current token, returning it as line and column information.
+func (p *Parser) position() (line, col int) {
+	line = 1               // Line counter
 	lastNewLineOffset := 0 // The byte offset of the last newline seen
 	for index, byt := range p.src {
 		if byt == '\n' {
@@ -102,11 +127,25 @@ func (p *Parser) syntaxError(format string, args ...any) {
 
 	// The column is therefore the number of bytes from the position of the most recent newline
 	// encountered before the token, and the offset of the token itself
-	col := p.current.Start - lastNewLineOffset
+	col = p.current.Start - lastNewLineOffset
+
+	return line, col
+}
+
+// syntaxError emits a [SyntaxError], populating it with line/col info using
+// the parser's current state.
+func (p *Parser) syntaxError(format string, args ...any) {
+	msg := fmt.Sprintf(format, args...)
+	if p.trace {
+		p.startTrace("error: " + msg)
+		defer p.endTrace()
+	}
+
+	line, col := p.position()
 
 	err := SyntaxError{
 		File:  p.name,
-		Msg:   fmt.Sprintf(format, args...),
+		Msg:   msg,
 		Token: p.current,
 		Line:  line,
 		Col:   col,
@@ -115,23 +154,39 @@ func (p *Parser) syntaxError(format string, args ...any) {
 	p.errs = append(p.errs, err)
 }
 
-// Parse is the top level parsing method, and will parse an entire Lox
-// source file to completion.
-func (p *Parser) Parse() (ast.Program, error) {
-	prog := ast.Program{}
-	for !p.current.Is(token.EOF) {
-		statement := p.parseStatement()
-		if statement != nil && len(p.errs) == 0 {
-			prog.Statements = append(prog.Statements, statement)
-		}
-		p.advance()
-	}
+// printTrace outputs a parser trace to stderr.
+func (p *Parser) printTrace(a ...any) {
+	const padding = 2 // Indent multiplier
 
-	return prog, errors.Join(p.errs...)
+	line, col := p.position()
+	fmt.Fprintf(p.traceWriter, "%5d:%3d: ", line, col)
+	fmt.Fprint(p.traceWriter, strings.Repeat(".", padding*p.indent))
+	fmt.Fprintln(p.traceWriter, a...)
+}
+
+// startTrace starts a parser trace.
+func (p *Parser) startTrace(msg string) {
+	p.printTrace(msg, "(")
+	p.indent++
+}
+
+// endTrace ends a parser trace.
+//
+// Usage:
+//
+//	p.startTrace("message")
+//	defer p.endTrace()
+func (p *Parser) endTrace() {
+	p.indent--
+	p.printTrace(")")
 }
 
 // parseStatement parses statements of all kinds.
 func (p *Parser) parseStatement() ast.Statement {
+	if p.trace {
+		p.startTrace("Statement")
+		defer p.endTrace()
+	}
 	switch p.current.Kind {
 	case token.Var:
 		return p.parseVarDecl()
@@ -151,6 +206,11 @@ func (p *Parser) Errors() []error {
 
 // parseVarDecl parses a `var <ident> = <expr>` statement.
 func (p *Parser) parseVarDecl() ast.Statement {
+	if p.trace {
+		p.startTrace("VarDecl")
+		defer p.endTrace()
+	}
+
 	var statement ast.VarStatement
 	p.expect(token.Ident)
 	statement.Ident = ast.Ident{Tok: p.current, Name: p.src[p.current.Start:p.current.End]}
@@ -167,6 +227,11 @@ func (p *Parser) parseVarDecl() ast.Statement {
 
 // parseReturnStatement parses a `return <expr>;` statement.
 func (p *Parser) parseReturnStatement() ast.Statement {
+	if p.trace {
+		p.startTrace("ReturnStatement")
+		defer p.endTrace()
+	}
+
 	statement := ast.ReturnStatement{Tok: p.current}
 
 	p.advance()
@@ -179,6 +244,11 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 
 // parsePrintStatement parses a `print <expr>;` statement.
 func (p *Parser) parsePrintStatement() ast.Statement {
+	if p.trace {
+		p.startTrace("PrintStatement")
+		defer p.endTrace()
+	}
+
 	statement := ast.PrintStatement{Tok: p.current}
 
 	p.advance()
@@ -192,6 +262,11 @@ func (p *Parser) parsePrintStatement() ast.Statement {
 // parseExpressionStatement parses a generic expression statement
 // i.e. `<expr>;`.
 func (p *Parser) parseExpressionStatement() ast.Statement {
+	if p.trace {
+		p.startTrace("ExpressionStatement")
+		defer p.endTrace()
+	}
+
 	statement := ast.ExpressionStatement{Tok: p.current}
 	statement.Value = p.parseExpression(token.PrecedenceMin)
 
@@ -205,6 +280,11 @@ func (p *Parser) parseExpressionStatement() ast.Statement {
 // parseExpression is the top level parse function for precedence based
 // expression parsing.
 func (p *Parser) parseExpression(precedence int) ast.Expression {
+	if p.trace {
+		p.startTrace("Expression")
+		defer p.endTrace()
+	}
+
 	var expression ast.Expression
 
 	switch p.current.Kind {
@@ -223,7 +303,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		return nil
 	}
 
-	for !p.next.Is(token.SemiColon) && precedence < p.next.Precedence() {
+	for !p.next.Is(token.SemiColon) && p.next.Precedence() > precedence {
 		p.advance()
 		switch p.current.Kind {
 		case token.Or,
@@ -248,11 +328,23 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	return expression
 }
 
+// TODO(@FollowTheProcess): Do we return concrete structs from these?
+
 func (p *Parser) parseIdentifierExpression() ast.Expression {
+	if p.trace {
+		p.startTrace("Ident")
+		defer p.endTrace()
+	}
+
 	return ast.Ident{Tok: p.current, Name: p.src[p.current.Start:p.current.End]}
 }
 
 func (p *Parser) parseNumberLiteralExpression() ast.Expression {
+	if p.trace {
+		p.startTrace("Number")
+		defer p.endTrace()
+	}
+
 	src := p.src[p.current.Start:p.current.End]
 	n, err := strconv.ParseFloat(src, 64)
 	if err != nil {
@@ -264,6 +356,11 @@ func (p *Parser) parseNumberLiteralExpression() ast.Expression {
 }
 
 func (p *Parser) parseBoolLiteralExpression() ast.Expression {
+	if p.trace {
+		p.startTrace("Bool")
+		defer p.endTrace()
+	}
+
 	src := p.src[p.current.Start:p.current.End]
 	v, err := strconv.ParseBool(src)
 	if err != nil {
@@ -276,6 +373,10 @@ func (p *Parser) parseBoolLiteralExpression() ast.Expression {
 // parseUnaryExpression parses a unary expression
 // i.e. `!true`.
 func (p *Parser) parseUnaryExpression() ast.Expression {
+	if p.trace {
+		p.startTrace("UnaryExpression")
+		defer p.endTrace()
+	}
 	expression := ast.UnaryExpression{Tok: p.current}
 
 	p.advance()
@@ -288,6 +389,11 @@ func (p *Parser) parseUnaryExpression() ast.Expression {
 // parseBinaryExpression parses a binary expression
 // i.e. `x != y` or `5 + 5`.
 func (p *Parser) parseBinaryExpression(left ast.Expression) ast.Expression {
+	if p.trace {
+		p.startTrace("BinaryExpression")
+		defer p.endTrace()
+	}
+
 	expression := ast.BinaryExpression{Left: left, Op: p.current}
 
 	precedence := p.current.Precedence()
@@ -300,6 +406,11 @@ func (p *Parser) parseBinaryExpression(left ast.Expression) ast.Expression {
 // parseGroupedExpression parses a parenthesised expression
 // i.e. `(x + y)`.
 func (p *Parser) parseGroupedExpression() ast.Expression {
+	if p.trace {
+		p.startTrace("GroupedExpression")
+		defer p.endTrace()
+	}
+
 	expression := ast.GroupedExpression{LParen: p.current}
 	p.advance()
 	inner := p.parseExpression(token.PrecedenceMin)
