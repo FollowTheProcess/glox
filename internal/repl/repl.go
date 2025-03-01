@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/FollowTheProcess/glox/internal/syntax/parser"
 )
@@ -12,7 +13,7 @@ import (
 const prompt = "-> "
 
 // Start starts the REPL, reading from in and printing to out.
-func Start(in io.Reader, out io.Writer) error {
+func Start(in io.Reader, out io.Writer, trace bool) error {
 	scanner := bufio.NewScanner(in)
 
 	for {
@@ -24,7 +25,7 @@ func Start(in io.Reader, out io.Writer) error {
 		}
 
 		line := scanner.Text()
-		p := parser.New("REPL", line, false)
+		p := parser.New("REPL", line, trace, os.Stderr)
 
 		program, err := p.Parse()
 		if err != nil {

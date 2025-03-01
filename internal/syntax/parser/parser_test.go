@@ -1,6 +1,7 @@
 package parser_test
 
 import (
+	"io"
 	"slices"
 	"testing"
 
@@ -55,7 +56,7 @@ func TestParseVarStatement(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := parser.New(t.Name(), tt.src, false)
+			p := parser.New(t.Name(), tt.src, true, io.Discard)
 			got, err := p.Parse()
 
 			// Whether or not we wanted an error is encoded in the length of tt.errs:
@@ -98,7 +99,7 @@ func TestParseReturnStatement(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := parser.New(t.Name(), tt.src, false)
+			p := parser.New(t.Name(), tt.src, true, io.Discard)
 			got, err := p.Parse()
 
 			// Whether or not we wanted an error is encoded in the length of tt.errs:
@@ -141,7 +142,7 @@ func TestParsePrintStatement(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := parser.New(t.Name(), tt.src, false)
+			p := parser.New(t.Name(), tt.src, true, io.Discard)
 			got, err := p.Parse()
 
 			// Whether or not we wanted an error is encoded in the length of tt.errs:
@@ -184,7 +185,7 @@ func TestParseIdent(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := parser.New(t.Name(), tt.src, false)
+			p := parser.New(t.Name(), tt.src, true, io.Discard)
 			got, err := p.Parse()
 
 			// Whether or not we wanted an error is encoded in the length of tt.errs:
@@ -257,7 +258,7 @@ func TestParseNumber(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := parser.New(t.Name(), tt.src, false)
+			p := parser.New(t.Name(), tt.src, true, io.Discard)
 			got, err := p.Parse()
 
 			// Whether or not we wanted an error is encoded in the length of tt.errs:
@@ -315,7 +316,7 @@ func TestParseBool(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := parser.New(t.Name(), tt.src, false)
+			p := parser.New(t.Name(), tt.src, true, io.Discard)
 			got, err := p.Parse()
 
 			// Whether or not we wanted an error is encoded in the length of tt.errs:
@@ -397,7 +398,7 @@ func TestParseUnaryExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := parser.New(t.Name(), tt.src, false)
+			p := parser.New(t.Name(), tt.src, true, io.Discard)
 			got, err := p.Parse()
 
 			// Whether or not we wanted an error is encoded in the length of tt.errs:
@@ -665,7 +666,7 @@ func TestParseBinaryExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := parser.New(t.Name(), tt.src, false)
+			p := parser.New(t.Name(), tt.src, true, io.Discard)
 			got, err := p.Parse()
 
 			// Whether or not we wanted an error is encoded in the length of tt.errs:
@@ -715,7 +716,7 @@ func TestParseGroupedExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := parser.New(t.Name(), tt.src, false)
+			p := parser.New(t.Name(), tt.src, true, io.Discard)
 			got, err := p.Parse()
 
 			// Whether or not we wanted an error is encoded in the length of tt.errs:
@@ -847,7 +848,7 @@ func TestOperatorPrecedence(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := parser.New(t.Name(), tt.src, false)
+			p := parser.New(t.Name(), tt.src, true, io.Discard)
 			prog, err := p.Parse()
 			test.Ok(t, err, test.Context("unexpected parse error"))
 
