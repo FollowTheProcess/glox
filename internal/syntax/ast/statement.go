@@ -10,9 +10,6 @@ type Statement interface {
 	statementNode() // Private method enforcing type safety
 }
 
-// TODO(@FollowTheProcess): VarStatement will actually get turned into VarDeclaration
-// so we'll need a new file and node type
-
 // Concrete AST Statement node types, all implementing [Node] and [Statement].
 type (
 	// A VarStatement is the AST node representing a var declaration
