@@ -270,9 +270,7 @@ func (p *Parser) parseExpressionStatement() ast.ExpressionStatement {
 	statement := ast.ExpressionStatement{Tok: p.current}
 	statement.Value = p.parseExpression(token.PrecedenceMin)
 
-	if p.next.Is(token.SemiColon) {
-		p.advance()
-	}
+	p.expect(token.SemiColon)
 
 	return statement
 }
