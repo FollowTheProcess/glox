@@ -205,7 +205,7 @@ func (p *Parser) Errors() []error {
 }
 
 // parseVarDecl parses a `var <ident> = <expr>` statement.
-func (p *Parser) parseVarDecl() ast.Statement {
+func (p *Parser) parseVarDecl() ast.VarStatement {
 	if p.trace {
 		p.startTrace("VarDecl")
 		defer p.endTrace()
@@ -213,7 +213,7 @@ func (p *Parser) parseVarDecl() ast.Statement {
 
 	var statement ast.VarStatement
 	p.expect(token.Ident)
-	statement.Ident = ast.Ident{Tok: p.current, Name: p.src[p.current.Start:p.current.End]}
+	statement.Ident = p.parseIdent()
 
 	p.expect(token.Eq)
 	p.advance()
@@ -226,7 +226,7 @@ func (p *Parser) parseVarDecl() ast.Statement {
 }
 
 // parseReturnStatement parses a `return <expr>;` statement.
-func (p *Parser) parseReturnStatement() ast.Statement {
+func (p *Parser) parseReturnStatement() ast.ReturnStatement {
 	if p.trace {
 		p.startTrace("ReturnStatement")
 		defer p.endTrace()
@@ -243,7 +243,7 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 }
 
 // parsePrintStatement parses a `print <expr>;` statement.
-func (p *Parser) parsePrintStatement() ast.Statement {
+func (p *Parser) parsePrintStatement() ast.PrintStatement {
 	if p.trace {
 		p.startTrace("PrintStatement")
 		defer p.endTrace()
@@ -261,7 +261,7 @@ func (p *Parser) parsePrintStatement() ast.Statement {
 
 // parseExpressionStatement parses a generic expression statement
 // i.e. `<expr>;`.
-func (p *Parser) parseExpressionStatement() ast.Statement {
+func (p *Parser) parseExpressionStatement() ast.ExpressionStatement {
 	if p.trace {
 		p.startTrace("ExpressionStatement")
 		defer p.endTrace()
@@ -289,13 +289,13 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 	switch p.current.Kind {
 	case token.Ident:
-		expression = p.parseIdentifierExpression()
+		expression = p.parseIdent()
 	case token.Number:
-		expression = p.parseNumberLiteralExpression()
+		expression = p.parseNumber()
 	case token.Bang, token.Minus:
 		expression = p.parseUnaryExpression()
 	case token.True, token.False:
-		expression = p.parseBoolLiteralExpression()
+		expression = p.parseBool()
 	case token.OpenParen:
 		expression = p.parseGroupedExpression()
 	default:
@@ -328,9 +328,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	return expression
 }
 
-// TODO(@FollowTheProcess): Do we return concrete structs from these?
-
-func (p *Parser) parseIdentifierExpression() ast.Expression {
+func (p *Parser) parseIdent() ast.Ident {
 	if p.trace {
 		p.startTrace("Ident")
 		defer p.endTrace()
@@ -339,7 +337,7 @@ func (p *Parser) parseIdentifierExpression() ast.Expression {
 	return ast.Ident{Tok: p.current, Name: p.src[p.current.Start:p.current.End]}
 }
 
-func (p *Parser) parseNumberLiteralExpression() ast.Expression {
+func (p *Parser) parseNumber() ast.Number {
 	if p.trace {
 		p.startTrace("Number")
 		defer p.endTrace()
@@ -349,13 +347,12 @@ func (p *Parser) parseNumberLiteralExpression() ast.Expression {
 	n, err := strconv.ParseFloat(src, 64)
 	if err != nil {
 		p.syntaxError("invalid number literal %q: %v", src, err)
-		return nil
 	}
 
 	return ast.Number{Value: n, Tok: p.current}
 }
 
-func (p *Parser) parseBoolLiteralExpression() ast.Expression {
+func (p *Parser) parseBool() ast.Bool {
 	if p.trace {
 		p.startTrace("Bool")
 		defer p.endTrace()
@@ -372,7 +369,7 @@ func (p *Parser) parseBoolLiteralExpression() ast.Expression {
 
 // parseUnaryExpression parses a unary expression
 // i.e. `!true`.
-func (p *Parser) parseUnaryExpression() ast.Expression {
+func (p *Parser) parseUnaryExpression() ast.UnaryExpression {
 	if p.trace {
 		p.startTrace("UnaryExpression")
 		defer p.endTrace()
@@ -388,7 +385,7 @@ func (p *Parser) parseUnaryExpression() ast.Expression {
 
 // parseBinaryExpression parses a binary expression
 // i.e. `x != y` or `5 + 5`.
-func (p *Parser) parseBinaryExpression(left ast.Expression) ast.Expression {
+func (p *Parser) parseBinaryExpression(left ast.Expression) ast.BinaryExpression {
 	if p.trace {
 		p.startTrace("BinaryExpression")
 		defer p.endTrace()
@@ -405,7 +402,7 @@ func (p *Parser) parseBinaryExpression(left ast.Expression) ast.Expression {
 
 // parseGroupedExpression parses a parenthesised expression
 // i.e. `(x + y)`.
-func (p *Parser) parseGroupedExpression() ast.Expression {
+func (p *Parser) parseGroupedExpression() ast.GroupedExpression {
 	if p.trace {
 		p.startTrace("GroupedExpression")
 		defer p.endTrace()
