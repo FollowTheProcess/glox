@@ -99,7 +99,7 @@ func doRun(options *runOptions) func(cmd *cli.Command, args []string) error {
 			return stdoutWriter.Flush()
 		}
 
-		parser := parser.New(src, string(contents))
+		parser := parser.New(src, string(contents), options.debug)
 		program, err := parser.Parse()
 		if err != nil {
 			return err

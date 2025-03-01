@@ -24,7 +24,7 @@ func Start(in io.Reader, out io.Writer) error {
 		}
 
 		line := scanner.Text()
-		p := parser.New("REPL", line)
+		p := parser.New("REPL", line, false)
 
 		program, err := p.Parse()
 		if err != nil {

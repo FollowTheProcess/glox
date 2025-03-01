@@ -31,14 +31,16 @@ type Parser struct {
 	errs      []error      // List of [SyntaxError], collected while parsing
 	current   token.Token  // The current token the parser is sat on
 	next      token.Token  // The next token in the stream
+	trace     bool         // Output parse traces
 }
 
 // New returns a new Parser.
-func New(name, src string) *Parser {
+func New(name, src string, trace bool) *Parser {
 	parser := &Parser{
 		name:      name,
 		src:       src,
 		tokeniser: lexer.New(src),
+		trace:     trace,
 	}
 
 	// Read 2 tokens so current and next are set
@@ -223,7 +225,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		return nil
 	}
 
-	for !p.next.Is(token.SemiColon) && precedence < p.next.Precedence() {
+	for !p.next.Is(token.SemiColon) && p.next.Precedence() > precedence {
 		p.advance()
 		switch p.current.Kind {
 		case token.Or,
