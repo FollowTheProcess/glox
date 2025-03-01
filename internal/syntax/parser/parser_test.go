@@ -214,7 +214,7 @@ func TestParseNumber(t *testing.T) {
 	tests := []parseTest{
 		{
 			name: "integer",
-			src:  "5",
+			src:  "5;",
 			want: ast.Program{
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
@@ -229,7 +229,7 @@ func TestParseNumber(t *testing.T) {
 		},
 		{
 			name: "bigger integer",
-			src:  "9463",
+			src:  "9463;",
 			want: ast.Program{
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
@@ -244,7 +244,7 @@ func TestParseNumber(t *testing.T) {
 		},
 		{
 			name: "float",
-			src:  "3.14159",
+			src:  "3.14159;",
 			want: ast.Program{
 				Statements: []ast.Statement{
 					ast.ExpressionStatement{
@@ -749,102 +749,102 @@ func TestOperatorPrecedence(t *testing.T) {
 	}{
 		{
 			name: "unary beats multiply",
-			src:  "-a * b",
+			src:  "-a * b;",
 			want: "((-a) * b)",
 		},
 		{
 			name: "unary beats negation",
-			src:  "!-a",
+			src:  "!-a;",
 			want: "(!(-a))",
 		},
 		{
 			name: "three adds",
-			src:  "a + b + c",
+			src:  "a + b + c;",
 			want: "((a + b) + c)",
 		},
 		{
 			name: "add then subtract",
-			src:  "a + b - c",
+			src:  "a + b - c;",
 			want: "((a + b) - c)",
 		},
 		{
 			name: "three multiplies",
-			src:  "a * b * c",
+			src:  "a * b * c;",
 			want: "((a * b) * c)",
 		},
 		{
 			name: "multiply beats divide",
-			src:  "a * b / c",
+			src:  "a * b / c;",
 			want: "((a * b) / c)",
 		},
 		{
 			name: "divide beats add",
-			src:  "a + b / c",
+			src:  "a + b / c;",
 			want: "(a + (b / c))",
 		},
 		{
 			name: "lots of stuff",
-			src:  "a + b * c + d / e - f",
+			src:  "a + b * c + d / e - f;",
 			want: "(((a + (b * c)) + (d / e)) - f)",
 		},
 		{
 			name: "binary comparison",
-			src:  "5 > 4 == 3 < 4",
+			src:  "5 > 4 == 3 < 4;",
 			want: "((5 > 4) == (3 < 4))",
 		},
 		{
 			name: "binary comparison 2",
-			src:  "5 < 4 != 3 > 4",
+			src:  "5 < 4 != 3 > 4;",
 			want: "((5 < 4) != (3 > 4))",
 		},
 		{
 			name: "two complex expressions equal",
-			src:  "3 + 4 * 5 == 3 * 1 + 4 * 5",
+			src:  "3 + 4 * 5 == 3 * 1 + 4 * 5;",
 			want: "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
 		},
 		{
 			name: "bool true",
-			src:  "true",
+			src:  "true;",
 			want: "true",
 		},
 		{
 			name: "bool false",
-			src:  "false",
+			src:  "false;",
 			want: "false",
 		},
 		{
 			name: "bool comparison false",
-			src:  "3 > 5 == false",
+			src:  "3 > 5 == false;",
 			want: "((3 > 5) == false)",
 		},
 		{
 			name: "bool comparison true",
-			src:  "3 < 5 == true",
+			src:  "3 < 5 == true;",
 			want: "((3 < 5) == true)",
 		},
 		{
 			name: "grouped add",
-			src:  "1 + (2 + 3) + 4",
+			src:  "1 + (2 + 3) + 4;",
 			want: "((1 + (2 + 3)) + 4)",
 		},
 		{
 			name: "grouped add beats multiply",
-			src:  "(5 + 5) * 2",
+			src:  "(5 + 5) * 2;",
 			want: "((5 + 5) * 2)",
 		},
 		{
 			name: "grouped add beats divide",
-			src:  "2 / (5 + 5)",
+			src:  "2 / (5 + 5);",
 			want: "(2 / (5 + 5))",
 		},
 		{
 			name: "group beats unary negate",
-			src:  "-(5 + 5)",
+			src:  "-(5 + 5);",
 			want: "(-(5 + 5))",
 		},
 		{
 			name: "group beats unary not",
-			src:  "!(true == true)",
+			src:  "!(true == true);",
 			want: "(!(true == true))",
 		},
 	}
