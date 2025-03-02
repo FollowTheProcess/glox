@@ -55,7 +55,7 @@ func (s String) Kind() Kind { return KindString }
 
 func (n Number) String() string { return strconv.FormatFloat(n.Value, 'g', -1, 64) }
 func (b Bool) String() string   { return strconv.FormatBool(b.Value) }
-func (s String) String() string { return s.Value }
+func (s String) String() string { return strconv.Quote(s.Value) }
 
 // IsTruthy reports whether the type is considered truthy or falsey.
 func IsTruthy(t Type) bool {

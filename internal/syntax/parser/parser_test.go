@@ -341,6 +341,49 @@ func TestParseBool(t *testing.T) {
 	}
 }
 
+func TestParseString(t *testing.T) {
+	tests := []parseTest{
+		{
+			name: "valid",
+			src:  `"I'm a string literal";`,
+			want: ast.Program{
+				Statements: []ast.Statement{
+					ast.ExpressionStatement{
+						Value: ast.String{
+							Value: "I'm a string literal",
+							Tok:   token.Token{Kind: token.String, Start: 0, End: 22},
+						},
+						Tok: token.Token{Kind: token.String, Start: 0, End: 22},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := parser.New(t.Name(), tt.src, *debug, os.Stderr)
+			got, err := p.Parse()
+
+			// Whether or not we wanted an error is encoded in the length of tt.errs:
+			// 	0:	No, any error is unexpected and should fail the test
+			// 	>0:	Yes, we wanted very specific errors and should test for them
+			wantedError := len(tt.errs) != 0
+			test.WantErr(t, err, wantedError)
+
+			if wantedError {
+				// If we wanted an error, the Program should be empty, and our errs list
+				// should contain the right parse errors
+				test.Equal(t, len(got.Statements), 0, test.Context("expected empty program"))
+				test.EqualFunc(t, p.Errors(), tt.errs, slices.Equal, test.Context("syntax errors did not match"))
+				return
+			}
+
+			testParse(t, got, tt.want)
+		})
+	}
+}
+
 func TestParseUnaryExpression(t *testing.T) {
 	tests := []parseTest{
 		{
@@ -977,6 +1020,8 @@ func testExpression(tb testing.TB, expression, expected ast.Expression) {
 		testBool(tb, expression, expected)
 	case ast.Ident:
 		testIdent(tb, expression, expected)
+	case ast.String:
+		testString(tb, expression, expected)
 	case ast.UnaryExpression:
 		testUnaryExpression(tb, expression, expected)
 	case ast.BinaryExpression:
@@ -1028,6 +1073,20 @@ func testBool(tb testing.TB, expression, expected ast.Expression) {
 	test.True(tb, ok, test.Context("expected want to be ast.Bool, got %T: %#v", expected, expected))
 
 	test.Equal(tb, got, want, test.Context("Bool mismatch"))
+}
+
+// testString tests two [ast.String] nodes for equality, failing the test
+// if they are not identical.
+func testString(tb testing.TB, expression, expected ast.Expression) {
+	tb.Helper()
+
+	got, ok := expression.(ast.String)
+	test.True(tb, ok, test.Context("expected got to be ast.String, got %T: %#v", expression, expression))
+
+	want, ok := expected.(ast.String)
+	test.True(tb, ok, test.Context("expected want to be ast.String, got %T: %#v", expected, expected))
+
+	test.Equal(tb, got, want, test.Context("String mismatch"))
 }
 
 // testUnaryExpression tests two [ast.Bool] nodes for equality, failing the test

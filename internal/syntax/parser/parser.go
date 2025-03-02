@@ -290,6 +290,8 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		expression = p.parseIdent()
 	case token.Number:
 		expression = p.parseNumber()
+	case token.String:
+		expression = p.parseString()
 	case token.Bang, token.Minus:
 		expression = p.parseUnaryExpression()
 	case token.True, token.False:
@@ -363,6 +365,20 @@ func (p *Parser) parseBool() ast.Bool {
 	}
 
 	return ast.Bool{Value: v, Tok: p.current}
+}
+
+func (p *Parser) parseString() ast.String {
+	if p.trace {
+		p.startTrace("String")
+		defer p.endTrace()
+	}
+
+	src := p.src[p.current.Start:p.current.End]
+	trimmed, err := strconv.Unquote(src)
+	if err != nil {
+		p.syntaxError("invalid string literal %q: %v", src, err)
+	}
+	return ast.String{Value: trimmed, Tok: p.current}
 }
 
 // parseUnaryExpression parses a unary expression
