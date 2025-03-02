@@ -95,6 +95,12 @@ func TestEqual(t *testing.T) {
 			b:    types.Number{Value: 3.14159},
 			want: false,
 		},
+		{
+			name: "different types not equal",
+			a:    types.String{Value: "42"},
+			b:    types.Number{Value: 42},
+			want: false,
+		},
 	}
 
 	for _, tt := range tests {
