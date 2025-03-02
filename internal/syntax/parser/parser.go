@@ -70,6 +70,31 @@ func (p *Parser) Parse() (ast.Program, error) {
 	return prog, errors.Join(p.errs...)
 }
 
+// TODO(@FollowTheProcess): Figure out if we need this?
+
+// synchronise synchronises the parser on the next statement boundary to try and
+// minimise cascading errors.
+//
+// It continuously discards tokens until it thinks it's found the next statement, then returns
+// so that the parser may continue with known valid state.
+// func (p *Parser) synchronise() {
+// 	p.advance()
+
+// 	for !p.current.Is(token.EOF) {
+// 		if p.current.Is(token.SemiColon) {
+// 			return
+// 		}
+
+// 		// TODO(@FollowTheProcess): An IsAny method that takes a variadic list of token kinds
+// 		switch p.next.Kind {
+// 		case token.Class, token.Fun, token.Var, token.For, token.If, token.While, token.Print, token.Return:
+// 			return
+// 		}
+
+// 		p.advance()
+// 	}
+// }
+
 // advance advances the parser by a single token.
 func (p *Parser) advance() {
 	p.current = p.next
