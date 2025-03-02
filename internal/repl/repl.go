@@ -7,7 +7,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/FollowTheProcess/glox/internal/eval"
+	"github.com/FollowTheProcess/glox/internal/interpreter"
 	"github.com/FollowTheProcess/glox/internal/syntax/parser"
 )
 
@@ -33,7 +33,9 @@ func Start(in io.Reader, out io.Writer, trace bool) error {
 			return err
 		}
 
-		result, err := eval.Eval(program)
+		interp := interpreter.New()
+
+		result, err := interp.Eval(program)
 		if err != nil {
 			return err
 		}

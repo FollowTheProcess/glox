@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/FollowTheProcess/cli"
+	"github.com/FollowTheProcess/glox/internal/interpreter"
 	"github.com/FollowTheProcess/glox/internal/repl"
 	"github.com/FollowTheProcess/glox/internal/syntax/lexer"
 	"github.com/FollowTheProcess/glox/internal/syntax/parser"
@@ -111,7 +112,14 @@ func doRun(options *runOptions) func(cmd *cli.Command, args []string) error {
 			return err
 		}
 
-		fmt.Fprintf(cmd.Stdout(), "%#v\n", program)
+		interp := interpreter.New()
+		result, err := interp.Eval(program)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(result)
+
 		return nil
 	}
 }

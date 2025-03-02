@@ -1,9 +1,9 @@
-package eval_test
+package interpreter_test
 
 import (
 	"testing"
 
-	"github.com/FollowTheProcess/glox/internal/eval"
+	"github.com/FollowTheProcess/glox/internal/interpreter"
 	"github.com/FollowTheProcess/glox/internal/syntax/ast"
 	"github.com/FollowTheProcess/glox/internal/syntax/token"
 	"github.com/FollowTheProcess/glox/internal/syntax/types"
@@ -402,7 +402,8 @@ func TestEval(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := eval.Eval(tt.node)
+			interp := interpreter.New()
+			got, err := interp.Eval(tt.node)
 			test.Ok(t, err)
 
 			test.Equal(t, got, tt.want, test.Context("eval.Eval(T%) mismatch", tt.node))
