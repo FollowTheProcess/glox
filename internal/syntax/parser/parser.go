@@ -70,6 +70,31 @@ func (p *Parser) Parse() (ast.Program, error) {
 	return prog, errors.Join(p.errs...)
 }
 
+// TODO(@FollowTheProcess): Figure out if we need this?
+
+// synchronise synchronises the parser on the next statement boundary to try and
+// minimise cascading errors.
+//
+// It continuously discards tokens until it thinks it's found the next statement, then returns
+// so that the parser may continue with known valid state.
+// func (p *Parser) synchronise() {
+// 	p.advance()
+
+// 	for !p.current.Is(token.EOF) {
+// 		if p.current.Is(token.SemiColon) {
+// 			return
+// 		}
+
+// 		// TODO(@FollowTheProcess): An IsAny method that takes a variadic list of token kinds
+// 		switch p.next.Kind {
+// 		case token.Class, token.Fun, token.Var, token.For, token.If, token.While, token.Print, token.Return:
+// 			return
+// 		}
+
+// 		p.advance()
+// 	}
+// }
+
 // advance advances the parser by a single token.
 func (p *Parser) advance() {
 	p.current = p.next
@@ -188,12 +213,12 @@ func (p *Parser) parseStatement() ast.Statement {
 		defer p.endTrace()
 	}
 	switch p.current.Kind {
-	case token.Var:
-		return p.parseVarDecl()
 	case token.Return:
 		return p.parseReturnStatement()
 	case token.Print:
 		return p.parsePrintStatement()
+	case token.Var:
+		return p.parseDeclarationStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -204,14 +229,14 @@ func (p *Parser) Errors() []error {
 	return p.errs
 }
 
-// parseVarDecl parses a `var <ident> = <expr>` statement.
-func (p *Parser) parseVarDecl() ast.VarStatement {
+// parseVarDecl parses a `var <ident> = <expr>;` declaration statement.
+func (p *Parser) parseVarDecl() ast.VarDeclaration {
 	if p.trace {
 		p.startTrace("VarDecl")
 		defer p.endTrace()
 	}
 
-	var statement ast.VarStatement
+	var statement ast.VarDeclaration
 	p.expect(token.Ident)
 	statement.Ident = p.parseIdent()
 
@@ -219,8 +244,6 @@ func (p *Parser) parseVarDecl() ast.VarStatement {
 	p.advance()
 
 	statement.Value = p.parseExpression(token.PrecedenceMin)
-
-	p.expect(token.SemiColon)
 
 	return statement
 }
@@ -267,8 +290,22 @@ func (p *Parser) parseExpressionStatement() ast.ExpressionStatement {
 		defer p.endTrace()
 	}
 
-	statement := ast.ExpressionStatement{Tok: p.current}
-	statement.Value = p.parseExpression(token.PrecedenceMin)
+	statement := ast.ExpressionStatement{Value: p.parseExpression(token.PrecedenceMin)}
+
+	p.expect(token.SemiColon)
+
+	return statement
+}
+
+// parseDeclarationStatement parses a generic declaration statement
+// e.g. var, fun, class etc.
+func (p *Parser) parseDeclarationStatement() ast.DeclarationStatement {
+	if p.trace {
+		p.startTrace("DeclarationStatement")
+		defer p.endTrace()
+	}
+
+	statement := ast.DeclarationStatement{Value: p.parseDeclaration()}
 
 	p.expect(token.SemiColon)
 
@@ -326,6 +363,22 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	}
 
 	return expression
+}
+
+// parseDeclaration is the top level parse function for parsing declarations.
+func (p *Parser) parseDeclaration() ast.Declaration {
+	if p.trace {
+		p.startTrace("Declaration")
+		defer p.endTrace()
+	}
+
+	switch p.current.Kind {
+	case token.Var:
+		return p.parseVarDecl()
+	default:
+		p.syntaxError("Unhandled token in parseVarDeclaration: %s", p.current.Kind)
+		return nil
+	}
 }
 
 func (p *Parser) parseIdent() ast.Ident {
