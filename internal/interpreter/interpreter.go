@@ -1,6 +1,5 @@
-// Package eval handles the evaluation of Lox source code and implements the
-// tree walking interpreter.
-package eval
+// Package interpreter implements the tree walking interpreter.
+package interpreter
 
 import (
 	"fmt"
@@ -16,25 +15,35 @@ import (
 
 // TODO(@FollowTheProcess): Make the errors a lot better with position info and highlighting etc.
 
-// Eval evaluates a Lox AST Node.
-func Eval(node ast.Node) (types.Type, error) {
+// Interpreter is the glox interpreter.
+type Interpreter struct {
+	// TODO(@FollowTheProcess): Environment
+}
+
+// New returns a new interpreter.
+func New() Interpreter {
+	return Interpreter{}
+}
+
+// Eval evaluates an AST node.
+func (i Interpreter) Eval(node ast.Node) (types.Type, error) {
 	switch node := node.(type) {
 	case ast.Program:
-		return evalStatements(node.Statements)
+		return i.evalStatements(node.Statements)
 	case ast.ExpressionStatement:
-		return Eval(node.Value)
+		return i.Eval(node.Value)
 	case ast.GroupedExpression:
-		return Eval(node.Value)
+		return i.Eval(node.Value)
 	case ast.UnaryExpression:
-		return evalUnaryExpression(node)
+		return i.evalUnaryExpression(node)
 	case ast.BinaryExpression:
-		return evalBinaryExpression(node)
+		return i.evalBinaryExpression(node)
 	case ast.Number:
-		return evalNumber(node), nil
+		return i.evalNumber(node), nil
 	case ast.Bool:
-		return evalBool(node), nil
+		return i.evalBool(node), nil
 	case ast.String:
-		return evalString(node), nil
+		return i.evalString(node), nil
 	default:
 		return nil, fmt.Errorf("unhandled ast.Node in Eval: %T", node)
 	}
@@ -42,11 +51,11 @@ func Eval(node ast.Node) (types.Type, error) {
 
 // evalStatements iterates through all the statements in the program, evaluating each
 // and returning the final type.
-func evalStatements(statements []ast.Statement) (types.Type, error) {
+func (i Interpreter) evalStatements(statements []ast.Statement) (types.Type, error) {
 	var result types.Type
 	var err error
 	for _, statement := range statements {
-		result, err = Eval(statement)
+		result, err = i.Eval(statement)
 		if err != nil {
 			return nil, err
 		}
@@ -56,7 +65,7 @@ func evalStatements(statements []ast.Statement) (types.Type, error) {
 }
 
 // evalBool interprets a bool AST node, returning either the True or False singleton.
-func evalBool(node ast.Bool) *types.Bool {
+func (i Interpreter) evalBool(node ast.Bool) *types.Bool {
 	if node.Value {
 		return types.True
 	}
@@ -64,18 +73,18 @@ func evalBool(node ast.Bool) *types.Bool {
 }
 
 // evalNumber interprets a numeric AST node, returning a types.Number.
-func evalNumber(node ast.Number) types.Number {
+func (i Interpreter) evalNumber(node ast.Number) types.Number {
 	return types.Number{Value: node.Value}
 }
 
 // evalString interprets a string AST node, returning a types.String.
-func evalString(node ast.String) types.String {
+func (i Interpreter) evalString(node ast.String) types.String {
 	return types.String{Value: node.Value}
 }
 
 // evalUnaryExpression interprets a unary expression like `-5` or `!true`.
-func evalUnaryExpression(node ast.UnaryExpression) (types.Type, error) {
-	operand, err := Eval(node.Value)
+func (i Interpreter) evalUnaryExpression(node ast.UnaryExpression) (types.Type, error) {
+	operand, err := i.Eval(node.Value)
 	if err != nil {
 		return nil, err
 	}
@@ -98,45 +107,45 @@ func evalUnaryExpression(node ast.UnaryExpression) (types.Type, error) {
 }
 
 // evalBinaryExpression interprets a binary expression like `5 + 5` or `x != y`.
-func evalBinaryExpression(node ast.BinaryExpression) (types.Type, error) {
-	left, err := Eval(node.Left)
+func (i Interpreter) evalBinaryExpression(node ast.BinaryExpression) (types.Type, error) {
+	left, err := i.Eval(node.Left)
 	if err != nil {
 		return nil, err
 	}
 
-	right, err := Eval(node.Right)
+	right, err := i.Eval(node.Right)
 	if err != nil {
 		return nil, err
 	}
 
 	switch node.Op.Kind {
 	case token.Minus:
-		return evalBinarySubtract(left, right)
+		return i.evalBinarySubtract(left, right)
 	case token.Plus:
-		return evalBinaryAdd(left, right)
+		return i.evalBinaryAdd(left, right)
 	case token.ForwardSlash:
-		return evalBinaryDivide(left, right)
+		return i.evalBinaryDivide(left, right)
 	case token.Star:
-		return evalBinaryMultiply(left, right)
+		return i.evalBinaryMultiply(left, right)
 	case token.GreaterThan:
-		return evalGreaterThan(left, right)
+		return i.evalGreaterThan(left, right)
 	case token.GreaterThanEq:
-		return evalGreaterThanEq(left, right)
+		return i.evalGreaterThanEq(left, right)
 	case token.LessThan:
-		return evalLessThan(left, right)
+		return i.evalLessThan(left, right)
 	case token.LessThanEq:
-		return evalLessThanEq(left, right)
+		return i.evalLessThanEq(left, right)
 	case token.DoubleEq:
-		return evalEqual(left, right), nil
+		return i.evalEqual(left, right), nil
 	case token.BangEq:
-		return evalNotEqual(left, right), nil
+		return i.evalNotEqual(left, right), nil
 	default:
 		return nil, fmt.Errorf("unsupported binary operator: %s", node.Op.Kind.Lexeme())
 	}
 }
 
 // evalBinarySubtract interprets a binary subtraction e.g. `5 - 3`.
-func evalBinarySubtract(left, right types.Type) (types.Number, error) {
+func (i Interpreter) evalBinarySubtract(left, right types.Type) (types.Number, error) {
 	var zero types.Number
 	l, r, err := checkNumeric(left, right)
 	if err != nil {
@@ -150,7 +159,7 @@ func evalBinarySubtract(left, right types.Type) (types.Number, error) {
 // evalBinaryAdd interprets a binary addition e.g. `x + y`.
 //
 // It is overloaded in the case of two strings to concat the string.
-func evalBinaryAdd(left, right types.Type) (types.Type, error) {
+func (i Interpreter) evalBinaryAdd(left, right types.Type) (types.Type, error) {
 	switch left := left.(type) {
 	case types.String:
 		// Make sure right is also a string
@@ -169,7 +178,7 @@ func evalBinaryAdd(left, right types.Type) (types.Type, error) {
 }
 
 // evalBinaryDivide interprets a binary division e.g. `10 / 2`.
-func evalBinaryDivide(left, right types.Type) (types.Number, error) {
+func (i Interpreter) evalBinaryDivide(left, right types.Type) (types.Number, error) {
 	var zero types.Number
 	l, r, err := checkNumeric(left, right)
 	if err != nil {
@@ -181,7 +190,7 @@ func evalBinaryDivide(left, right types.Type) (types.Number, error) {
 }
 
 // evalBinaryMultiply interprets a binary multiplication e.g. `5 * 3`.
-func evalBinaryMultiply(left, right types.Type) (types.Number, error) {
+func (i Interpreter) evalBinaryMultiply(left, right types.Type) (types.Number, error) {
 	var zero types.Number
 	l, r, err := checkNumeric(left, right)
 	if err != nil {
@@ -193,7 +202,7 @@ func evalBinaryMultiply(left, right types.Type) (types.Number, error) {
 }
 
 // evalGreaterThan interprets e.g. `5 > 3`.
-func evalGreaterThan(left, right types.Type) (*types.Bool, error) {
+func (i Interpreter) evalGreaterThan(left, right types.Type) (*types.Bool, error) {
 	l, r, err := checkNumeric(left, right)
 	if err != nil {
 		return types.False, err
@@ -206,7 +215,7 @@ func evalGreaterThan(left, right types.Type) (*types.Bool, error) {
 }
 
 // evalGreaterThanEq interprets e.g. `x >= y`.
-func evalGreaterThanEq(left, right types.Type) (*types.Bool, error) {
+func (i Interpreter) evalGreaterThanEq(left, right types.Type) (*types.Bool, error) {
 	l, r, err := checkNumeric(left, right)
 	if err != nil {
 		return types.False, err
@@ -219,7 +228,7 @@ func evalGreaterThanEq(left, right types.Type) (*types.Bool, error) {
 }
 
 // evalLessThan interprets `x < y`.
-func evalLessThan(left, right types.Type) (*types.Bool, error) {
+func (i Interpreter) evalLessThan(left, right types.Type) (*types.Bool, error) {
 	l, r, err := checkNumeric(left, right)
 	if err != nil {
 		return types.False, err
@@ -232,7 +241,7 @@ func evalLessThan(left, right types.Type) (*types.Bool, error) {
 }
 
 // evalLessThanEq interprets e.g. `x <= y`.
-func evalLessThanEq(left, right types.Type) (*types.Bool, error) {
+func (i Interpreter) evalLessThanEq(left, right types.Type) (*types.Bool, error) {
 	l, r, err := checkNumeric(left, right)
 	if err != nil {
 		return types.False, err
@@ -245,7 +254,7 @@ func evalLessThanEq(left, right types.Type) (*types.Bool, error) {
 }
 
 // evalEqual interprets `x == y`.
-func evalEqual(left, right types.Type) *types.Bool {
+func (i Interpreter) evalEqual(left, right types.Type) *types.Bool {
 	if types.Equal(left, right) {
 		return types.True
 	}
@@ -253,7 +262,7 @@ func evalEqual(left, right types.Type) *types.Bool {
 }
 
 // evalNotEqual interprets `x != y`.
-func evalNotEqual(left, right types.Type) *types.Bool {
+func (i Interpreter) evalNotEqual(left, right types.Type) *types.Bool {
 	if types.Equal(left, right) {
 		return types.False
 	}
