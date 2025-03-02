@@ -103,10 +103,20 @@ func evalBinaryExpression(node ast.BinaryExpression) (types.Type, error) {
 	switch node.Op.Kind {
 	case token.Minus:
 		return evalBinarySubtract(left, right)
+	case token.Plus:
+		return evalBinaryAdd(left, right)
 	case token.ForwardSlash:
 		return evalBinaryDivide(left, right)
 	case token.Star:
 		return evalBinaryMultiply(left, right)
+	case token.GreaterThan:
+		return evalGreaterThan(left, right)
+	case token.GreaterThanEq:
+		return evalGreaterThanEq(left, right)
+	case token.LessThan:
+		return evalLessThan(left, right)
+	case token.LessThanEq:
+		return evalLessThanEq(left, right)
 	default:
 		return nil, fmt.Errorf("unsupported binary operator: %s", node.Op.Kind.Lexeme())
 	}
@@ -122,6 +132,27 @@ func evalBinarySubtract(left, right types.Type) (types.Number, error) {
 
 	result := types.Number{Value: l.Value - r.Value}
 	return result, nil
+}
+
+// evalBinaryAdd interprets a binary addition e.g. `x + y`.
+//
+// It is overloaded in the case of two strings to concat the string.
+func evalBinaryAdd(left, right types.Type) (types.Type, error) {
+	switch left := left.(type) {
+	case types.String:
+		// Make sure right is also a string
+		r, ok := right.(types.String)
+		if !ok {
+			return nil, fmt.Errorf("invalid types for binary add: left (String) + right (%T)", right)
+		}
+		return types.String{Value: left.Value + r.Value}, nil
+	default:
+		l, r, err := checkNumeric(left, right)
+		if err != nil {
+			return nil, err
+		}
+		return types.Number{Value: l.Value + r.Value}, nil
+	}
 }
 
 // evalBinaryDivide interprets a binary division e.g. `10 / 2`.
@@ -146,6 +177,58 @@ func evalBinaryMultiply(left, right types.Type) (types.Number, error) {
 
 	result := types.Number{Value: l.Value * r.Value}
 	return result, nil
+}
+
+// evalGreaterThan interprets e.g. `5 > 3`.
+func evalGreaterThan(left, right types.Type) (*types.Bool, error) {
+	l, r, err := checkNumeric(left, right)
+	if err != nil {
+		return types.False, err
+	}
+
+	if l.Value > r.Value {
+		return types.True, nil
+	}
+	return types.False, nil
+}
+
+// evalGreaterThanEq interprets e.g. `x >= y`.
+func evalGreaterThanEq(left, right types.Type) (*types.Bool, error) {
+	l, r, err := checkNumeric(left, right)
+	if err != nil {
+		return types.False, err
+	}
+
+	if l.Value >= r.Value {
+		return types.True, nil
+	}
+	return types.False, nil
+}
+
+// evalLessThan interprets `x < y`.
+func evalLessThan(left, right types.Type) (*types.Bool, error) {
+	l, r, err := checkNumeric(left, right)
+	if err != nil {
+		return types.False, err
+	}
+
+	if l.Value < r.Value {
+		return types.True, nil
+	}
+	return types.False, nil
+}
+
+// evalLessThanEq interprets e.g. `x <= y`.
+func evalLessThanEq(left, right types.Type) (*types.Bool, error) {
+	l, r, err := checkNumeric(left, right)
+	if err != nil {
+		return types.False, err
+	}
+
+	if l.Value <= r.Value {
+		return types.True, nil
+	}
+	return types.False, nil
 }
 
 // checkNumeric is a helper function to validate that the left and right operands of a binary

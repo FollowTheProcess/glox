@@ -64,6 +64,21 @@ func TestEval(t *testing.T) {
 			want: types.Bool{Value: false},
 		},
 		{
+			name: "binary add",
+			node: ast.BinaryExpression{
+				Left: ast.Number{
+					Value: 5,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Right: ast.Number{
+					Value: 2,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Op: token.Token{Kind: token.Plus},
+			},
+			want: types.Number{Value: 7},
+		},
+		{
 			name: "binary subtract",
 			node: ast.BinaryExpression{
 				Left: ast.Number{
@@ -107,6 +122,156 @@ func TestEval(t *testing.T) {
 				Op: token.Token{Kind: token.Star},
 			},
 			want: types.Number{Value: 20},
+		},
+		{
+			name: "greater than true",
+			node: ast.BinaryExpression{
+				Left: ast.Number{
+					Value: 5,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Right: ast.Number{
+					Value: 3,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Op: token.Token{Kind: token.GreaterThan},
+			},
+			want: types.True,
+		},
+		{
+			name: "greater than false",
+			node: ast.BinaryExpression{
+				Left: ast.Number{
+					Value: 3,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Right: ast.Number{
+					Value: 5,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Op: token.Token{Kind: token.GreaterThan},
+			},
+			want: types.False,
+		},
+		{
+			name: "greater than eq true greater",
+			node: ast.BinaryExpression{
+				Left: ast.Number{
+					Value: 5,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Right: ast.Number{
+					Value: 3,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Op: token.Token{Kind: token.GreaterThanEq},
+			},
+			want: types.True,
+		},
+		{
+			name: "greater than eq true equal",
+			node: ast.BinaryExpression{
+				Left: ast.Number{
+					Value: 5,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Right: ast.Number{
+					Value: 5,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Op: token.Token{Kind: token.GreaterThanEq},
+			},
+			want: types.True,
+		},
+		{
+			name: "greater than eq false",
+			node: ast.BinaryExpression{
+				Left: ast.Number{
+					Value: 3,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Right: ast.Number{
+					Value: 5,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Op: token.Token{Kind: token.GreaterThanEq},
+			},
+			want: types.False,
+		},
+		{
+			name: "less than true",
+			node: ast.BinaryExpression{
+				Left: ast.Number{
+					Value: 1,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Right: ast.Number{
+					Value: 3,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Op: token.Token{Kind: token.LessThan},
+			},
+			want: types.True,
+		},
+		{
+			name: "less than false",
+			node: ast.BinaryExpression{
+				Left: ast.Number{
+					Value: 3,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Right: ast.Number{
+					Value: 1,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Op: token.Token{Kind: token.LessThan},
+			},
+			want: types.False,
+		},
+		{
+			name: "less than eq true less",
+			node: ast.BinaryExpression{
+				Left: ast.Number{
+					Value: 1,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Right: ast.Number{
+					Value: 3,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Op: token.Token{Kind: token.LessThanEq},
+			},
+			want: types.True,
+		},
+		{
+			name: "less than eq true equal",
+			node: ast.BinaryExpression{
+				Left: ast.Number{
+					Value: 5,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Right: ast.Number{
+					Value: 5,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Op: token.Token{Kind: token.LessThanEq},
+			},
+			want: types.True,
+		},
+		{
+			name: "less than eq false",
+			node: ast.BinaryExpression{
+				Left: ast.Number{
+					Value: 7,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Right: ast.Number{
+					Value: 4,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Op: token.Token{Kind: token.LessThanEq},
+			},
+			want: types.False,
 		},
 	}
 
