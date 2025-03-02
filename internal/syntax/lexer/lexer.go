@@ -346,8 +346,7 @@ func lexString(l *Lexer) lexFn {
 	}
 
 	if l.atEOF() {
-		currentPos := l.pos
-		return l.error(openingQuotePos, currentPos)
+		return l.error(openingQuotePos, l.pos)
 	}
 
 	l.next() // Consume the closing '"'

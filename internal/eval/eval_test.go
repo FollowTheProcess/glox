@@ -37,6 +37,11 @@ func TestEval(t *testing.T) {
 			want: types.False,
 		},
 		{
+			name: "string literal",
+			node: ast.String{Value: "a string"},
+			want: types.String{Value: "a string"},
+		},
+		{
 			name: "grouped number",
 			node: ast.GroupedExpression{Value: ast.Number{Value: 1}},
 			want: types.Number{Value: 1},

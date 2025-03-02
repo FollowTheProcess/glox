@@ -31,6 +31,8 @@ func Eval(node ast.Node) (types.Type, error) {
 		return evalNumber(node), nil
 	case ast.Bool:
 		return evalBool(node), nil
+	case ast.String:
+		return evalString(node), nil
 	default:
 		return nil, fmt.Errorf("unhandled ast.Node in Eval: %T", node)
 	}
@@ -59,9 +61,14 @@ func evalBool(node ast.Bool) *types.Bool {
 	return types.False
 }
 
-// evalNumber interprets a numeric node, returning a types.Number.
+// evalNumber interprets a numeric AST node, returning a types.Number.
 func evalNumber(node ast.Number) types.Number {
 	return types.Number{Value: node.Value}
+}
+
+// evalString interprets a string AST node, returning a types.String.
+func evalString(node ast.String) types.String {
+	return types.String{Value: node.Value}
 }
 
 // evalUnaryExpression interprets a unary expression like `-5` or `!true`.

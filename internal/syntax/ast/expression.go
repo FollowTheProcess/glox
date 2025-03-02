@@ -41,6 +41,12 @@ type (
 		Tok   token.Token // Underlying token.True|token.False
 	}
 
+	// A String is the AST node representing a string literal.
+	String struct {
+		Value string      // The underlying string literal
+		Tok   token.Token // The string literal token
+	}
+
 	// A UnaryExpression is the AST node representing a unary expression
 	// i.e. `-5` or `!true`.
 	UnaryExpression struct {
@@ -70,6 +76,7 @@ type (
 func (i Ident) Token() token.Token             { return i.Tok }
 func (n Number) Token() token.Token            { return n.Tok }
 func (b Bool) Token() token.Token              { return b.Tok }
+func (s String) Token() token.Token            { return s.Tok }
 func (u UnaryExpression) Token() token.Token   { return u.Tok }
 func (b BinaryExpression) Token() token.Token  { return b.Left.Token() }
 func (g GroupedExpression) Token() token.Token { return g.LParen }
@@ -79,6 +86,7 @@ func (g GroupedExpression) Token() token.Token { return g.LParen }
 func (i Ident) expressionNode()             {}
 func (n Number) expressionNode()            {}
 func (b Bool) expressionNode()              {}
+func (s String) expressionNode()            {}
 func (u UnaryExpression) expressionNode()   {}
 func (b BinaryExpression) expressionNode()  {}
 func (g GroupedExpression) expressionNode() {}
@@ -95,6 +103,10 @@ func (n Number) Precedence() string {
 
 func (b Bool) Precedence() string {
 	return strconv.FormatBool(b.Value)
+}
+
+func (s String) Precedence() string {
+	return s.Value
 }
 
 func (u UnaryExpression) Precedence() string {
