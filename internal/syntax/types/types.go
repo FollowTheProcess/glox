@@ -25,7 +25,7 @@ type Type interface {
 	Kind() Kind
 }
 
-// Only one canonical true, false and nil.
+// Only one canonical true and false.
 var (
 	True  = &Bool{Value: true}
 	False = &Bool{Value: false}
@@ -58,6 +58,9 @@ func IsTruthy(t Type) bool {
 	case Number:
 		return typ.Value != 0
 	default:
-		return false
+		// TODO(@FollowTheProcess): Don't love the panic, but it's a good way of making sure
+		// I don't miss one while developing. Remove this when all the types are handled and just
+		// return false
+		panic(fmt.Sprintf("Unhandled type in IsTruthy: %T", t))
 	}
 }
