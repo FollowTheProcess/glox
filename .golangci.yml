@@ -11,6 +11,7 @@ linters:
     - gci # gofmt/goimports is fine
     - ginkgolinter # I don't use whatever this is
     - gochecknoglobals # Globals are fine sometimes, use common sense
+    - gocognit # Basically cyclop by another name
     - gocyclo # cyclop does this instead
     - godox # "todo" and "fixme" comments are allowed
     - goheader # No need

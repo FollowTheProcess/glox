@@ -278,6 +278,126 @@ func TestEval(t *testing.T) {
 			},
 			want: types.False,
 		},
+		{
+			name: "equal numbers true",
+			node: ast.BinaryExpression{
+				Left: ast.Number{
+					Value: 42,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Right: ast.Number{
+					Value: 42,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Op: token.Token{Kind: token.DoubleEq},
+			},
+			want: types.True,
+		},
+		{
+			name: "equal numbers false",
+			node: ast.BinaryExpression{
+				Left: ast.Number{
+					Value: 69,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Right: ast.Number{
+					Value: 42,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Op: token.Token{Kind: token.DoubleEq},
+			},
+			want: types.False,
+		},
+		{
+			name: "equal strings true",
+			node: ast.BinaryExpression{
+				Left: ast.String{
+					Value: "yes",
+					Tok:   token.Token{Kind: token.String},
+				},
+				Right: ast.String{
+					Value: "yes",
+					Tok:   token.Token{Kind: token.String},
+				},
+				Op: token.Token{Kind: token.DoubleEq},
+			},
+			want: types.True,
+		},
+		{
+			name: "equal strings false",
+			node: ast.BinaryExpression{
+				Left: ast.String{
+					Value: "yes",
+					Tok:   token.Token{Kind: token.String},
+				},
+				Right: ast.String{
+					Value: "no",
+					Tok:   token.Token{Kind: token.String},
+				},
+				Op: token.Token{Kind: token.DoubleEq},
+			},
+			want: types.False,
+		},
+		{
+			name: "not equal numbers true",
+			node: ast.BinaryExpression{
+				Left: ast.Number{
+					Value: 42,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Right: ast.Number{
+					Value: 69,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Op: token.Token{Kind: token.BangEq},
+			},
+			want: types.True,
+		},
+		{
+			name: "not equal numbers false",
+			node: ast.BinaryExpression{
+				Left: ast.Number{
+					Value: 69,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Right: ast.Number{
+					Value: 69,
+					Tok:   token.Token{Kind: token.Number},
+				},
+				Op: token.Token{Kind: token.BangEq},
+			},
+			want: types.False,
+		},
+		{
+			name: "not equal strings true",
+			node: ast.BinaryExpression{
+				Left: ast.String{
+					Value: "yes",
+					Tok:   token.Token{Kind: token.String},
+				},
+				Right: ast.String{
+					Value: "no",
+					Tok:   token.Token{Kind: token.String},
+				},
+				Op: token.Token{Kind: token.BangEq},
+			},
+			want: types.True,
+		},
+		{
+			name: "not equal strings false",
+			node: ast.BinaryExpression{
+				Left: ast.String{
+					Value: "yes",
+					Tok:   token.Token{Kind: token.String},
+				},
+				Right: ast.String{
+					Value: "yes",
+					Tok:   token.Token{Kind: token.String},
+				},
+				Op: token.Token{Kind: token.BangEq},
+			},
+			want: types.False,
+		},
 	}
 
 	for _, tt := range tests {
@@ -285,7 +405,7 @@ func TestEval(t *testing.T) {
 			got, err := eval.Eval(tt.node)
 			test.Ok(t, err)
 
-			test.Equal(t, got, tt.want)
+			test.Equal(t, got, tt.want, test.Context("eval.Eval(T%) mismatch", tt.node))
 		})
 	}
 }

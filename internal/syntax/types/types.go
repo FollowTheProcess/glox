@@ -18,6 +18,8 @@ const (
 	KindString
 )
 
+// TODO(@FollowTheProcess): Could we use generics here? Have a Value() T method in the interface?
+
 // Type is a Lox object type.
 type Type interface {
 	fmt.Stringer
@@ -65,7 +67,8 @@ func IsTruthy(t Type) bool {
 	case Number:
 		return typ.Value != 0
 	case String:
-		// Like python, an empty string is falsey
+		// Like python, an empty string is falsey, note this differs from Lox in the book
+		// but I don't like the implementation there where only nil and false are falsey
 		return len(typ.Value) != 0
 	default:
 		// TODO(@FollowTheProcess): Don't love the panic, but it's a good way of making sure
@@ -73,4 +76,18 @@ func IsTruthy(t Type) bool {
 		// return false
 		panic(fmt.Sprintf("Unhandled type in IsTruthy: %T", t))
 	}
+}
+
+// Equal reports whether two types should be considered equal.
+func Equal(a, b Type) bool {
+	// Two types of different kinds are *never* equal
+	if a.Kind() != b.Kind() {
+		return false
+	}
+
+	// TODO(@FollowTheProcess): Not sure if we can get away with this long term
+	// but just comparing the string representations seems fine enough? We know
+	// by this point that they are the same kind, and String() simply formats
+	// the underlying value in a kind-specific way so... seems legit
+	return a.String() == b.String()
 }
