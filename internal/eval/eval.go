@@ -14,6 +14,8 @@ import (
 // to the user with position info and then move on to the next expression. Maybe need an interpreter
 // struct with fields tracking errors etc.
 
+// TODO(@FollowTheProcess): Make the errors a lot better with position info and highlighting etc.
+
 // Eval evaluates a Lox AST Node.
 func Eval(node ast.Node) (types.Type, error) {
 	switch node := node.(type) {
@@ -124,6 +126,10 @@ func evalBinaryExpression(node ast.BinaryExpression) (types.Type, error) {
 		return evalLessThan(left, right)
 	case token.LessThanEq:
 		return evalLessThanEq(left, right)
+	case token.DoubleEq:
+		return evalEqual(left, right), nil
+	case token.BangEq:
+		return evalNotEqual(left, right), nil
 	default:
 		return nil, fmt.Errorf("unsupported binary operator: %s", node.Op.Kind.Lexeme())
 	}
@@ -236,6 +242,22 @@ func evalLessThanEq(left, right types.Type) (*types.Bool, error) {
 		return types.True, nil
 	}
 	return types.False, nil
+}
+
+// evalEqual interprets `x == y`.
+func evalEqual(left, right types.Type) *types.Bool {
+	if types.Equal(left, right) {
+		return types.True
+	}
+	return types.False
+}
+
+// evalNotEqual interprets `x != y`.
+func evalNotEqual(left, right types.Type) *types.Bool {
+	if types.Equal(left, right) {
+		return types.False
+	}
+	return types.True
 }
 
 // checkNumeric is a helper function to validate that the left and right operands of a binary
