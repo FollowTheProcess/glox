@@ -188,12 +188,12 @@ func (p *Parser) parseStatement() ast.Statement {
 		defer p.endTrace()
 	}
 	switch p.current.Kind {
-	case token.Var:
-		return p.parseVarDecl()
 	case token.Return:
 		return p.parseReturnStatement()
 	case token.Print:
 		return p.parsePrintStatement()
+	case token.Var:
+		return p.parseDeclarationStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -204,14 +204,14 @@ func (p *Parser) Errors() []error {
 	return p.errs
 }
 
-// parseVarDecl parses a `var <ident> = <expr>` statement.
-func (p *Parser) parseVarDecl() ast.VarStatement {
+// parseVarDecl parses a `var <ident> = <expr>;` declaration statement.
+func (p *Parser) parseVarDecl() ast.VarDeclaration {
 	if p.trace {
 		p.startTrace("VarDecl")
 		defer p.endTrace()
 	}
 
-	var statement ast.VarStatement
+	var statement ast.VarDeclaration
 	p.expect(token.Ident)
 	statement.Ident = p.parseIdent()
 
@@ -219,8 +219,6 @@ func (p *Parser) parseVarDecl() ast.VarStatement {
 	p.advance()
 
 	statement.Value = p.parseExpression(token.PrecedenceMin)
-
-	p.expect(token.SemiColon)
 
 	return statement
 }
@@ -267,8 +265,22 @@ func (p *Parser) parseExpressionStatement() ast.ExpressionStatement {
 		defer p.endTrace()
 	}
 
-	statement := ast.ExpressionStatement{Tok: p.current}
-	statement.Value = p.parseExpression(token.PrecedenceMin)
+	statement := ast.ExpressionStatement{Value: p.parseExpression(token.PrecedenceMin)}
+
+	p.expect(token.SemiColon)
+
+	return statement
+}
+
+// parseDeclarationStatement parses a generic declaration statement
+// e.g. var, fun, class etc.
+func (p *Parser) parseDeclarationStatement() ast.DeclarationStatement {
+	if p.trace {
+		p.startTrace("DeclarationStatement")
+		defer p.endTrace()
+	}
+
+	statement := ast.DeclarationStatement{Value: p.parseDeclaration()}
 
 	p.expect(token.SemiColon)
 
@@ -326,6 +338,22 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	}
 
 	return expression
+}
+
+// parseDeclaration is the top level parse function for parsing declarations.
+func (p *Parser) parseDeclaration() ast.Declaration {
+	if p.trace {
+		p.startTrace("Declaration")
+		defer p.endTrace()
+	}
+
+	switch p.current.Kind {
+	case token.Var:
+		return p.parseVarDecl()
+	default:
+		p.syntaxError("Unhandled token in parseVarDeclaration: %s", p.current.Kind)
+		return nil
+	}
 }
 
 func (p *Parser) parseIdent() ast.Ident {

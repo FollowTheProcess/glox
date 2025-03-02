@@ -12,13 +12,6 @@ type Statement interface {
 
 // Concrete AST Statement node types, all implementing [Node] and [Statement].
 type (
-	// A VarStatement is the AST node representing a var declaration
-	// i.e. `var <ident> = <expression>;`.
-	VarStatement struct {
-		Value Expression
-		Ident Ident
-	}
-
 	// A ReturnStatement is the AST node representing a return statement
 	// i.e. `return <expression>;`.
 	ReturnStatement struct {
@@ -37,20 +30,25 @@ type (
 	// expression as a statement.
 	ExpressionStatement struct {
 		Value Expression
-		Tok   token.Token // The first token of the expression
+	}
+
+	// A DeclarationStatement is the AST node representing a top level
+	// declaration as a statement.
+	DeclarationStatement struct {
+		Value Declaration
 	}
 )
 
 // [Node] implementations
 
-func (v VarStatement) Token() token.Token        { return v.Ident.Tok }
-func (r ReturnStatement) Token() token.Token     { return r.Tok }
-func (p PrintStatement) Token() token.Token      { return p.Tok }
-func (e ExpressionStatement) Token() token.Token { return e.Tok }
+func (r ReturnStatement) Token() token.Token      { return r.Tok }
+func (p PrintStatement) Token() token.Token       { return p.Tok }
+func (e ExpressionStatement) Token() token.Token  { return e.Value.Token() }
+func (d DeclarationStatement) Token() token.Token { return d.Value.Token() }
 
 // [Statement] implementations
 
-func (r ReturnStatement) statementNode()     {}
-func (v VarStatement) statementNode()        {}
-func (p PrintStatement) statementNode()      {}
-func (e ExpressionStatement) statementNode() {}
+func (r ReturnStatement) statementNode()      {}
+func (p PrintStatement) statementNode()       {}
+func (e ExpressionStatement) statementNode()  {}
+func (d DeclarationStatement) statementNode() {}
