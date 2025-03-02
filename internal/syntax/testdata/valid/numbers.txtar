@@ -1,0 +1,44 @@
+-- parsed.txt --
+ast.Program{
+    Statements: {
+        ast.ExpressionStatement{
+            Value: ast.Number{
+                Value: 123,
+                Tok:   token.Token{Kind:22, Start:0, End:3},
+            },
+        },
+        ast.ExpressionStatement{
+            Value: ast.Number{
+                Value: 123.456,
+                Tok:   token.Token{Kind:22, Start:5, End:12},
+            },
+        },
+        ast.ExpressionStatement{
+            Value: ast.Number{
+                Value: 42,
+                Tok:   token.Token{Kind:22, Start:14, End:16},
+            },
+        },
+        ast.ExpressionStatement{
+            Value: ast.Number{
+                Value: 9.999999e+06,
+                Tok:   token.Token{Kind:22, Start:18, End:25},
+            },
+        },
+    },
+}
+-- src.lox --
+123;
+123.456;
+42;
+9999999;
+-- tokens.txt --
+<Token::Number start=0, end=3>
+<Token::SemiColon start=3, end=4>
+<Token::Number start=5, end=12>
+<Token::SemiColon start=12, end=13>
+<Token::Number start=14, end=16>
+<Token::SemiColon start=16, end=17>
+<Token::Number start=18, end=25>
+<Token::SemiColon start=25, end=26>
+<Token::EOF start=27, end=27>

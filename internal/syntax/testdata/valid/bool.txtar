@@ -1,0 +1,26 @@
+-- src.lox --
+true;
+false;
+-- tokens.txt --
+<Token::True start=0, end=4>
+<Token::SemiColon start=4, end=5>
+<Token::False start=6, end=11>
+<Token::SemiColon start=11, end=12>
+<Token::EOF start=13, end=13>
+-- parsed.txt --
+ast.Program{
+    Statements: {
+        ast.ExpressionStatement{
+            Value: ast.Bool{
+                Value: true,
+                Tok:   token.Token{Kind:30, Start:0, End:4},
+            },
+        },
+        ast.ExpressionStatement{
+            Value: ast.Bool{
+                Value: false,
+                Tok:   token.Token{Kind:31, Start:6, End:11},
+            },
+        },
+    },
+}
