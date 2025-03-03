@@ -2,9 +2,6 @@ package ast
 
 import "github.com/FollowTheProcess/glox/internal/syntax/token"
 
-// TODO(@FollowTheProcess): Port VarStatement over to this, the ast.Program will need to now have
-// []Declaration rather than []Statement.
-
 // Declaration is an AST declaration node.
 type Declaration interface {
 	Node              // Marks the declaration as an AST node

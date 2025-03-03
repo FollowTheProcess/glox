@@ -151,6 +151,39 @@ func TestPrecedence(t *testing.T) {
 	}
 }
 
+func TestIsBinaryOp(t *testing.T) {
+	tests := []struct {
+		kind token.Kind // The token kind under test
+		want bool       // Whether it should be a binary op
+	}{
+		{kind: token.Or, want: true},
+		{kind: token.And, want: true},
+		{kind: token.DoubleEq, want: true},
+		{kind: token.BangEq, want: true},
+		{kind: token.LessThan, want: true},
+		{kind: token.LessThanEq, want: true},
+		{kind: token.GreaterThan, want: true},
+		{kind: token.GreaterThanEq, want: true},
+		{kind: token.Plus, want: true},
+		{kind: token.Minus, want: true},
+		{kind: token.Star, want: true},
+		{kind: token.ForwardSlash, want: true},
+		{kind: token.Number, want: false},
+		{kind: token.Ident, want: false},
+		{kind: token.EOF, want: false},
+		{kind: token.OpenParen, want: false},
+		{kind: token.CloseParen, want: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.kind.String(), func(t *testing.T) {
+			tok := token.Token{Kind: tt.kind}
+
+			test.Equal(t, tok.IsBinaryOp(), tt.want)
+		})
+	}
+}
+
 func TestBadToken(t *testing.T) {
 	tok := token.Token{Kind: 9999}
 	test.Equal(t, tok.Kind.Lexeme(), "<BadToken>")

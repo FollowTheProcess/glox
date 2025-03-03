@@ -1,6 +1,7 @@
 package interpreter
 
 import (
+	"errors"
 	"fmt"
 	"unicode"
 	"unicode/utf8"
@@ -32,6 +33,11 @@ func (e *Environment) Define(name string, variable types.Type) error {
 	if !isValidIdent(name) {
 		return fmt.Errorf("%q is not a valid identifier", name)
 	}
+
+	if variable == nil {
+		return errors.New("cannot define nil")
+	}
+
 	if _, exists := e.values[name]; exists {
 		return fmt.Errorf("variable %q already defined in this scope (%s): %s", name, e.name, variable)
 	}

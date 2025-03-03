@@ -98,7 +98,7 @@ func Equal(a, b Type) bool {
 		return false
 	}
 
-	// TODO(@FollowTheProcess): Not sure if we can get away with this long term
+	// Not sure if we can get away with this long term
 	// but just comparing the string representations seems fine enough? We know
 	// by this point that they are the same kind, and String() simply formats
 	// the underlying value in a kind-specific way so... seems legit

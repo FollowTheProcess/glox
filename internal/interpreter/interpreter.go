@@ -14,7 +14,6 @@ import (
 // struct with fields tracking errors etc.
 
 // TODO(@FollowTheProcess): Make the errors a lot better with position info and highlighting etc.
-// TODO(@FollowTheProcess): Use collections/Chain to emulate the local, wider, global scopes
 
 // Interpreter is the glox interpreter.
 type Interpreter struct {
