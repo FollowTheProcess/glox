@@ -17,11 +17,15 @@ import (
 // TODO(@FollowTheProcess): Use collections/Chain to emulate the local, wider, global scopes
 
 // Interpreter is the glox interpreter.
-type Interpreter struct{}
+type Interpreter struct {
+	env *Environment // Global interpreter environment
+}
 
 // New returns a new interpreter.
 func New() Interpreter {
-	return Interpreter{}
+	return Interpreter{
+		env: NewEnvironment("globals", nil),
+	}
 }
 
 // Eval evaluates an AST node.
