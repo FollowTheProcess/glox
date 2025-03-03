@@ -189,6 +189,27 @@ func (t Token) Is(kind Kind) bool {
 	return t.Kind == kind
 }
 
+// IsBinaryOp reports whether the token is a valid binary operator.
+func (t Token) IsBinaryOp() bool {
+	switch t.Kind {
+	case Or,
+		And,
+		DoubleEq,
+		BangEq,
+		LessThan,
+		LessThanEq,
+		GreaterThan,
+		GreaterThanEq,
+		Plus,
+		Minus,
+		Star,
+		ForwardSlash:
+		return true
+	default:
+		return false
+	}
+}
+
 // Keyword looks up an identifier in the set of Lox keywords, returning it's
 // [Kind] if it was a keyword.
 //

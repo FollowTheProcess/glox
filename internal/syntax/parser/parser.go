@@ -13,18 +13,6 @@ import (
 	"github.com/FollowTheProcess/glox/internal/syntax/token"
 )
 
-// TODO(@FollowTheProcess): A sort of integration test where there is a single txtar archive file per test case
-// containing 3 files:
-// 	- src.lox: 		Raw Lox source code
-//	- tokens.txt:	The output from tokenising src.lox
-//  - ast.txt:		Some serialised representation of the AST from parsing tokens.txt
-//
-// Would thoroughly test all 3 components without coupling them together too much.
-//
-// The blocker is really the 3rd point, how do we nicely serialise the AST, keep all of
-// the detail and nesting, and make it easily readable. I'm thinking like a formatted dump
-// of the %#v format basically?
-
 // Parser is the glox parser.
 type Parser struct {
 	traceWriter io.Writer
@@ -342,22 +330,11 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 	for !p.next.Is(token.SemiColon) && p.next.Precedence() > precedence {
 		p.advance()
-		switch p.current.Kind {
-		case token.Or,
-			token.And,
-			token.DoubleEq,
-			token.BangEq,
-			token.LessThan,
-			token.LessThanEq,
-			token.GreaterThan,
-			token.GreaterThanEq,
-			token.Plus,
-			token.Minus,
-			token.Star,
-			token.ForwardSlash:
+		switch {
+		case p.current.IsBinaryOp():
 			expression = p.parseBinaryExpression(expression)
 		default:
-			p.syntaxError("Unhandled token in parseExpression (binary switch): %s", p.current.Kind)
+			p.syntaxError("Invalid binary operator %s", p.current.Kind.Lexeme())
 			return nil
 		}
 	}
