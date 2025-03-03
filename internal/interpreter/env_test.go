@@ -118,3 +118,5 @@ func TestGet(t *testing.T) {
 		})
 	}
 }
+
+// TODO(@FollowTheProcess): Tests for define, assign etc.
