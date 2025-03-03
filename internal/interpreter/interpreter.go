@@ -14,15 +14,18 @@ import (
 // struct with fields tracking errors etc.
 
 // TODO(@FollowTheProcess): Make the errors a lot better with position info and highlighting etc.
+// TODO(@FollowTheProcess): Use collections/Chain to emulate the local, wider, global scopes
 
 // Interpreter is the glox interpreter.
 type Interpreter struct {
-	// TODO(@FollowTheProcess): Environment
+	env *Environment // Global interpreter environment
 }
 
 // New returns a new interpreter.
 func New() Interpreter {
-	return Interpreter{}
+	return Interpreter{
+		env: NewEnvironment("globals", nil),
+	}
 }
 
 // Eval evaluates an AST node.

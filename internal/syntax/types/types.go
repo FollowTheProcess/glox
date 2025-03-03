@@ -80,6 +80,19 @@ func IsTruthy(t Type) bool {
 
 // Equal reports whether two types should be considered equal.
 func Equal(a, b Type) bool {
+	// If one is nil and the other isn't, not equal
+	if (a == nil) != (b == nil) {
+		return false
+	}
+
+	// Now they are either both nil, or both actual types
+
+	if a == nil && b == nil {
+		return true // Two nils are equal, like python None
+	}
+
+	// By here they *must* be non-nil
+
 	// Two types of different kinds are *never* equal
 	if a.Kind() != b.Kind() {
 		return false
