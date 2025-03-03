@@ -10,15 +10,17 @@ import (
 
 // Environment is the environment/scope of the Lox interpreter.
 type Environment struct {
-	parent *Environment          // The enclosing parent env
-	values map[string]types.Type // Variables defined in this scope
+	parent *Environment
+	values map[string]types.Type
+	name   string
 }
 
 // NewEnvironment returns a new environment, with an optional parent.
 //
 // To define the global environment use NewEnvironment(nil).
-func NewEnvironment(parent *Environment) *Environment {
+func NewEnvironment(name string, parent *Environment) *Environment {
 	return &Environment{
+		name:   name,
 		parent: parent,
 		values: make(map[string]types.Type),
 	}
@@ -31,7 +33,7 @@ func (e *Environment) Define(name string, variable types.Type) error {
 		return fmt.Errorf("%q is not a valid identifier", name)
 	}
 	if _, exists := e.values[name]; exists {
-		return fmt.Errorf("variable %q already defined in this scope: %s", name, variable)
+		return fmt.Errorf("variable %q already defined in this scope (%s): %s", name, e.name, variable)
 	}
 
 	e.values[name] = variable

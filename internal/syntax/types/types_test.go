@@ -60,6 +60,24 @@ func TestEqual(t *testing.T) {
 		want bool       // Expected return value
 	}{
 		{
+			name: "nils equal",
+			a:    nil,
+			b:    nil,
+			want: true,
+		},
+		{
+			name: "a nil b not",
+			a:    nil,
+			b:    types.True,
+			want: false,
+		},
+		{
+			name: "b nil a not",
+			a:    types.True,
+			b:    nil,
+			want: false,
+		},
+		{
 			name: "strings equal",
 			a:    types.String{Value: "yes"},
 			b:    types.String{Value: "yes"},
