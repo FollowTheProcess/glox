@@ -1,0 +1,40 @@
+-- parsed.txt --
+ast.Program{
+    Statements: {
+        ast.DeclarationStatement{
+            Value: ast.VarDeclaration{
+                Value: ast.Number{
+                    Value: 42,
+                    Tok:   token.Token{Kind:22, Start:38, End:40},
+                },
+                Ident: ast.Ident{
+                    Name: "something",
+                    Tok:  token.Token{Kind:23, Start:26, End:35},
+                },
+            },
+        },
+        ast.PrintStatement{
+            Value: ast.Ident{
+                Name: "something",
+                Tok:  token.Token{Kind:23, Start:59, End:68},
+            },
+            Tok: token.Token{Kind:38, Start:53, End:58},
+        },
+    },
+}
+-- src.lox --
+// Declare a variable
+var something = 42;
+
+// Use it
+print something;
+-- tokens.txt --
+<Token::Var start=22, end=25>
+<Token::Ident start=26, end=35>
+<Token::Eq start=36, end=37>
+<Token::Number start=38, end=40>
+<Token::SemiColon start=40, end=41>
+<Token::Print start=53, end=58>
+<Token::Ident start=59, end=68>
+<Token::SemiColon start=68, end=69>
+<Token::EOF start=70, end=70>

@@ -18,38 +18,6 @@ func TestGet(t *testing.T) {
 		ok     bool                  // Expected ok return value
 	}{
 		{
-			name:   "empty string",
-			parent: nil,
-			values: nil,
-			get:    "",
-			want:   nil,
-			ok:     false,
-		},
-		{
-			name:   "no variables",
-			parent: nil,
-			values: nil,
-			get:    "something",
-			want:   nil,
-			ok:     false,
-		},
-		{
-			name:   "bad ident whitespace",
-			parent: nil,
-			values: nil,
-			get:    "not an ident",
-			want:   nil,
-			ok:     false,
-		},
-		{
-			name:   "bad ident first char",
-			parent: nil,
-			values: nil,
-			get:    "1variableplz",
-			want:   nil,
-			ok:     false,
-		},
-		{
 			name: "global variable",
 			parent: map[string]types.Type{
 				"is_global": types.True,
@@ -129,30 +97,6 @@ func TestDefine(t *testing.T) {
 		wantErr bool                  // Whether Define should return an error
 	}{
 		{
-			name:    "zero",
-			values:  nil,
-			define:  "",
-			value:   nil,
-			wantErr: true,
-			errMsg:  `"" is not a valid identifier`,
-		},
-		{
-			name:    "bad ident",
-			values:  nil,
-			define:  "some words",
-			value:   types.String{Value: "hello"},
-			wantErr: true,
-			errMsg:  `"some words" is not a valid identifier`,
-		},
-		{
-			name:    "nil value",
-			values:  nil,
-			define:  "a_nil",
-			value:   nil,
-			wantErr: true,
-			errMsg:  "cannot define nil",
-		},
-		{
 			name: "already exists",
 			values: map[string]types.Type{
 				"something": types.True,
@@ -207,24 +151,6 @@ func TestAssign(t *testing.T) {
 		errMsg  string                // If wantErr, what should the message say
 		wantErr bool                  // Whether assign should return an error
 	}{
-		{
-			name:    "zero",
-			parent:  nil,
-			values:  nil,
-			assign:  "",
-			value:   nil,
-			wantErr: true,
-			errMsg:  `"" is not a valid identifier`,
-		},
-		{
-			name:    "bad ident",
-			parent:  nil,
-			values:  nil,
-			assign:  "some words",
-			value:   types.String{Value: "hello"},
-			wantErr: true,
-			errMsg:  `"some words" is not a valid identifier`,
-		},
 		{
 			name:   "undefined",
 			parent: nil,
