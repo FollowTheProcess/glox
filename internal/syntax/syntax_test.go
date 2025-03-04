@@ -2,7 +2,7 @@ package syntax_test
 
 import (
 	"flag"
-	"io"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -15,7 +15,10 @@ import (
 	"github.com/kr/pretty"
 )
 
-var update = flag.Bool("update", false, "Update snapshots and testdata")
+var (
+	debug  = flag.Bool("debug", false, "Emit parse traces during tests")
+	update = flag.Bool("update", false, "Update snapshots and testdata")
+)
 
 func TestParseValid(t *testing.T) {
 	validCaseGlob := filepath.Join("testdata", "valid", "*.txtar")
@@ -39,7 +42,7 @@ func TestParseValid(t *testing.T) {
 			test.Ok(t, err)
 
 			tokens := lex(src)
-			tree := parse(t, name, src)
+			tree := parse(t, name, src, *debug)
 
 			if *update {
 				// Update the expected with what's actually been seen
@@ -81,7 +84,7 @@ func TestParseInvalid(t *testing.T) {
 			want, err := archive.Read("want.txt")
 			test.Ok(t, err)
 
-			p := parser.New("src.lox", src, false, io.Discard)
+			p := parser.New("src.lox", src, *debug, os.Stderr)
 			_, err = p.Parse()
 			test.Err(t, err, test.Context("invalid case must generate parse error"))
 
@@ -117,10 +120,10 @@ func lex(src string) string {
 
 // parse parses a stream of tokens into an AST, returning it's formatted
 // string representation.
-func parse(t *testing.T, name, src string) string {
+func parse(t *testing.T, name, src string, debug bool) string {
 	t.Helper()
 
-	p := parser.New(name, src, false, io.Discard)
+	p := parser.New(name, src, debug, os.Stderr)
 	program, err := p.Parse()
 	test.Ok(t, err)
 
