@@ -398,6 +398,31 @@ func TestEval(t *testing.T) {
 			},
 			want: types.False,
 		},
+		{
+			name: "var declaration",
+			node: ast.VarDeclaration{
+				Ident: ast.Ident{Name: "something"},
+				Value: ast.Number{Value: 42},
+			},
+			want: nil, // No return value
+		},
+		{
+			name: "variable define and use",
+			node: ast.Program{
+				Statements: []ast.Statement{
+					ast.DeclarationStatement{
+						Value: ast.VarDeclaration{
+							Value: ast.Number{Value: 42},
+							Ident: ast.Ident{Name: "something"},
+						},
+					},
+					ast.ExpressionStatement{
+						Value: ast.Ident{Name: "something"},
+					},
+				},
+			},
+			want: types.Number{Value: 42},
+		},
 	}
 
 	for _, tt := range tests {
@@ -406,7 +431,7 @@ func TestEval(t *testing.T) {
 			got, err := interp.Eval(tt.node)
 			test.Ok(t, err)
 
-			test.Equal(t, got, tt.want, test.Context("eval.Eval(T%) mismatch", tt.node))
+			test.Equal(t, got, tt.want, test.Context("eval.Eval mismatch"))
 		})
 	}
 }

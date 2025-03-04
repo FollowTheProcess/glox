@@ -83,7 +83,9 @@ func doRun(options *runOptions) func(cmd *cli.Command, args []string) error {
 	return func(cmd *cli.Command, args []string) error {
 		start := time.Now()
 		defer func() {
-			fmt.Fprintf(cmd.Stderr(), "\nTook %v\n", time.Since(start))
+			if options.timings {
+				fmt.Fprintf(cmd.Stderr(), "\nTook %v\n", time.Since(start))
+			}
 		}()
 
 		src := cmd.Arg("src")

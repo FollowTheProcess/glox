@@ -34,18 +34,24 @@ func (i Interpreter) Eval(node ast.Node) (types.Type, error) {
 		return i.evalStatements(node.Statements)
 	case ast.ExpressionStatement:
 		return i.Eval(node.Value)
+	case ast.DeclarationStatement:
+		return i.Eval(node.Value)
 	case ast.GroupedExpression:
 		return i.Eval(node.Value)
 	case ast.UnaryExpression:
 		return i.evalUnaryExpression(node)
 	case ast.BinaryExpression:
 		return i.evalBinaryExpression(node)
+	case ast.VarDeclaration:
+		return nil, i.evalVarDeclaration(node)
 	case ast.Number:
 		return i.evalNumber(node), nil
 	case ast.Bool:
 		return i.evalBool(node), nil
 	case ast.String:
 		return i.evalString(node), nil
+	case ast.Ident:
+		return i.evalIdent(node)
 	default:
 		return nil, fmt.Errorf("unhandled ast.Node in Eval: %T", node)
 	}
@@ -269,6 +275,31 @@ func (i Interpreter) evalNotEqual(left, right types.Type) *types.Bool {
 		return types.False
 	}
 	return types.True
+}
+
+// evalVarDeclaration evaluates `var <ident> = <expr>`.
+func (i Interpreter) evalVarDeclaration(node ast.VarDeclaration) error {
+	if node.Value == nil {
+		// We're just defining the variable, no expression
+		return i.env.Define(node.Ident.Name, nil)
+	}
+
+	value, err := i.Eval(node.Value)
+	if err != nil {
+		return err
+	}
+
+	return i.env.Define(node.Ident.Name, value)
+}
+
+// evalIdent evaluates an ident expression.
+func (i Interpreter) evalIdent(node ast.Ident) (types.Type, error) {
+	v, defined := i.env.Get(node.Name)
+	if !defined {
+		return nil, fmt.Errorf("use of undefined variable %q", node.Name)
+	}
+
+	return v, nil
 }
 
 // checkNumeric is a helper function to validate that the left and right operands of a binary
