@@ -1,0 +1,6 @@
+Missing a semicolon at the end
+-- src.lox --
+// A comment
+var something = 2
+-- want.txt --
+src.lox:2:17: expected ";", got EOF

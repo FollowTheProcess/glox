@@ -128,13 +128,13 @@ func (p *Parser) position() (line, col int) {
 	line = 1               // Line counter
 	lastNewLineOffset := 0 // The byte offset of the last newline seen
 	for index, byt := range p.src {
-		if byt == '\n' {
-			line++
-			lastNewLineOffset = index
+		if index == p.current.Start {
+			break
 		}
 
-		if index > p.current.Start {
-			break
+		if byt == '\n' {
+			lastNewLineOffset = index
+			line++
 		}
 	}
 

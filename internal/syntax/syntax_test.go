@@ -17,9 +17,7 @@ import (
 
 var update = flag.Bool("update", false, "Update snapshots and testdata")
 
-// TODO(@FollowTheProcess): Many more test cases
-
-func TestParsePipeline(t *testing.T) {
+func TestParseValid(t *testing.T) {
 	validCaseGlob := filepath.Join("testdata", "valid", "*.txtar")
 
 	validCases, err := filepath.Glob(validCaseGlob)
@@ -61,6 +59,42 @@ func TestParsePipeline(t *testing.T) {
 
 			// And the AST
 			test.Diff(t, tree, expectedTree)
+		})
+	}
+}
+
+func TestParseInvalid(t *testing.T) {
+	invalidCaseGlob := filepath.Join("testdata", "invalid", "*.txtar")
+
+	invalidCases, err := filepath.Glob(invalidCaseGlob)
+	test.Ok(t, err)
+
+	for _, file := range invalidCases {
+		name := filepath.Base(file)
+		t.Run(name, func(t *testing.T) {
+			archive, err := txtar.ParseFile(file)
+			test.Ok(t, err)
+
+			src, err := archive.Read("src.lox")
+			test.Ok(t, err)
+
+			want, err := archive.Read("want.txt")
+			test.Ok(t, err)
+
+			p := parser.New("src.lox", src, false, io.Discard)
+			_, err = p.Parse()
+			test.Err(t, err, test.Context("invalid case must generate parse error"))
+
+			if *update {
+				err = archive.Write("want.txt", err.Error())
+				test.Ok(t, err)
+
+				err = txtar.DumpFile(file, archive)
+				test.Ok(t, err)
+				return
+			}
+
+			test.Diff(t, err.Error()+"\n", want)
 		})
 	}
 }

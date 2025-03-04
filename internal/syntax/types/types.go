@@ -18,8 +18,6 @@ const (
 	KindString
 )
 
-// TODO(@FollowTheProcess): Could we use generics here? Have a Value() T method in the interface?
-
 // Type is a Lox object type.
 type Type interface {
 	fmt.Stringer
