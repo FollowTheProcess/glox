@@ -126,21 +126,31 @@ func (p *Parser) expect(kind token.Kind) {
 // p.current token, returning it as line and column information.
 func (p *Parser) position() (line, col int) {
 	line = 1               // Line counter
-	lastNewLineOffset := 0 // The byte offset of the last newline seen
+	lastNewLineOffset := 0 // The byte offset of the (end of the) last newline seen
 	for index, byt := range p.src {
-		if byt == '\n' {
-			line++
-			lastNewLineOffset = index
+		if index >= p.current.Start {
+			break
 		}
 
-		if index > p.current.Start {
-			break
+		if byt == '\n' {
+			lastNewLineOffset = index + 1 // +1 to account for len("\n")
+			line++
 		}
 	}
 
-	// The column is therefore the number of bytes from the position of the most recent newline
-	// encountered before the token, and the offset of the token itself
-	col = p.current.Start - lastNewLineOffset
+	// If the next token is EOF, we use the end of the current token as the syntax
+	// error is likely to be unexpected EOF so we want to point to the end of the
+	// current token as in "something should have gone here"
+	pos := p.current.Start
+	if p.next.Is(token.EOF) {
+		pos = p.current.End
+	}
+
+	// The column is therefore the number of bytes between the end of the last newline
+	// and the current position, +1 because editors columns start at 1. Applying this
+	// correction here means you can click a glox syntax error in the terminal and be
+	// taken to a precise location in an editor which is probably what we want to happen
+	col = 1 + pos - lastNewLineOffset
 
 	return line, col
 }

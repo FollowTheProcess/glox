@@ -54,7 +54,7 @@ func TestParseVarDeclaration(t *testing.T) {
 				Msg:   `expected ";", got EOF`,
 				Token: token.Token{Kind: token.Number, Start: 16, End: 17},
 				Line:  1,
-				Col:   16,
+				Col:   18, // Columns in editors start at 1, so end offset + 1
 			}},
 		},
 	}
