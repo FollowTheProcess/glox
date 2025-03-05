@@ -1,6 +1,7 @@
 package interpreter_test
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/FollowTheProcess/glox/internal/interpreter"
@@ -423,11 +424,25 @@ func TestEval(t *testing.T) {
 			},
 			want: types.Number{Value: 42},
 		},
+		{
+			name: "print",
+			node: ast.PrintStatement{
+				Value: ast.BinaryExpression{
+					Left:  ast.Number{Value: 1},
+					Right: ast.Number{Value: 2},
+					Op:    token.Token{Kind: token.Plus},
+				},
+			},
+			want: nil, // No return value
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			interp := interpreter.New()
+			stdout := &bytes.Buffer{}
+			stderr := &bytes.Buffer{}
+
+			interp := interpreter.New(stdout, stderr)
 			got, err := interp.Eval(tt.node)
 			test.Ok(t, err)
 

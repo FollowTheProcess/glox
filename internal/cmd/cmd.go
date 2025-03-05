@@ -114,7 +114,7 @@ func doRun(options *runOptions) func(cmd *cli.Command, args []string) error {
 			return err
 		}
 
-		interp := interpreter.New()
+		interp := interpreter.New(cmd.Stdout(), cmd.Stderr())
 		result, err := interp.Eval(program)
 		if err != nil {
 			return err
