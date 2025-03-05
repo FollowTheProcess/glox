@@ -1,4 +1,5 @@
 Missing a semicolon at the end
+
 -- src.lox --
 var something = 2
 -- want.txt --

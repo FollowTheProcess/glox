@@ -1,0 +1,26 @@
+-- parsed.txt --
+ast.Program{
+    Statements: {
+        ast.ExpressionStatement{
+            Value: ast.String{
+                Value: "hello there",
+                Tok:   token.Token{Kind:21, Start:0, End:13},
+            },
+        },
+        ast.ExpressionStatement{
+            Value: ast.String{
+                Value: "general kenobi",
+                Tok:   token.Token{Kind:21, Start:15, End:31},
+            },
+        },
+    },
+}
+-- src.lox --
+"hello there";
+"general kenobi";
+-- tokens.txt --
+<Token::String start=0, end=13>
+<Token::SemiColon start=13, end=14>
+<Token::String start=15, end=31>
+<Token::SemiColon start=31, end=32>
+<Token::EOF start=33, end=33>
