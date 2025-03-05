@@ -3,6 +3,7 @@ package interpreter
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/FollowTheProcess/glox/internal/syntax/ast"
 	"github.com/FollowTheProcess/glox/internal/syntax/token"
@@ -17,13 +18,17 @@ import (
 
 // Interpreter is the glox interpreter.
 type Interpreter struct {
-	env *Environment // Global interpreter environment
+	stdout io.Writer    // Print normal output here
+	stderr io.Writer    // Errors and logs go here
+	env    *Environment // Global interpreter environment
 }
 
 // New returns a new interpreter.
-func New() Interpreter {
+func New(stdout, stderr io.Writer) Interpreter {
 	return Interpreter{
-		env: NewEnvironment("globals", nil),
+		stdout: stdout,
+		stderr: stderr,
+		env:    NewEnvironment("globals", nil),
 	}
 }
 
@@ -44,6 +49,8 @@ func (i Interpreter) Eval(node ast.Node) (types.Type, error) {
 		return i.evalBinaryExpression(node)
 	case ast.VarDeclaration:
 		return nil, i.evalVarDeclaration(node)
+	case ast.PrintStatement:
+		return nil, i.evalPrintStatement(node)
 	case ast.Number:
 		return i.evalNumber(node), nil
 	case ast.Bool:
@@ -290,6 +297,17 @@ func (i Interpreter) evalVarDeclaration(node ast.VarDeclaration) error {
 	}
 
 	return i.env.Define(node.Ident.Name, value)
+}
+
+// evalPrintStatement evaluates a `print <expr>` statement.
+func (i Interpreter) evalPrintStatement(node ast.PrintStatement) error {
+	value, err := i.Eval(node.Value)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintln(i.stdout, value)
+	return nil
 }
 
 // evalIdent evaluates an ident expression.

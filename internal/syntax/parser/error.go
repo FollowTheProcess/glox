@@ -11,8 +11,8 @@ type SyntaxError struct {
 	File  string      // The name of the source file or "stdin" if REPL
 	Msg   string      // The error message
 	Token token.Token // The offending token triggering the error
-	Line  int         // Line number on which Token appears
-	Col   int         // Column number on Line on which the first char of Token appears
+	Line  int         // Line number on which Token appears, 1 indexed
+	Col   int         // Column number on Line on which the first char of Token appears, 1 indexed
 }
 
 // Error implements the error interface for a SyntaxError, enabling its use

@@ -1,0 +1,48 @@
+-- parsed.txt --
+ast.Program{
+    Statements: {
+        ast.DeclarationStatement{
+            Value: ast.VarDeclaration{
+                Value: ast.String{
+                    Value: "hello",
+                    Tok:   token.Token{Kind:21, Start:8, End:15},
+                },
+                Ident: ast.Ident{
+                    Name: "a",
+                    Tok:  token.Token{Kind:23, Start:4, End:5},
+                },
+            },
+        },
+        ast.PrintStatement{
+            Value: ast.String{
+                Value: "hello",
+                Tok:   token.Token{Kind:21, Start:23, End:30},
+            },
+            Tok: token.Token{Kind:38, Start:17, End:22},
+        },
+        ast.PrintStatement{
+            Value: ast.Ident{
+                Name: "a",
+                Tok:  token.Token{Kind:23, Start:38, End:39},
+            },
+            Tok: token.Token{Kind:38, Start:32, End:37},
+        },
+    },
+}
+-- src.lox --
+var a = "hello";
+print "hello";
+print a;
+-- tokens.txt --
+<Token::Var start=0, end=3>
+<Token::Ident start=4, end=5>
+<Token::Eq start=6, end=7>
+<Token::String start=8, end=15>
+<Token::SemiColon start=15, end=16>
+<Token::Print start=17, end=22>
+<Token::String start=23, end=30>
+<Token::SemiColon start=30, end=31>
+<Token::Print start=32, end=37>
+<Token::Ident start=38, end=39>
+<Token::SemiColon start=39, end=40>
+<Token::EOF start=41, end=41>

@@ -16,7 +16,7 @@ const prompt = "-> "
 // Start starts the REPL, reading from in and printing to out.
 func Start(in io.Reader, out io.Writer, trace bool) error {
 	scanner := bufio.NewScanner(in)
-	interp := interpreter.New() // Must be outside so state is preserved
+	interp := interpreter.New(out, os.Stderr) // Must be outside so state is preserved
 
 	for {
 		fmt.Fprint(out, prompt)
