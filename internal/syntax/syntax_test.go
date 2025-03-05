@@ -32,14 +32,14 @@ func TestParseValid(t *testing.T) {
 			archive, err := txtar.ParseFile(file)
 			test.Ok(t, err)
 
-			src, err := archive.Read("src.lox")
-			test.Ok(t, err)
+			src, ok := archive.Read("src.lox")
+			test.True(t, ok, test.Context("src.lox not in archive"))
 
-			expectedTokens, err := archive.Read("tokens.txt")
-			test.Ok(t, err)
+			expectedTokens, ok := archive.Read("tokens.txt")
+			test.True(t, ok, test.Context("tokens.txt not in archive"))
 
-			expectedTree, err := archive.Read("parsed.txt")
-			test.Ok(t, err)
+			expectedTree, ok := archive.Read("parsed.txt")
+			test.True(t, ok, test.Context("parsed.txt not in archive"))
 
 			tokens := lex(src)
 			tree := parse(t, name, src, *debug)
@@ -78,11 +78,11 @@ func TestParseInvalid(t *testing.T) {
 			archive, err := txtar.ParseFile(file)
 			test.Ok(t, err)
 
-			src, err := archive.Read("src.lox")
-			test.Ok(t, err)
+			src, ok := archive.Read("src.lox")
+			test.True(t, ok, test.Context("src.lox not in archive"))
 
-			want, err := archive.Read("want.txt")
-			test.Ok(t, err)
+			want, ok := archive.Read("want.txt")
+			test.True(t, ok, test.Context("want.txt not in archive"))
 
 			p := parser.New("src.lox", src, *debug, os.Stderr)
 			_, err = p.Parse()

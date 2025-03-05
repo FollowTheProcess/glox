@@ -406,11 +406,11 @@ func TestLexerIntegration(t *testing.T) {
 			archive, err := txtar.ParseFile(file)
 			test.Ok(t, err)
 
-			src, err := archive.Read("src.lox")
-			test.Ok(t, err)
+			src, ok := archive.Read("src.lox")
+			test.True(t, ok, test.Context("src.lox not in archive"))
 
-			expected, err := archive.Read("tokens.txt")
-			test.Ok(t, err)
+			expected, ok := archive.Read("tokens.txt")
+			test.True(t, ok, test.Context("tokens.txt not in archive"))
 
 			tokens := collect(src)
 
@@ -453,8 +453,8 @@ func FuzzLexer(f *testing.F) {
 		archive, err := txtar.ParseFile(file)
 		test.Ok(f, err)
 
-		src, err := archive.Read("src.lox")
-		test.Ok(f, err)
+		src, ok := archive.Read("src.lox")
+		test.True(f, ok, test.Context("src.lox not in archive"))
 
 		f.Add(src)
 	}
