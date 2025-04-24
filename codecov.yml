@@ -1,0 +1,2 @@
+ignore:
+  - internal/syntax/token/kind_string.go # Generated

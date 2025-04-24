@@ -21,6 +21,13 @@ tasks:
     cmds:
       - go mod tidy
 
+  gen:
+    desc: Run go generate
+    sources:
+      - "**/*.go"
+    cmds:
+      - go generate ./...
+
   fmt:
     desc: Run go fmt on all source files
     sources:
