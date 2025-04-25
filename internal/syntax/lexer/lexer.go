@@ -71,6 +71,8 @@ func (l *Lexer) NextToken() token.Token {
 		return l.scanGreater()
 	case '<':
 		return l.scanLess()
+	case '"':
+		return l.scanString()
 	default:
 		l.errorf("unexpected character %q", char)
 		return l.emit(token.Error)
@@ -206,4 +208,19 @@ func (l *Lexer) scanLess() token.Token {
 		return l.emit(token.LessEq)
 	}
 	return l.emit(token.Less)
+}
+
+// scanString scans a string literal.
+func (l *Lexer) scanString() token.Token {
+	for l.peek() != '"' && l.peek() != eof {
+		l.next()
+	}
+
+	if l.peek() == eof {
+		l.error("unterminated string literal")
+		return l.emit(token.Error)
+	}
+
+	l.next() // The closing '"'
+	return l.emit(token.String)
 }

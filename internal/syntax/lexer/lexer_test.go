@@ -159,6 +159,13 @@ func TestBasics(t *testing.T) {
 				{Kind: token.LessEq, Line: 1, Start: 0, End: 2},
 			},
 		},
+		{
+			name: "String",
+			src:  `"I'm a string literal"`,
+			want: []token.Token{
+				{Kind: token.String, Line: 1, Start: 0, End: 22},
+			},
+		},
 	}
 
 	for _, tt := range tests {
