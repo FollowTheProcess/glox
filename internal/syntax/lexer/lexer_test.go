@@ -23,6 +23,69 @@ func TestBasics(t *testing.T) {
 				{Kind: token.OpenParen, Line: 1, Start: 0, End: 1},
 			},
 		},
+		{
+			name: "CloseParen",
+			src:  ")",
+			want: []token.Token{
+				{Kind: token.CloseParen, Line: 1, Start: 0, End: 1},
+			},
+		},
+		{
+			name: "OpenBrace",
+			src:  "{",
+			want: []token.Token{
+				{Kind: token.OpenBrace, Line: 1, Start: 0, End: 1},
+			},
+		},
+		{
+			name: "CloseBrace",
+			src:  "}",
+			want: []token.Token{
+				{Kind: token.CloseBrace, Line: 1, Start: 0, End: 1},
+			},
+		},
+		{
+			name: "Comma",
+			src:  ",",
+			want: []token.Token{
+				{Kind: token.Comma, Line: 1, Start: 0, End: 1},
+			},
+		},
+		{
+			name: "Dot",
+			src:  ".",
+			want: []token.Token{
+				{Kind: token.Dot, Line: 1, Start: 0, End: 1},
+			},
+		},
+		{
+			name: "Minus",
+			src:  "-",
+			want: []token.Token{
+				{Kind: token.Minus, Line: 1, Start: 0, End: 1},
+			},
+		},
+		{
+			name: "Plus",
+			src:  "+",
+			want: []token.Token{
+				{Kind: token.Plus, Line: 1, Start: 0, End: 1},
+			},
+		},
+		{
+			name: "SemiColon",
+			src:  ";",
+			want: []token.Token{
+				{Kind: token.SemiColon, Line: 1, Start: 0, End: 1},
+			},
+		},
+		{
+			name: "Star",
+			src:  "*",
+			want: []token.Token{
+				{Kind: token.Star, Line: 1, Start: 0, End: 1},
+			},
+		},
 	}
 
 	for _, tt := range tests {
