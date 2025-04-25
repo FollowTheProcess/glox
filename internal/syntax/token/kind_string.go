@@ -9,7 +9,7 @@ func _() {
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
 	_ = x[EOF-0]
-	_ = x[Invalid-1]
+	_ = x[Error-1]
 	_ = x[OpenParen-2]
 	_ = x[CloseParen-3]
 	_ = x[OpenBrace-4]
@@ -50,9 +50,9 @@ func _() {
 	_ = x[While-39]
 }
 
-const _Kind_name = "EOFInvalidOpenParenCloseParenOpenBraceCloseBraceCommaDotMinusPlusSemiColonSlashStarBangBangEqEqDoubleEqGreaterGreaterEqLessLessEqIdentStringNumberAndClassElseFalseFunForIfNilOrPrintReturnSuperThisTrueVarWhile"
+const _Kind_name = "EOFErrorOpenParenCloseParenOpenBraceCloseBraceCommaDotMinusPlusSemiColonSlashStarBangBangEqEqDoubleEqGreaterGreaterEqLessLessEqIdentStringNumberAndClassElseFalseFunForIfNilOrPrintReturnSuperThisTrueVarWhile"
 
-var _Kind_index = [...]uint8{0, 3, 10, 19, 29, 38, 48, 53, 56, 61, 65, 74, 79, 83, 87, 93, 95, 103, 110, 119, 123, 129, 134, 140, 146, 149, 154, 158, 163, 166, 169, 171, 174, 176, 181, 187, 192, 196, 200, 203, 208}
+var _Kind_index = [...]uint8{0, 3, 8, 17, 27, 36, 46, 51, 54, 59, 63, 72, 77, 81, 85, 91, 93, 101, 108, 117, 121, 127, 132, 138, 144, 147, 152, 156, 161, 164, 167, 169, 172, 174, 179, 185, 190, 194, 198, 201, 206}
 
 func (i Kind) String() string {
 	if i < 0 || i >= Kind(len(_Kind_index)-1) {

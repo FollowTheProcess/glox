@@ -9,7 +9,7 @@ type Kind int
 //go:generate stringer -type Kind -linecomment
 const (
 	EOF        Kind = iota // EOF
-	Invalid                // Invalid
+	Error                  // Error
 	OpenParen              // OpenParen
 	CloseParen             // CloseParen
 	OpenBrace              // OpenBrace

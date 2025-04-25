@@ -40,9 +40,27 @@ func (l *Lexer) NextToken() token.Token {
 		return l.emit(token.EOF)
 	case '(':
 		return l.emit(token.OpenParen)
+	case ')':
+		return l.emit(token.CloseParen)
+	case '{':
+		return l.emit(token.OpenBrace)
+	case '}':
+		return l.emit(token.CloseBrace)
+	case ',':
+		return l.emit(token.Comma)
+	case '.':
+		return l.emit(token.Dot)
+	case '-':
+		return l.emit(token.Minus)
+	case '+':
+		return l.emit(token.Plus)
+	case ';':
+		return l.emit(token.SemiColon)
+	case '*':
+		return l.emit(token.Star)
 	default:
-		l.errorf("invalid character %c", char)
-		return l.emit(token.Invalid)
+		l.errorf("unexpected character %q", char)
+		return l.emit(token.Error)
 	}
 }
 
