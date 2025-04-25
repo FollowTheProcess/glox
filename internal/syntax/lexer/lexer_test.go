@@ -94,6 +94,23 @@ func TestBasics(t *testing.T) {
 			},
 		},
 		{
+			name: "Slash",
+			src:  "/",
+			want: []token.Token{
+				{Kind: token.Slash, Line: 1, Start: 0, End: 1},
+			},
+		},
+		{
+			name: "Comment",
+			src:  "// A comment here",
+			want: []token.Token{},
+		},
+		{
+			name: "Comment newline",
+			src:  "// A comment here\n",
+			want: []token.Token{},
+		},
+		{
 			name: "Eq",
 			src:  "=",
 			want: []token.Token{
@@ -140,6 +157,13 @@ func TestBasics(t *testing.T) {
 			src:  "<=",
 			want: []token.Token{
 				{Kind: token.LessEq, Line: 1, Start: 0, End: 2},
+			},
+		},
+		{
+			name: "String",
+			src:  `"I'm a string literal"`,
+			want: []token.Token{
+				{Kind: token.String, Line: 1, Start: 0, End: 22},
 			},
 		},
 	}
