@@ -34,7 +34,7 @@ func New(name, src string, handler syntax.ErrorHandler) *Lexer {
 }
 
 // NextToken returns the next token from the input stream.
-func (l *Lexer) NextToken() token.Token {
+func (l *Lexer) NextToken() token.Token { //nolint:cyclop // Complex yes but also trivial
 	switch char := l.next(); char {
 	case eof:
 		return l.emit(token.EOF)
@@ -58,6 +58,30 @@ func (l *Lexer) NextToken() token.Token {
 		return l.emit(token.SemiColon)
 	case '*':
 		return l.emit(token.Star)
+	case '=':
+		if l.peek() == '=' {
+			l.next()
+			return l.emit(token.DoubleEq)
+		}
+		return l.emit(token.Eq)
+	case '!':
+		if l.peek() == '=' {
+			l.next() // Consume the '='
+			return l.emit(token.BangEq)
+		}
+		return l.emit(token.Bang)
+	case '>':
+		if l.peek() == '=' {
+			l.next()
+			return l.emit(token.GreaterEq)
+		}
+		return l.emit(token.Greater)
+	case '<':
+		if l.peek() == '=' {
+			l.next()
+			return l.emit(token.LessEq)
+		}
+		return l.emit(token.Less)
 	default:
 		l.errorf("unexpected character %q", char)
 		return l.emit(token.Error)
@@ -72,8 +96,7 @@ func (l *Lexer) next() rune {
 		return eof
 	}
 
-	char, width := utf8.DecodeRuneInString(l.src)
-
+	char, width := utf8.DecodeRuneInString(l.src[l.pos:])
 	l.width = width
 	l.pos += width
 
@@ -82,6 +105,16 @@ func (l *Lexer) next() rune {
 		l.lineStart = l.pos
 	}
 
+	return char
+}
+
+// peek returns, but does not consume, the next utf8 rune in the input.
+func (l *Lexer) peek() rune {
+	if l.pos >= len(l.src) {
+		return eof
+	}
+
+	char, _ := utf8.DecodeRuneInString(l.src[l.pos:])
 	return char
 }
 
