@@ -86,6 +86,62 @@ func TestBasics(t *testing.T) {
 				{Kind: token.Star, Line: 1, Start: 0, End: 1},
 			},
 		},
+		{
+			name: "Bang",
+			src:  "!",
+			want: []token.Token{
+				{Kind: token.Bang, Line: 1, Start: 0, End: 1},
+			},
+		},
+		{
+			name: "Eq",
+			src:  "=",
+			want: []token.Token{
+				{Kind: token.Eq, Line: 1, Start: 0, End: 1},
+			},
+		},
+		{
+			name: "BangEq",
+			src:  "!=",
+			want: []token.Token{
+				{Kind: token.BangEq, Line: 1, Start: 0, End: 2},
+			},
+		},
+		{
+			name: "DoubleEq",
+			src:  "==",
+			want: []token.Token{
+				{Kind: token.DoubleEq, Line: 1, Start: 0, End: 2},
+			},
+		},
+		{
+			name: "Greater",
+			src:  ">",
+			want: []token.Token{
+				{Kind: token.Greater, Line: 1, Start: 0, End: 1},
+			},
+		},
+		{
+			name: "GreaterEq",
+			src:  ">=",
+			want: []token.Token{
+				{Kind: token.GreaterEq, Line: 1, Start: 0, End: 2},
+			},
+		},
+		{
+			name: "Less",
+			src:  "<",
+			want: []token.Token{
+				{Kind: token.Less, Line: 1, Start: 0, End: 1},
+			},
+		},
+		{
+			name: "LessEq",
+			src:  "<=",
+			want: []token.Token{
+				{Kind: token.LessEq, Line: 1, Start: 0, End: 2},
+			},
+		},
 	}
 
 	for _, tt := range tests {
