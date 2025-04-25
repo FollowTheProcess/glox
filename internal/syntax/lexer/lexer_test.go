@@ -94,6 +94,23 @@ func TestBasics(t *testing.T) {
 			},
 		},
 		{
+			name: "Slash",
+			src:  "/",
+			want: []token.Token{
+				{Kind: token.Slash, Line: 1, Start: 0, End: 1},
+			},
+		},
+		{
+			name: "Comment",
+			src:  "// A comment here",
+			want: []token.Token{},
+		},
+		{
+			name: "Comment newline",
+			src:  "// A comment here\n",
+			want: []token.Token{},
+		},
+		{
 			name: "Eq",
 			src:  "=",
 			want: []token.Token{
