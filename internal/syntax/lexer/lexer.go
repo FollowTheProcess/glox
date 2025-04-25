@@ -35,7 +35,7 @@ func New(name, src string, handler syntax.ErrorHandler) *Lexer {
 }
 
 // NextToken returns the next token from the input stream.
-func (l *Lexer) NextToken() token.Token {
+func (l *Lexer) NextToken() token.Token { //nolint:cyclop // Technically yes but this is clearly trivial
 	l.skip(unicode.IsSpace)
 
 	switch char := l.next(); char {
@@ -74,8 +74,15 @@ func (l *Lexer) NextToken() token.Token {
 	case '"':
 		return l.scanString()
 	default:
-		l.errorf("unexpected character %q", char)
-		return l.emit(token.Error)
+		switch {
+		case unicode.IsDigit(char):
+			return l.scanNumber()
+		case isAlpha(char):
+			return l.scanIdent()
+		default:
+			l.errorf("unexpected character %q", char)
+			return l.emit(token.Error)
+		}
 	}
 }
 
@@ -223,4 +230,40 @@ func (l *Lexer) scanString() token.Token {
 
 	l.next() // The closing '"'
 	return l.emit(token.String)
+}
+
+// scanNumber scans a number literal.
+func (l *Lexer) scanNumber() token.Token {
+	for unicode.IsDigit(l.peek()) {
+		l.next()
+	}
+
+	// Look for a fractional part
+	if l.peek() == '.' {
+		l.next() // Absorb the "."
+		for unicode.IsDigit(l.peek()) {
+			l.next()
+		}
+	}
+
+	return l.emit(token.Number)
+}
+
+// scanIdent scans an identifier.
+func (l *Lexer) scanIdent() token.Token {
+	for isAlphaNumeric(l.peek()) {
+		l.next()
+	}
+
+	return l.emit(token.Ident)
+}
+
+// isAlpha returns whether r is a-z, A-Z or _.
+func isAlpha(r rune) bool {
+	return (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || r == '_'
+}
+
+// isAlphaNumeric returns whether r is an alphanumeric character.
+func isAlphaNumeric(r rune) bool {
+	return isAlpha(r) || unicode.IsDigit(r)
 }

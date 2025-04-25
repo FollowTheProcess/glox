@@ -166,6 +166,27 @@ func TestBasics(t *testing.T) {
 				{Kind: token.String, Line: 1, Start: 0, End: 22},
 			},
 		},
+		{
+			name: "Number integer",
+			src:  "42",
+			want: []token.Token{
+				{Kind: token.Number, Line: 1, Start: 0, End: 2},
+			},
+		},
+		{
+			name: "Number float",
+			src:  "3.14159",
+			want: []token.Token{
+				{Kind: token.Number, Line: 1, Start: 0, End: 7},
+			},
+		},
+		{
+			name: "Ident",
+			src:  "balls",
+			want: []token.Token{
+				{Kind: token.Ident, Line: 1, Start: 0, End: 5},
+			},
+		},
 	}
 
 	for _, tt := range tests {
