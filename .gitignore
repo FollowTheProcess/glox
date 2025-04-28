@@ -8,16 +8,31 @@
 *
 
 # But not these files...
-!/.gitignore
 
+# Git/GitHub
+!/.gitignore
+!/.gitattributes
+!/.github
+
+# Go
 !*.go
 !go.sum
 !go.mod
+!.goreleaser.yaml
+!.golangci.yml
 
+# CodeCov
+!codecov.yml
+
+# General
 !README.md
 !LICENSE
 
-# !Makefile
+# Typos
+!.typos.toml
+
+# Task
+!Taskfile.yml
 
 # ...even if they are in subdirectories
 !*/
