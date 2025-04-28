@@ -7,7 +7,7 @@
 # Ignore everything
 *
 
-# But not these files...
+# Except these...
 
 # Git/GitHub
 !/.gitignore
@@ -27,8 +27,8 @@
 # General
 !README.md
 !LICENSE
-!img
-!docs/img
+!img/**/*
+!docs/img/**/*
 
 # Typos
 !.typos.toml
